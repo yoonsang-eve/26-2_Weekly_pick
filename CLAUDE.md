@@ -200,6 +200,8 @@ low-volatility anomaly / betting-against-beta(Frazzini & Pedersen 2014)에 따�
 
 - **API 키를 저장소에 커밋하지 말 것.** 환경변수 또는 저장소 루트의 `.env`(`llm.load_dotenv`가 읽는다)로만 받는다 (`llm.*.api_key_env`). `.env`와 `*.key`는 이미 `.gitignore`에 있다.
 - 본 실행 전에 `python src/agents.py --check`로 게이트웨이 연결과 단계별 모델(에셋) 이름을 먼저 확인한다. 모델명 오타는 실행 중반에야 터진다.
+- **검색 예산은 단계별로 따로 준다** (`llm.search_budget`). analyst는 후보 20종목을 처음 훑어야 하지만 bear는 3종목만 검증한다. 같은 예산을 주면 bear가 남는 만큼 더 검색하고 그 결과가 전부 입력 토큰으로 쌓인다 — wk4 실측에서 bear 한 단계가 전체 비용의 절반(input 514k)을 썼다. 프롬프트에 알려 주는 숫자와 실제로 거는 한도는 반드시 같은 값이어야 한다.
+- 비용은 검색 루프가 지배한다. 검색할 때마다 직전까지의 대화 전체가 다시 입력으로 들어간다. 줄이는 순서: 단계별 검색 예산 → `universe.quota` → (최후) 검색 끄기.
 - 웹 검색을 쓸 수 없는 실행에서는 analyst·bear 프롬프트의 `{{search_policy}}`에 "검색 도구가 없으니 확인 불가는 확인 불가로 표기하라"는 지침이 자동으로 들어간다. **검색이 없는데 검색이 있는 것처럼 물으면 LLM이 날짜와 수치를 지어낸다.** 이 치환을 없애지 말 것.
 - 현행 세대 모델(Opus 5 / Sonnet 5 등)은 `temperature`를 받지 않는다. `config.llm.temperature`가 `null`이면 파라미터 자체를 보내지 않는 것이 기본 동작이다.
 

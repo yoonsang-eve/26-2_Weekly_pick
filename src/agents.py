@@ -259,6 +259,7 @@ def run_auto(cfg: dict, market: str, week: int, out: Path, resp: Path,
     values = base_values(cfg, market, week, out,
                          web_search=provider.supports_web_search,
                          max_searches=getattr(provider, "max_uses", 0))
+    budgets = lc.get("search_budget") or {}
 
     meta_f = out / "run_meta.json"
     meta = load_meta(meta_f, week, market, cfg, "auto")
@@ -275,16 +276,23 @@ def run_auto(cfg: dict, market: str, week: int, out: Path, resp: Path,
             print(f"[{market}] '{stage}'의 선행 응답이 없다: {missing}", file=sys.stderr)
             return 1
 
+        use_search = stage in SEARCH_STAGES and provider.supports_web_search
+        # 단계마다 검색 예산이 다르다. 프롬프트에 알려 주는 숫자와 실제로 거는 한도가
+        # 어긋나면 모델이 예산을 잘못 배분하므로 같은 값을 쓴다.
+        budget = int(budgets.get(stage) or getattr(provider, "max_uses", 0))
+        if use_search:
+            values["search_policy"] = SEARCH_ON.format(n=budget)
+
         text = render(cfg, stage, values, resp)
         (out / f"rendered_{stage}.txt").write_text(text, encoding="utf-8")
-        use_search = stage in SEARCH_STAGES and provider.supports_web_search
         model = models[stage]
         print(f"  [{market}/{stage}] 호출 — {model} "
-              f"({len(text):,}자{', 웹 검색 on' if use_search else ''})")
+              f"({len(text):,}자{f', 웹 검색 {budget}회' if use_search else ''})")
 
         t0 = datetime.now()
         reply = provider.complete(model=model, prompt=text, max_tokens=max_tokens,
-                                  temperature=temperature, web_search=use_search)
+                                  temperature=temperature, web_search=use_search,
+                                  max_searches=budget if use_search else None)
 
         # trader는 구조화 JSON이 필수다. 파싱 실패하면 JSON만 다시 요구해 재시도한다.
         pick = None

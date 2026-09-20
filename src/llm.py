@@ -94,8 +94,9 @@ class OpenAICompatProvider:
         self.max_retries = max_retries
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
-                 temperature: float | None, web_search: bool) -> Reply:
-        # web_search는 여기서 쓰지 않는다. 게이트웨이마다 툴 스펙 형식이 달라 확인 전에는
+                 temperature: float | None, web_search: bool,
+                 max_searches: int | None = None) -> Reply:
+        # web_search·max_searches는 여기서 쓰지 않는다. 게이트웨이마다 툴 스펙 형식이 달라 확인 전에는
         # 보낼 수 없고, config의 web_search는 '게이트웨이가 알아서 검색해 주는가'라는
         # 선언으로만 쓰여 프롬프트 문구(search_policy)를 고른다.
         import requests
@@ -174,7 +175,8 @@ class AnthropicProvider:
         self.max_pause_rounds = int(conf.get("max_pause_rounds") or 8)
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
-                 temperature: float | None, web_search: bool) -> Reply:
+                 temperature: float | None, web_search: bool,
+                 max_searches: int | None = None) -> Reply:
         kwargs: dict[str, Any] = {
             "model": model,
             "max_tokens": max_tokens,
@@ -187,7 +189,7 @@ class AnthropicProvider:
             kwargs["temperature"] = temperature
         if web_search and self.supports_web_search:
             kwargs["tools"] = [{"type": self.tool_type, "name": "web_search",
-                                "max_uses": self.max_uses}]
+                                "max_uses": max_searches or self.max_uses}]
 
         # 서버사이드 검색이 길어지면 API가 턴을 끊고 stop_reason="pause_turn"으로
         # 돌려준다. 그대로 받으면 "검색을 시작하겠습니다" 한 줄만 남는다 (wk4 KR에서
