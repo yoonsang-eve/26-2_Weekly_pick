@@ -1,0 +1,81 @@
+# weekly_pick 설정
+# 이 파일의 필터 값을 바꾸면 프롬프트 새 버전을 제출한다 (CLAUDE.md 7절)
+
+meta:
+  # 필터를 바꿨지만 prompt_version은 v1로 둔다. CLAUDE.md 7절은 config 필터 변경 시
+  # 새 버전 제출을 요구하나, v1은 아직 한 번도 제출되지 않았다. wk3 첫 제출 전의
+  # 확정 작업이므로 v1에 포함시키고, 첫 제출 이후의 변경부터 v2로 올린다.
+  prompt_version: v1
+  config_version: 2
+
+run:
+  week_no: 3
+  buy_date: "2026-09-14"
+  sell_date: "2026-09-18"
+  agent_mode: manual        # manual | auto
+  # 실행 전 수동 확인. 평가 기간(buy_date~sell_date)에 걸리는 일정만 적는다.
+  macro_calendar: "9/15-16 FOMC(한국시간 9/17 새벽 3시 결정 발표, 점도표 포함), 9/18 미국 쿼드러플 위칭(선물·옵션 동시만기)"
+
+universe:
+  markets: [KR, US]
+  quota: {KR: 20, US: 0}    # 최종 후보 배분. 현재 KR 단독 운용이라 20을 KR이 다 쓴다
+  kr:
+    exclude_preferred: true       # 우선주
+    exclude_spac: true
+    exclude_etf_etn_elw: true
+    exclude_reit: true
+    exclude_admin_issue: true     # 관리종목
+    exclude_halted: true          # 거래정지
+  us:
+    index_source: "sp500+nasdaq100"   # 정적 CSV, 분기 1회 갱신
+    exclude_etf: true
+
+data:
+  # KRX가 2025-12-27부터 회원제로 전환되어 pykrx 전종목 조회는 KRX_ID/KRX_PW 없이 불가.
+  # FinanceDataReader로 대체한다. 종목 선정 알고리즘은 동일하며 소스만 다르다.
+  source_kr: fdr
+  lookback_days: 250              # 52주 신고가 산출용 영업일 수
+  # FDR은 날짜 단위 전종목 일괄 조회를 제공하지 않는다. 전종목 히스토리 루프를 피하기 위해
+  # 스냅샷의 당일 거래대금 상위 N개만 히스토리를 받고, 그 안에서 진짜 adv20 순위를 매긴다.
+  # adv20_rank_max_kr보다 넉넉해야 순위 경계 종목이 누락되지 않는다.
+  prefetch_top_n_kr: 500
+  max_workers: 8
+
+filters:
+  # 1. 유동성 — 알파 아님. 거래정지 회피 및 발표 방어 목적
+  adv20_rank_max_kr: 300          # 20일 평균 거래대금 상위 N위
+  adv20_min_usd_us: 50_000_000
+
+  # 2. 시가총액 하한
+  mktcap_min_krw: 200_000_000_000   # 2,000억
+  mktcap_min_usd: 2_000_000_000
+
+  # 3. 중기 모멘텀 + 단기 반전 (부호가 반대인 두 효과의 조합 — CLAUDE.md 4절 참조)
+  #    모멘텀은 J&T(1993) 표준대로 최근 1개월을 건너뛴 구간에서 측정한다.
+  #    건너뛴 그 구간은 Jegadeesh(1990) 단기 반전이 지배하므로 역방향으로 건다.
+  mom_lookback_days: 120          # 6개월
+  mom_skip_days: 20               # 최근 1개월 제외
+  mom_pct_rank_min: 0.60          # 모멘텀 상위 40%
+  reversal_days: 5                # 최근 1주일
+  reversal_max: 0.0               # 최근 5영업일 수익률 <= 0 (눌림)
+
+  # (구 4번 52주 신고가 근접 필터는 제거했다. George & Hwang 2004의 검정 구간은 6~12개월
+  #  보유이고, 같은 논문이 52주 고점 근접도는 과거 수익률 모멘텀을 '대체'한다고 주장한다.
+  #  5영업일 horizon에서의 근거가 없는 데다 필터 3과 같은 신호를 이중으로 세는 셈이라
+  #  하드 컷에서 뺐다. pct_from_52wh는 참고용으로 CSV에 계속 출력한다.)
+
+  # 4. 변동성 — 컷이 아니라 정렬 기준. 알파가 아닌 tournament 최적화
+  sort_by: atr20_pct
+  sort_desc: true
+
+output:
+  n_candidates: 20                # LLM 검증 품질 상한. 30 초과 금지
+
+llm:
+  # 정확한 모델 문자열은 docs/references.md의 API 문서에서 확인할 것
+  analyst_model: ""
+  bull_model: ""
+  bear_model: ""
+  trader_model: ""
+  web_search: true
+  max_retries: 1

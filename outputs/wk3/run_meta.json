@@ -1,0 +1,24 @@
+{
+  "week": 3,
+  "prompt_version": "v1",
+  "mode": "manual",
+  "config_version": 2,
+  "stages": {
+    "analyst": {
+      "rendered_at": "2026-09-12T21:21:07",
+      "model": "Claude Sonnet 5"
+    },
+    "bull": {
+      "rendered_at": "2026-09-12T21:31:38",
+      "model": "Claude Sonnet 5"
+    },
+    "bear": {
+      "rendered_at": "2026-09-12T21:35:55",
+      "model": "Claude Sonnet 5"
+    },
+    "trader": {
+      "rendered_at": "2026-09-12T21:41:19",
+      "model": "Claude Sonnet 5"
+    }
+  }
+}

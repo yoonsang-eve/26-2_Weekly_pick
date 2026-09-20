@@ -1,0 +1,14 @@
+# 가격 데이터 캐시 — 재실행하면 재생성된다
+cache/
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+.env
+*.key
+
+.DS_Store
+Thumbs.db
+desktop.ini
