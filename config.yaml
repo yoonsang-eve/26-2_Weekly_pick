@@ -2,23 +2,31 @@
 # 이 파일의 필터 값을 바꾸면 프롬프트 새 버전을 제출한다 (CLAUDE.md 7절)
 
 meta:
-  # 필터를 바꿨지만 prompt_version은 v1로 둔다. CLAUDE.md 7절은 config 필터 변경 시
-  # 새 버전 제출을 요구하나, v1은 아직 한 번도 제출되지 않았다. wk3 첫 제출 전의
-  # 확정 작업이므로 v1에 포함시키고, 첫 제출 이후의 변경부터 v2로 올린다.
-  prompt_version: v1
-  config_version: 2
+  # v2 변경점: (a) US 시장을 실제로 운용 — KR/US 각각 1종목씩 추천, (b) 프롬프트에
+  # 시장 컨텍스트 블록({{market_label}}, {{market_notes}})과 보유기간({{holding_days}})
+  # placeholder 추가, (c) agents auto 모드(LLM API 직접 호출) 도입.
+  # v1은 prompts/v1/에 그대로 보존한다.
+  #
+  # 보유기간을 placeholder로 뺀 이유: 휴장이 끼면 시장마다 영업일 수가 달라진다.
+  # 2026 추석(9/25 금)이 낀 wk4가 그 첫 사례로, KR은 3영업일, US는 5영업일이다.
+  # v2는 아직 한 번도 제출되지 않았으므로 이 변경을 v2에 포함시키고, 첫 제출 이후의
+  # 변경부터 v3으로 올린다 (v1 때와 같은 기준).
+  prompt_version: v2
+  config_version: 3
 
 run:
-  week_no: 3
-  buy_date: "2026-09-14"
-  sell_date: "2026-09-18"
-  agent_mode: manual        # manual | auto
+  week_no: 4
+  # 시장 공통 기본값. 휴장이 끼면 markets.{시장}.sell_date로 시장별로 덮어쓴다.
+  buy_date: "2026-09-21"
+  sell_date: "2026-09-25"
+  # 운용 시장. 각 시장에서 독립적으로 1종목씩 추천한다 (KR 1 + US 1).
+  markets: [KR, US]
+  agent_mode: auto          # manual | auto
   # 실행 전 수동 확인. 평가 기간(buy_date~sell_date)에 걸리는 일정만 적는다.
-  macro_calendar: "9/15-16 FOMC(한국시간 9/17 새벽 3시 결정 발표, 점도표 포함), 9/18 미국 쿼드러플 위칭(선물·옵션 동시만기)"
+  macro_calendar: "KRX 추석 휴장 9/24(목)~9/25(금) — 한국 평가주간의 마지막 거래일은 9/23(수)다. 미국은 휴장 없음. (미국 지표 일정은 미확인)"
 
 universe:
-  markets: [KR, US]
-  quota: {KR: 20, US: 0}    # 최종 후보 배분. 현재 KR 단독 운용이라 20을 KR이 다 쓴다
+  quota: {KR: 20, US: 20}   # 시장별 최종 후보 수. 시장마다 독립 파이프라인을 돌린다
   kr:
     exclude_preferred: true       # 우선주
     exclude_spac: true
@@ -27,32 +35,90 @@ universe:
     exclude_admin_issue: true     # 관리종목
     exclude_halted: true          # 거래정지
   us:
-    index_source: "sp500+nasdaq100"   # 정적 CSV, 분기 1회 갱신
+    # S&P500 + Nasdaq100 합집합을 data/us_universe.csv에 정적으로 둔다.
+    # 갱신: python src/us_universe.py --refresh  (분기 1회)
+    universe_csv: data/us_universe.csv
     exclude_etf: true
+    # 클래스 주식(BRK.B, GOOG/GOOGL 등)에서 거래량이 적은 쪽을 버린다.
+    # yfinance 티커 표기는 점이 아니라 하이픈이다 (BRK.B -> BRK-B).
+    drop_secondary_class: true
+
+# 시장별 표시·프롬프트 컨텍스트. prompts/v2의 {{market_label}}, {{market_notes}}로 주입된다.
+markets:
+  KR:
+    label: "한국 (KOSPI / KOSDAQ)"
+    # 2026 추석: 9/25(금)이 추석, 연휴 9/24(목)~9/26(토), 대체공휴일 없음.
+    # KRX는 9/24·9/25 휴장이므로 평가주간의 마지막 거래일이 9/23(수)이다.
+    # 휴장이 없는 주에는 이 두 줄을 지우면 run.sell_date(금요일)를 그대로 쓴다.
+    sell_date: "2026-09-23"
+    holding_days: 3
+    currency: KRW
+    price_unit: "원"
+    cap_unit: "억원"
+    cap_divisor: 100_000_000        # 원 -> 억원
+    benchmark: "KS11"               # KOSPI
+    notes: |
+      - 가격·시가총액 단위는 원이다. 시총과 거래대금은 억원으로 표기했다.
+      - 공시는 DART(dart.fss.or.kr) 원문으로 확인한다. 정규장은 09:00~15:30 KST.
+      - 가격제한폭이 ±30%다. 상한가 직행 시 추격 매수가 불가능한 점을 고려하라.
+      - 수급 확인 시 기관·외국인 순매수, 공매도 잔고, 대차잔고를 본다.
+      - 매수일이 한국 휴장일이면 그 주 첫 영업일 시가가 매수가다.
+      - 연휴 직전에는 포지션을 줄이려는 수급이 나온다. 연휴 중 해외 시장이 움직이면
+        재개장일에 갭으로 반영되므로, 연휴를 건너뛰는 catalyst는 이 주차에서 실현되지
+        않는 것으로 본다.
+  US:
+    label: "미국 (S&P 500 + Nasdaq 100)"
+    holding_days: 5             # 미국은 이 주에 휴장이 없다. sell_date는 run의 값을 쓴다
+    currency: USD
+    price_unit: "USD"
+    cap_unit: "$B"
+    cap_divisor: 1_000_000_000      # USD -> $B
+    benchmark: "US500"              # S&P 500
+    notes: |
+      - 가격·시가총액 단위는 USD다. 시총은 10억 달러($B) 단위로 표기했다.
+      - 실적 발표는 ET 기준 날짜와 **장전(pre-market) / 장마감 후(after-hours)** 구분까지
+        확인하라. 이 정도로 짧은 평가 구간에서는 이 구분이 수익률 부호를 바꾼다.
+      - 공시는 SEC EDGAR(8-K, S-1, 424B5, 13D/G) 원문으로 확인한다. 정규장은
+        09:30~16:00 ET.
+      - 가격제한폭이 없다. 갭 상승·갭 하락이 KR보다 크므로 하방 시나리오를 더 크게 잡아라.
+      - 섹터 로테이션과 금리(10Y), 달러인덱스 민감도를 반드시 확인하라.
+      - 미국 공휴일(휴장)에 매수일이 걸리면 다음 영업일 시가가 매수가다.
+      - 한국시간 금요일 기준으로는 미국 현지 금요일장이 아직 열리지 않았다. 스크리너가
+        출력한 '기준일'이 곧 확정된 마지막 종가일이며, 그 이후 가격은 모른다는 전제로 쓴다.
 
 data:
   # KRX가 2025-12-27부터 회원제로 전환되어 pykrx 전종목 조회는 KRX_ID/KRX_PW 없이 불가.
   # FinanceDataReader로 대체한다. 종목 선정 알고리즘은 동일하며 소스만 다르다.
   source_kr: fdr
+  source_us: yfinance
   lookback_days: 250              # 52주 신고가 산출용 영업일 수
   # FDR은 날짜 단위 전종목 일괄 조회를 제공하지 않는다. 전종목 히스토리 루프를 피하기 위해
   # 스냅샷의 당일 거래대금 상위 N개만 히스토리를 받고, 그 안에서 진짜 adv20 순위를 매긴다.
   # adv20_rank_max_kr보다 넉넉해야 순위 경계 종목이 누락되지 않는다.
   prefetch_top_n_kr: 500
   max_workers: 8
+  # FDR도 yfinance도 소켓 타임아웃을 노출하지 않는다. 소스가 연속 호출에 응답을 끊는
+  # 일이 실제로 있어서 소켓 기본 타임아웃을 걸고 종목 단위로 재시도한다. 이게 없으면
+  # 워커 스레드가 멈춘 채 스크리너가 영원히 끝나지 않는다.
+  request_timeout_sec: 20
+  kr_retries: 2
+  # yfinance 벌크 다운로드 배치 크기. 너무 크면 조용히 일부가 비어서 돌아온다.
+  us_batch_size: 100
 
 filters:
   # 1. 유동성 — 알파 아님. 거래정지 회피 및 발표 방어 목적
   adv20_rank_max_kr: 300          # 20일 평균 거래대금 상위 N위
-  adv20_min_usd_us: 50_000_000
+  adv20_min_usd_us: 50_000_000    # 20일 평균 거래대금 $50M 이상
 
   # 2. 시가총액 하한
   mktcap_min_krw: 200_000_000_000   # 2,000억
-  mktcap_min_usd: 2_000_000_000
+  mktcap_min_usd: 2_000_000_000     # $2B
 
   # 3. 중기 모멘텀 + 단기 반전 (부호가 반대인 두 효과의 조합 — CLAUDE.md 4절 참조)
   #    모멘텀은 J&T(1993) 표준대로 최근 1개월을 건너뛴 구간에서 측정한다.
   #    건너뛴 그 구간은 Jegadeesh(1990) 단기 반전이 지배하므로 역방향으로 건다.
+  #    KR/US 동일 파라미터를 쓴다. 두 시장에 서로 다른 값을 쓸 근거가 없고,
+  #    다르게 두면 시장 간 비교 가능성이 사라진다.
   mom_lookback_days: 120          # 6개월
   mom_skip_days: 20               # 최근 1개월 제외
   mom_pct_rank_min: 0.60          # 모멘텀 상위 40%
@@ -72,10 +138,66 @@ output:
   n_candidates: 20                # LLM 검증 품질 상한. 30 초과 금지
 
 llm:
-  # 정확한 모델 문자열은 docs/references.md의 API 문서에서 확인할 것
-  analyst_model: ""
-  bull_model: ""
-  bear_model: ""
-  trader_model: ""
-  web_search: true
-  max_retries: 1
+  # provider:
+  #   openai_compat — OpenAI Chat Completions 호환 게이트웨이 (Letsur AI 게이트웨이 등).
+  #                   base_url + api_key_env 를 채운다.
+  #   anthropic     — Anthropic Messages API. base_url을 게이트웨이로 돌릴 수도 있다
+  #                   (Letsur는 Anthropic 포맷도 중계한다. 이 경로로만 서버사이드
+  #                   웹 검색 툴이 통과할 가능성이 있어 실행 전에 한 번 확인할 것).
+  # Letsur 게이트웨이는 Anthropic 포맷도 중계하고, 그 경로로 서버사이드 web_search
+  # 툴이 실제로 통과한다 (2026-09-20 확인: web_search_tool_result 블록 수신).
+  # OpenAI 호환 경로에는 검색이 없으므로 analyst·bear 품질을 위해 anthropic을 쓴다.
+  provider: anthropic
+
+  openai_compat:
+    # Letsur AI 게이트웨이의 OpenAI 호환 엔드포인트.
+    # docs.platform.letsur.ai > AI 게이트웨이 > 인증과 공통 오류 기준.
+    base_url: "https://gw.letsur.ai/v1"
+    api_key_env: LETSUR_API_KEY
+    # 게이트웨이에 따라 Authorization: Bearer 대신 전용 헤더를 쓰기도 한다.
+    # 그 경우 auth_header 를 헤더 이름으로, auth_prefix 를 "" 로 둔다.
+    auth_header: Authorization
+    auth_prefix: "Bearer "
+    extra_headers: {}
+    # 이 값은 '게이트웨이가 알아서 웹 검색을 해 주는가'에 대한 선언이다. 여기서 툴
+    # 스펙을 보내지는 않는다 (게이트웨이마다 형식이 달라 확인 전에는 못 보낸다).
+    # false면 analyst/bear 프롬프트에 '검색 도구 없음' 문구가 자동으로 붙는다.
+    # 게이트웨이가 검색을 안 하는데 true로 두면 LLM이 확인한 척 날짜를 지어낸다.
+    web_search: false
+
+  anthropic:
+    # 빈 값이면 Anthropic 본사 API. 게이트웨이를 쓰려면 "https://gw.letsur.ai"를 넣는다.
+    # SDK가 /v1/messages 를 내부에서 붙이므로 여기에 /v1 을 넣으면 /v1/v1/messages 가 된다.
+    base_url: "https://gw.letsur.ai"
+    api_key_env: LETSUR_API_KEY
+    web_search: true
+    # 서버사이드 웹 검색 툴. Opus 4.6+ / Sonnet 4.6+ 는 _20260209, 그 이전은 _20250305.
+    web_search_tool_type: web_search_20260209
+    # 검색 결과가 전부 입력 토큰으로 들어온다. unit을 아끼려면 이 값을 낮춘다.
+    max_web_searches: 24
+    # pause_turn(서버 검색 중 턴 끊김)을 몇 번까지 이어받을지.
+    max_pause_rounds: 8
+
+  # 단계별 모델. openai_compat 을 쓰면 게이트웨이의 모델(에셋) 이름을 적는다.
+  # 이 이름이 요청 body의 "model" 필드로 그대로 나간다 — API 키는 인증만 하고,
+  # 모델 선택은 매 호출마다 이 값으로 정해진다. 콘솔 '에셋' 탭의 이름과 정확히 같아야 한다.
+  #
+  # 비용: sonnet-5는 입력 2.00 / 출력 10.00 unit per 1M token.
+  # trader만 opus-5(입력 5.00 / 출력 25.00)로 올리면 품질은 오르지만 단가가 2.5배다.
+  # 현재는 unit 절약을 위해 4단계 모두 sonnet-5로 둔다.
+  #
+  # 실측(wk4, 검색 5회 제한): KR+US 8콜에 input 641k / output 66k = 약 1.9 unit.
+  # 비용의 대부분은 analyst의 검색 루프다. 에이전트가 검색할 때마다 직전까지의
+  # 대화 전체가 다시 입력으로 들어가서 입력 토큰이 검색 횟수에 따라 가파르게 는다.
+  # unit을 줄이려면 순서대로: (1) max_web_searches 낮추기, (2) universe.quota 줄이기
+  # (검증할 종목이 적어지면 검색도 준다), (3) 검색 끄기(품질 급락, 권장하지 않음).
+  models:
+    analyst: claude-sonnet-5
+    bull: claude-sonnet-5
+    bear: claude-sonnet-5
+    trader: claude-sonnet-5
+
+  max_tokens: 16000
+  temperature: null               # null이면 파라미터 자체를 보내지 않는다
+  timeout_sec: 900
+  max_retries: 2                  # trader JSON 파싱 실패 시 재시도 포함

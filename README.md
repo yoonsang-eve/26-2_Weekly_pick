@@ -2,19 +2,28 @@
 
 연세대 2026-2학기 투자공학 주간 종목 추천 과제 파이프라인.
 
-매주 1종목을 추천하고 **월요일 시가 매수 → 금요일 종가 매도(5영업일)** 수익률로 상대 순위가 매겨진다. 이 저장소는 그 추천을 만들어내는 과정 전체다.
+매주 **한국 1종목 + 미국 1종목**을 추천하고 **월요일 시가 매수 → 금요일 종가 매도(5영업일)** 수익률로 상대 순위가 매겨진다. 이 저장소는 그 추천을 만들어내는 과정 전체다.
+
+두 시장은 **완전히 독립된 파이프라인**으로 돌린다. 후보 스크리닝부터 최종 선택까지 한 번도 섞이지 않는다. 섞으면 LLM이 "미국이 나은가 한국이 나은가"를 따지기 시작하는데, 그건 이 과제의 판단 기준(5영업일 내 catalyst의 구체성)과 무관한 축이고 매주 1종목씩 내는 제출 형식과도 맞지 않는다.
 
 ## 설계 요약
 
 LLM에게 "다음 주에 오를 종목을 추천해줘"라고 묻지 않는다. 그렇게 물으면 학습 데이터에 각인된 유명주나 이미 지나간 테마가 나온다. 대신 후보를 기계적으로 먼저 확정하고, LLM은 그 안에서만 탈락과 선택을 수행한다.
 
 ```
-[Step 1] screener.py   기계적 필터        LLM 호출 없음    → 후보 20종목
+                      KR 파이프라인              US 파이프라인
+[Step 1] screener.py  KOSPI+KOSDAQ 전종목        S&P500 + Nasdaq100
+                      기계적 필터 (LLM 없음)      기계적 필터 (LLM 없음)
+                            → 후보 20종목              → 후보 20종목
    ↓
-[Step 2] Analyst       뉴스·공시 검증      LLM + 웹 검색    → 20 → 3  (탈락 전담)
+[Step 2] Analyst      뉴스·공시 검증 (20 → 3)     뉴스·공시 검증 (20 → 3)
    ↓
-[Step 3] Bull → Bear → Trader            LLM              → 3 → 1   (선택 전담)
+[Step 3] Bull → Bear → Trader  (3 → 1)          Bull → Bear → Trader (3 → 1)
+   ↓
+                      KR 추천 1종목              US 추천 1종목
 ```
+
+Step 2·3은 `manual`(프롬프트를 렌더링해 Claude 웹에 붙여넣기)과 `auto`(LLM API 직접 호출) 두 모드로 돌아간다. 어느 쪽이든 산출물 경로와 형식이 같다.
 
 단계를 쪼갠 이유는 세 가지다.
 
@@ -24,12 +33,14 @@ LLM에게 "다음 주에 오를 종목을 추천해줘"라고 묻지 않는다. 
 
 ## 스크리닝 기준 (Step 1)
 
-기준일은 매수일 직전 금요일 종가. KOSPI + KOSDAQ 전종목에서 우선주·스팩·리츠·관리종목·거래정지를 제외하고 아래를 적용한다.
+기준일은 매수일 직전 금요일 종가. KR은 KOSPI + KOSDAQ 전종목에서 우선주·스팩·리츠·관리종목·거래정지를 제외하고, US는 S&P 500 + Nasdaq 100 합집합(정적 CSV, 분기 1회 갱신)에서 복수 클래스 주식의 비주력 클래스를 제외한 뒤 아래를 적용한다. 필터 3·4의 파라미터는 두 시장이 동일하다 — 다르게 두면 시장 간 비교 가능성이 사라지고, 다르게 둘 근거도 없다.
+
+**US 기준일은 달력이 아니라 데이터에서 확정한다.** 한국시간 금요일에 돌리면 미국 현지 금요일장은 아직 열리지도 않았다. 그래서 받아온 시세에서 다수 종목의 마지막 거래일을 찾아 그것을 기준일로 쓰고, 확정된 날짜를 로그와 `screen_meta.json`에 남긴다.
 
 | # | 조건 | 값 | 성격 |
 |---|---|---|---|
-| 1 | 20일 평균 거래대금 상위 | 300위 | 위생 필터 (알파 아님) |
-| 2 | 시가총액 하한 | 2,000억원 | 위생 필터 |
+| 1 | 20일 평균 거래대금 | KR 상위 300위 / US $50M 이상 | 위생 필터 (알파 아님) |
+| 2 | 시가총액 하한 | KR 2,000억원 / US $2B | 위생 필터 |
 | 3 | 중기 모멘텀 + 단기 반전 | 모멘텀 상위 40% & 최근 5일 수익률 ≤ 0 | **핵심 설계** |
 | 4 | ATR20 / 종가 | 내림차순 정렬 후 상위 20 | 컷이 아니라 정렬 |
 
@@ -46,30 +57,66 @@ LLM에게 "다음 주에 오를 종목을 추천해줘"라고 묻지 않는다. 
 ## 구조
 
 ```
-config.yaml                     필터 파라미터 (하드코딩 없음)
-docs/prompts_v1.md              프롬프트 전문 = 제출본의 원본
+config.yaml                     필터 파라미터·시장 정의·LLM 설정 (하드코딩 없음)
+data/us_universe.csv            S&P500 + NDX 합집합 (분기 1회 갱신)
+docs/prompts_v2.md              프롬프트 전문 = 제출본의 원본
 docs/references.md              참고 문헌
-prompts/v1/*.txt                analyst / bull / bear / trader
-src/screener.py                 Step 1
-src/agents.py                   Step 2·3 프롬프트 렌더링 (manual 모드)
-outputs/prompt_submission_v1.md 수업 제출용 프롬프트 문서
-outputs/wk{N}/                  주차별 후보·렌더링 결과·LLM 응답 원문
+prompts/v1/*.txt                v1 (보존)
+prompts/v2/*.txt                analyst / bull / bear / trader — 현행
+src/screener.py                 Step 1 (KR + US)
+src/us_universe.py              US 유니버스 관리·갱신
+src/llm.py                      LLM 호출 계층 (openai_compat / anthropic)
+src/agents.py                   Step 2·3 (manual / auto)
+outputs/prompt_submission_v2.md 수업 제출용 프롬프트 문서
+outputs/wk{N}/{KR,US}/          시장별 후보·렌더링 결과·LLM 응답 원문·pick.json
 ```
 
 ## 실행
 
 ```bash
 pip install -r requirements.txt
-
-python src/screener.py            # Step 1 → outputs/wk{N}/candidates.csv
-python src/agents.py              # 다음 단계 프롬프트를 렌더링하고 클립보드로 복사
 ```
 
-`agents.py`는 인자 없이 실행하면 응답이 아직 없는 첫 단계를 자동으로 골라 렌더링한다. 출력된 프롬프트를 Claude에 붙여넣고, 응답 전문을 `outputs/wk{N}/responses/{stage}.md`로 저장한 뒤 다시 실행하면 다음 단계로 넘어간다. 각 단계는 **새 대화**에서 실행해야 한다 — 히스토리를 누적하면 Bear가 Bull에 동조한다.
+**Step 1 — 스크리닝**
+
+```bash
+python src/screener.py                 # config.run.markets 전부 (KR, US)
+python src/screener.py --market US     # 한 시장만
+python src/us_universe.py --refresh    # US 유니버스 갱신 (분기 1회면 충분)
+```
+
+**Step 2·3 — auto 모드 (LLM API 직접 호출)**
+
+저장소 루트에 `.env`를 만들고 API 키 한 줄을 넣는다 (`.gitignore`에 있어 커밋되지 않는다).
+
+```
+LETSUR_API_KEY=발급받은_키
+```
+
+```bash
+python src/agents.py --check           # 게이트웨이 연결·모델 이름 확인
+```
+
+```bash
+python src/agents.py                   # KR·US 각각 analyst → bull → bear → trader
+```
+
+4단계를 순차 호출하고 응답 원문을 `outputs/wk{N}/{시장}/responses/*.md`에, 최종 선택을 `pick.json`에 저장한다. 이미 응답이 있는 단계는 건너뛰므로 중간에 끊겨도 이어서 돌릴 수 있다. 호출에 쓴 모델·토큰·소요시간은 `run_meta.json`에 기록된다 (발표 자료의 '사용 모델' 항목에 그대로 들어간다).
+
+**Step 2·3 — manual 모드**
+
+```bash
+python src/agents.py --mode manual --market KR
+```
+
+응답이 아직 없는 첫 단계를 골라 프롬프트를 렌더링하고 클립보드로 복사한다. Claude 웹에 붙여넣고 응답 전문을 `outputs/wk{N}/{시장}/responses/{stage}.md`로 저장한 뒤 다시 실행하면 다음 단계로 넘어간다. 각 단계는 **새 대화**에서 실행해야 한다 — 히스토리를 누적하면 Bear가 Bull에 동조한다.
+
+게이트웨이가 웹 검색 툴을 중계하지 않으면 (`llm.openai_compat.web_search: false`) analyst·bear 프롬프트에 "검색 도구가 없으니 확인 불가는 확인 불가로 표기하라"는 지침이 자동으로 붙는다. 검색이 중요한 주차에는 그 두 단계만 manual로 돌리는 혼합 운용이 가능하다 — 단계별로 모드를 바꿔도 산출물 경로가 같기 때문이다.
 
 ## 데이터 소스
 
-FinanceDataReader. 한국거래소가 2025-12-27부터 정보데이터시스템을 회원제로 전환해 pykrx로는 계정 없이 전종목 조회가 불가능해졌다. 종목 선정 로직은 데이터 소스와 무관하게 동일하다.
+- **KR**: FinanceDataReader. 한국거래소가 2025-12-27부터 정보데이터시스템을 회원제로 전환해 pykrx로는 계정 없이 전종목 조회가 불가능해졌다. 종목 선정 로직은 데이터 소스와 무관하게 동일하다.
+- **US**: yfinance (시세·시가총액) + 위키피디아 (지수 구성종목). 수익률은 분할·배당 조정된 `Adj Close`로, 표시 가격과 거래대금은 미조정 `Close`로 계산한다.
 
 ## 주의
 

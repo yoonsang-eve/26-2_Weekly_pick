@@ -1,5 +1,11 @@
 finance-datareader>=0.9.96
+yfinance>=0.2.50
 pandas>=2.0
 pyarrow>=14.0
 PyYAML>=6.0
 tabulate>=0.9
+requests>=2.31          # openai_compat 게이트웨이 호출 + 유니버스 갱신
+lxml>=5.0               # us_universe.py --refresh (위키피디아 표 파싱)
+
+# llm.provider: anthropic 을 쓸 때만 필요하다
+anthropic>=0.40

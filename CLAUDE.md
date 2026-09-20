@@ -4,7 +4,7 @@
 
 Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝트 스펙이다.
 구현 대상, 설계 근거, 제약 조건, 금지 사항이 모두 여기에 있다.
-프롬프트 전문은 `docs/prompts_v1.md`, 외부 참고자료는 `docs/references.md`에 있다.
+프롬프트 전문은 `docs/prompts_v2.md`, 외부 참고자료는 `docs/references.md`에 있다.
 
 ---
 
@@ -14,11 +14,11 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 
 | 항목 | 내용 |
 |---|---|
-| 주기 | 매주 1종목 추천 |
+| 주기 | 매주 KR 1종목 + US 1종목 추천 |
 | 추천 기한 | 금~일 (다음 주 월요일 장 시작 전) |
-| 평가 구간 | 월요일 **시가** 매수 → 금요일 **종가** 매도, 5영업일 |
+| 평가 구간 | 월요일 **시가** 매수 → 그 주 마지막 거래일 **종가** 매도 (평시 5영업일) |
 | 채점 | 주간 수익률 기준 상대 순위 |
-| 대상 시장 | 한국(KRX) / 미국(US) 둘 다 가능 |
+| 대상 시장 | 한국(KRX) / 미국(US). **둘 다 운용한다** (config_version 3부터) |
 | 부가 요건 | 주간 상위 3위는 8슬라이드 내외 발표 |
 | 프롬프트 제출 | **학기 전체에 1개 고정.** 수정 시 새 버전으로 추가되고 이전 버전도 기록으로 남음 |
 
@@ -26,6 +26,10 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 
 ### 이 구조에서 나오는 설계 결론 (중요)
 
+0. **휴장이 끼면 시장마다 보유 영업일 수가 달라진다.** 매도일과 보유일수는
+   `config.markets.{시장}.sell_date` / `holding_days`로 시장별로 덮어쓰고, 프롬프트에는
+   `{{sell_date}}` / `{{holding_days}}`로 주입한다. 양쪽에 같은 금요일을 쓰면 열리지도
+   않는 날의 종가를 목표로 삼게 된다. (첫 사례: 2026 추석 주간 — KR 3영업일 / US 5영업일)
 1. **Horizon이 5영업일이다.** 밸류에이션·성장성은 이 구간에서 노이즈다. 실제로 가격을 움직이는 것은 catalyst(실적·공시·정책·수주), 단기 수급, 섹터 로테이션뿐이다. fundamental analysis 가중치는 0으로 둔다.
 2. **주간 독립 시행이고 손실이 다음 주로 이월되지 않는다.** 따라서 geometric drag가 없고, 변동성을 낮출 이유가 구조적으로 없다. 기대수익률 +2%/변동성 3%짜리 대형주는 상위 3위에 절대 들지 못한다. → **고변동성을 의도적으로 선호한다.**
 3. **프롬프트가 학기 내내 고정이다.** 따라서 프롬프트는 특정 주차·특정 종목에 대한 내용을 담으면 안 되고, 매주 바뀌는 값은 전부 placeholder로 빠져야 한다. 파이프라인 전체가 "템플릿 + 주간 변수 주입" 구조여야 하는 이유다.
@@ -36,17 +40,27 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 ## 2. 파이프라인 구조
 
 ```
-[Step 1] screener.py   기계적 필터        LLM 호출 없음    → candidates_wk{N}.csv (약 20종목)
+KR과 US를 완전히 분리해 같은 파이프라인을 두 번 돌린다.
+
+[Step 1] screener.py   기계적 필터        LLM 호출 없음    → outputs/wk{N}/{시장}/candidates.csv (20종목)
    ↓
 [Step 2] agents.py     Analyst            LLM + web search → 후보 20개 중 3개로 압축 (탈락시키는 단계)
    ↓
-[Step 3] agents.py     Bull / Bear / Trader  LLM           → 최종 1종목 (선택하는 단계)
+[Step 3] agents.py     Bull / Bear / Trader  LLM           → 최종 1종목 (선택하는 단계) → pick.json
    ↓
          chart.py      6개월 일봉 PNG
          report.py     발표 뼈대 + 제출용 프롬프트 렌더링본
    ↓ (금요일 장마감 후)
          settle.py     실제 수익률 정산 → log.csv 누적
 ```
+
+### 시장을 분리하는 이유
+
+한 프롬프트에 KR·US 후보를 함께 넣으면 LLM이 "어느 시장이 나은가"를 따지기 시작한다.
+그건 판단 기준(5영업일 내 catalyst의 구체성)과 무관한 축이고, 시장별로 1종목씩 내는
+제출 형식과도 맞지 않는다. 시장 간 비교는 파이프라인 밖의 문제로 둔다.
+시장별로 다른 것은 **유니버스와 데이터 소스, 그리고 프롬프트에 주입되는 시장 특성
+블록**뿐이고, 필터 파라미터와 단계 구조는 동일하다.
 
 ### 단계 분리의 근거
 
@@ -61,29 +75,35 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 ```
 weekly_pick/
 ├── CLAUDE.md                  # 이 문서
-├── config.yaml                # 필터 파라미터 (버전 관리 대상)
+├── config.yaml                # 필터 파라미터·시장 정의·LLM 설정 (버전 관리 대상)
+├── data/
+│   └── us_universe.csv        # S&P500 + NDX 합집합 (분기 1회 갱신)
 ├── docs/
-│   ├── prompts_v1.md          # 프롬프트 전문 = 제출본의 원본
+│   ├── prompts_v1.md          # v1 프롬프트 전문 (보존)
+│   ├── prompts_v2.md          # 현행 프롬프트 전문 = 제출본의 원본
 │   └── references.md          # 외부 참고자료
 ├── src/
-│   ├── screener.py            # Step 1
-│   ├── agents.py              # Step 2, 3
+│   ├── screener.py            # Step 1 (KR + US)
+│   ├── us_universe.py         # US 유니버스 로드·갱신
+│   ├── llm.py                 # LLM 호출 계층 (openai_compat / anthropic)
+│   ├── agents.py              # Step 2, 3 (manual / auto)
 │   ├── chart.py               # 차트 생성
 │   ├── report.py              # 리포트 조립
 │   └── settle.py              # 금요일 정산
 ├── prompts/
-│   ├── v1/                    # analyst.txt, bull.txt, bear.txt, trader.txt
-│   └── ...                    # 프롬프트 수정 시 v2/ 추가, v1/은 보존
+│   ├── v1/                    # analyst.txt, bull.txt, bear.txt, trader.txt (보존)
+│   └── v2/                    # 현행. 시장 컨텍스트 블록 추가
 ├── outputs/
 │   └── wk{N}/
-│       ├── candidates.csv
-│       ├── rendered_analyst.txt      # 실제로 LLM에 들어간 전문
-│       ├── rendered_bull.txt
-│       ├── rendered_bear.txt
-│       ├── rendered_trader.txt
-│       ├── responses/*.md            # LLM 응답 원문
-│       ├── chart_{ticker}.png
-│       └── report.md                 # 발표 뼈대
+│       └── {KR|US}/
+│           ├── candidates.csv
+│           ├── screen_meta.json      # 확정 기준일 등 스크리너 메타
+│           ├── rendered_*.txt        # 실제로 LLM에 들어간 전문
+│           ├── responses/*.md        # LLM 응답 원문
+│           ├── run_meta.json         # 모델·토큰 사용량·소요시간
+│           ├── pick.json             # trader의 구조화 출력
+│           ├── chart_{ticker}.png
+│           └── report.md             # 발표 뼈대
 └── log.csv                    # 주차별 누적 기록
 ```
 
@@ -98,14 +118,23 @@ weekly_pick/
 ### 유니버스
 - **KR**: KOSPI + KOSDAQ 전종목 (FinanceDataReader. KRX가 2025-12-27부터 회원제로 전환되어 pykrx는 `KRX_ID`/`KRX_PW` 없이는 전종목 조회가 불가하다. 종목 선정 로직은 소스와 무관하게 동일하다)
   - 제외: 우선주(종목명 말미 `우`/`우B`/`1우` 등), 스팩, ETF/ETN/ELW, 리츠, 관리종목, 거래정지
-- **US**: S&P 500 + Nasdaq 100 합집합 (정적 CSV로 관리, 분기 1회 갱신)
-  - 제외: ETF, ADR 중 거래량 희박 종목
+- **US**: S&P 500 + Nasdaq 100 합집합 — `data/us_universe.csv`로 정적 관리하고 분기 1회
+  `python src/us_universe.py --refresh`로 갱신한다. 매주 긁으면 구성종목 변경이 조용히
+  결과를 바꿔서 재현이 깨진다. 시세는 yfinance.
+  - 제외: 복수 클래스 주식의 비주력 클래스 (GOOG/GOOGL, FOX/FOXA — 거래대금이 큰 쪽만 남긴다)
+  - 수익률은 분할·배당 조정된 `Adj Close`, 표시 가격·거래대금은 미조정 `Close`로 계산한다
+  - **기준일을 달력으로 고정하지 말 것.** 한국시간 금요일에는 미국 금요일장이 아직 열리지
+    않았다. 받아온 시세에서 다수 종목의 마지막 거래일을 찾아 기준일로 쓰고
+    (`resolve_us_ref`), 확정된 날짜를 `screen_meta.json`에 남겨 프롬프트에 주입한다
+  - 시가총액은 yfinance `fast_info`로 받는다. 조회 실패분은 **탈락시키지 않고 통과**시킨다.
+    S&P500·NDX 구성종목이라 $2B 하한이 사실상 비구속적이고, 조회 실패를 탈락으로 처리하면
+    그 자체가 의도치 않은 필터가 되기 때문이다
 
 ### 필터 (config.yaml에서 조정)
 
 | # | 조건 | 기본값 | 목적 | 근거 |
 |---|---|---|---|---|
-| 1 | 20일 평균 거래대금 상위 | KR 300위 / US 전체 통과 | 거래정지·작전주 회피, 발표 방어 | 알파와 무관. 위생 필터 |
+| 1 | 20일 평균 거래대금 | KR 상위 300위 / US $50M 이상 | 거래정지·작전주 회피, 발표 방어 | 알파와 무관. 위생 필터 |
 | 2 | 시가총액 하한 | KR 2,000억원 / US $2B | 동상 | 동상 |
 | 3 | 6개월 모멘텀(최근 1개월 제외) 상위 + 최근 1주일 눌림 | ret_mom 상위 40%, ret5 ≤ 0 | 중기 모멘텀은 타되 단기 과열은 피함 | **핵심 설계.** 아래 설명 참조 |
 | 4 | ATR20 / 종가 | 상위 순으로 **정렬** (컷이 아님) | 상위 3위 진입 확률 확보 | 알파 아님. tournament 최적화 |
@@ -129,10 +158,17 @@ weekly_pick/
 **#4에 대한 주의 — 이것은 알파 팩터가 아니라 오히려 마이너스다.**
 low-volatility anomaly / betting-against-beta(Frazzini & Pedersen 2014)에 따르면 고변동성 종목의 risk-adjusted return은 오히려 낮다. 이 필터는 기대수익률을 깎는 대신 상위 3위 진입 확률을 올리는 순수한 tournament 베팅이며, 주간 독립 시행 구조 때문에만 정당화된다. 코드 주석에 이 사실을 명시할 것. 발표에서도 "평가 구조에 최적화한 의도적 선택"으로 설명한다.
 
-### 출력
-`outputs/wk{N}/candidates.csv` — 상위 20종목 (KR/US 합산, config에서 시장별 쿼터 조정 가능)
+**필터 3·4의 파라미터는 KR과 US가 동일하다.** 시장별로 다르게 둘 문헌적 근거가 없고,
+다르게 두면 두 추천이 같은 기준으로 만들어졌다는 주장이 무너진다. 시장별로 다른 것은
+유니버스와 필터 1·2의 임계값(통화 단위 차이)뿐이다.
 
-컬럼: `market, ticker, name, sector, close, mktcap, adv20, ret_mom, ret20, ret5, pct_from_52wh, atr20_pct, score`
+### 출력
+`outputs/wk{N}/{KR|US}/candidates.csv` — 시장별 상위 20종목 (config `universe.quota`)
+
+컬럼: `market, exchange, ticker, name, sector, close, mktcap, adv20, ret_mom, ret20, ret5, pct_from_52wh, atr20_pct, score`
+
+`close`·`mktcap`·`adv20`의 단위는 해당 시장의 통화 그대로다 (KR 원, US USD). 표시 단위
+변환은 `agents.py`가 프롬프트를 만들 때 `config.markets.{시장}.cap_divisor` 등으로 한다.
 
 **20이라는 숫자에 이론적 근거는 없다.** LLM이 한 번에 성실히 검증할 수 있는 분량의 어림값이며, 30개를 넘기면 뒷부분 처리가 부실해지는 경향 때문에 잡은 상한이다.
 
@@ -150,10 +186,22 @@ low-volatility anomaly / betting-against-beta(Frazzini & Pedersen 2014)에 따�
 
 | 모드 | 동작 | 용도 |
 |---|---|---|
-| `manual` | 렌더링된 프롬프트 txt만 생성하고 종료. 사용자가 Claude 웹에 붙여넣고 응답을 `responses/`에 저장 | **기본값.** 첫 주 및 web search 품질이 중요할 때 |
-| `auto` | Anthropic API로 4단계 순차 호출 | 안정화 이후 |
+| `manual` | 렌더링된 프롬프트 txt만 생성하고 종료. 사용자가 Claude 웹에 붙여넣고 응답을 `responses/`에 저장 | 게이트웨이에 웹 검색이 없어 analyst·bear 품질이 중요할 때 |
+| `auto` | **기본값.** `src/llm.py`를 통해 4단계 순차 호출 | 평상시 |
 
-`manual` 모드에서도 렌더링 결과와 응답 저장 경로는 `auto`와 동일해야 한다. `report.py`가 두 모드를 구분하지 않게 만들 것.
+`manual` 모드에서도 렌더링 결과와 응답 저장 경로는 `auto`와 동일해야 한다. `report.py`가 두 모드를 구분하지 않게 만들 것. 경로가 같으므로 **단계별로 모드를 섞을 수 있다** — 검색이 필요한 analyst·bear만 manual로 돌리고 나머지를 auto로 돌리는 운용이 가능하다.
+
+### LLM 백엔드 (`src/llm.py`)
+
+| provider | 설명 | 웹 검색 |
+|---|---|---|
+| `openai_compat` | OpenAI `/chat/completions` 호환 게이트웨이. 수업에서 받은 Letsur AI 게이트웨이가 여기에 해당한다. `base_url`과 API 키 환경변수만 채우면 된다 | 게이트웨이가 중계할 때만 (`llm.openai_compat.web_search`) |
+| `anthropic` | Anthropic Messages API 직접 호출 (공식 SDK) | 서버사이드 web search tool |
+
+- **API 키를 저장소에 커밋하지 말 것.** 환경변수 또는 저장소 루트의 `.env`(`llm.load_dotenv`가 읽는다)로만 받는다 (`llm.*.api_key_env`). `.env`와 `*.key`는 이미 `.gitignore`에 있다.
+- 본 실행 전에 `python src/agents.py --check`로 게이트웨이 연결과 단계별 모델(에셋) 이름을 먼저 확인한다. 모델명 오타는 실행 중반에야 터진다.
+- 웹 검색을 쓸 수 없는 실행에서는 analyst·bear 프롬프트의 `{{search_policy}}`에 "검색 도구가 없으니 확인 불가는 확인 불가로 표기하라"는 지침이 자동으로 들어간다. **검색이 없는데 검색이 있는 것처럼 물으면 LLM이 날짜와 수치를 지어낸다.** 이 치환을 없애지 말 것.
+- 현행 세대 모델(Opus 5 / Sonnet 5 등)은 `temperature`를 받지 않는다. `config.llm.temperature`가 `null`이면 파라미터 자체를 보내지 않는 것이 기본 동작이다.
 
 ### 호출 체인 (auto 모드)
 
@@ -167,9 +215,12 @@ trader   : bull + bear 응답 → 최종 1종목, JSON 출력
 - 각 단계는 이전 단계의 **응답 텍스트를 입력으로 받는다.** 전체 대화 히스토리를 누적하지 말 것 (bear가 bull에 동조하는 것을 막기 위해 컨텍스트를 분리한다)
 - `trader` 단계는 반드시 구조화 JSON을 반환하게 강제하고 파싱 실패 시 1회 재시도한다
 - 모델 선택: analyst/bear는 검색 호출이 많으므로 중간 티어, trader는 최상위 티어를 권장. 정확한 모델 문자열과 web search tool 스펙은 `docs/references.md`의 API 문서에서 확인할 것 (기억에 의존하지 말 것)
-- 온도·모델·프롬프트 버전을 `outputs/wk{N}/run_meta.json`에 기록. 발표 자료에 그대로 들어간다
+- 모델·토큰 사용량·소요시간·프롬프트 버전을 `outputs/wk{N}/{시장}/run_meta.json`에 기록. 발표 자료에 그대로 들어간다
+- 이미 응답이 있는 단계는 건너뛴다. 중간에 끊겨도 이어서 돌릴 수 있고, 같은 단계를 다시 돌리려면 해당 `responses/{stage}.md`를 지우거나 단계명을 인자로 준다
 
 ### trader 출력 스키마
+
+`market` 값은 그 파이프라인의 시장으로 고정되어 프롬프트에 주입된다.
 
 ```json
 {
@@ -249,12 +300,10 @@ trader   : bull + bear 응답 → 최종 1종목, JSON 출력
 
 ## 9. 구현 순서
 
-1. `config.yaml` + `screener.py` — KR만 먼저, 필터 단계별 생존 종목 수 로깅
-2. `screener.py`에 US 유니버스 추가, 시차 처리
-3. `prompts/v1/*.txt` 배치 + `agents.py` manual 모드 (렌더링만)
-4. `report.py` — 제출용 문서 생성까지
-5. `chart.py`
-6. `settle.py` + `log.csv` 스키마 확정
-7. `agents.py` auto 모드 (API 연동)
-
-1~4까지만 되면 이번 주 제출이 가능하다. 5~7은 그 다음 주에 붙여도 된다.
+1. ~~`config.yaml` + `screener.py` — KR~~ **완료**
+2. ~~`screener.py`에 US 유니버스 추가, 시차 처리~~ **완료** (config_version 3)
+3. ~~`prompts/*.txt` 배치 + `agents.py` manual 모드~~ **완료**
+4. ~~`agents.py` auto 모드 (API 연동)~~ **완료** (`src/llm.py`)
+5. `report.py` — 제출용 문서 생성까지  ← 다음
+6. `chart.py`
+7. `settle.py` + `log.csv` 스키마 확정 — 시장 컬럼과 벤치마크(KS11 / US500)를 시장별로 남길 것

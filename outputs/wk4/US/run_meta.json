@@ -1,0 +1,112 @@
+{
+  "week": 4,
+  "market": "US",
+  "mode": "auto",
+  "prompt_version": "v2",
+  "config_version": 3,
+  "stages": {
+    "analyst": {
+      "rendered_at": "2026-09-20T22:47:21",
+      "model": "claude-sonnet-5",
+      "elapsed_sec": 288.3,
+      "web_search": true,
+      "web_search_calls": 24,
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "global",
+        "input_tokens": 151487,
+        "output_tokens": 21155,
+        "output_tokens_details": {
+          "thinking_tokens": 15281
+        },
+        "server_tool_use": {
+          "web_fetch_requests": 0,
+          "web_search_requests": 24
+        },
+        "service_tier": "standard"
+      },
+      "chars": 4552
+    },
+    "bull": {
+      "rendered_at": "2026-09-20T22:52:10",
+      "model": "claude-sonnet-5",
+      "elapsed_sec": 70.5,
+      "web_search": false,
+      "web_search_calls": 0,
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "global",
+        "input_tokens": 4959,
+        "output_tokens": 5416,
+        "output_tokens_details": {
+          "thinking_tokens": 1620
+        },
+        "server_tool_use": null,
+        "service_tier": "standard"
+      },
+      "chars": 3911
+    },
+    "bear": {
+      "rendered_at": "2026-09-20T22:53:20",
+      "model": "claude-sonnet-5",
+      "elapsed_sec": 258.5,
+      "web_search": true,
+      "web_search_calls": 16,
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "global",
+        "input_tokens": 213164,
+        "output_tokens": 18471,
+        "output_tokens_details": {
+          "thinking_tokens": 11057
+        },
+        "server_tool_use": {
+          "web_fetch_requests": 0,
+          "web_search_requests": 16
+        },
+        "service_tier": "standard"
+      },
+      "chars": 7739
+    },
+    "trader": {
+      "rendered_at": "2026-09-20T22:57:39",
+      "model": "claude-sonnet-5",
+      "elapsed_sec": 92.3,
+      "web_search": false,
+      "web_search_calls": 0,
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "inference_geo": "global",
+        "input_tokens": 14851,
+        "output_tokens": 7440,
+        "output_tokens_details": {
+          "thinking_tokens": 4985
+        },
+        "server_tool_use": null,
+        "service_tier": "standard"
+      },
+      "chars": 2679
+    }
+  },
+  "provider": "anthropic"
+}

@@ -1,0 +1,519 @@
+symbol,name,sector,index,refreshed_on
+A,Agilent Technologies,Health Care,SP500,2026-09-20
+AAPL,Apple Inc.,Information Technology,NDX+SP500,2026-09-20
+ABBV,AbbVie,Health Care,SP500,2026-09-20
+ABNB,Airbnb,Consumer Discretionary,NDX+SP500,2026-09-20
+ABT,Abbott Laboratories,Health Care,SP500,2026-09-20
+ACGL,Arch Capital Group,Financials,SP500,2026-09-20
+ACN,Accenture,Information Technology,SP500,2026-09-20
+ADBE,Adobe Inc.,Information Technology,NDX+SP500,2026-09-20
+ADI,Analog Devices,Information Technology,NDX+SP500,2026-09-20
+ADM,Archer Daniels Midland,Consumer Staples,SP500,2026-09-20
+ADP,Automatic Data Processing,Industrials,NDX+SP500,2026-09-20
+ADSK,Autodesk,Information Technology,NDX+SP500,2026-09-20
+AEE,Ameren,Utilities,SP500,2026-09-20
+AEP,American Electric Power,Utilities,NDX+SP500,2026-09-20
+AES,AES Corporation,Utilities,SP500,2026-09-20
+AFL,Aflac,Financials,SP500,2026-09-20
+AIG,American International Group,Financials,SP500,2026-09-20
+AIZ,Assurant,Financials,SP500,2026-09-20
+AJG,Arthur J. Gallagher & Co.,Financials,SP500,2026-09-20
+AKAM,Akamai Technologies,Information Technology,SP500,2026-09-20
+ALAB,Astera Labs,Technology,NDX,2026-09-20
+ALB,Albemarle Corporation,Materials,SP500,2026-09-20
+ALGN,Align Technology,Health Care,SP500,2026-09-20
+ALL,Allstate,Financials,SP500,2026-09-20
+ALLE,Allegion,Industrials,SP500,2026-09-20
+ALNY,Alnylam Pharmaceuticals,Health Care,NDX,2026-09-20
+AMAT,Applied Materials,Information Technology,NDX+SP500,2026-09-20
+AMCR,Amcor,Materials,SP500,2026-09-20
+AMD,Advanced Micro Devices,Information Technology,NDX+SP500,2026-09-20
+AME,Ametek,Industrials,SP500,2026-09-20
+AMGN,Amgen,Health Care,NDX+SP500,2026-09-20
+AMP,Ameriprise Financial,Financials,SP500,2026-09-20
+AMT,American Tower,Real Estate,SP500,2026-09-20
+AMZN,Amazon,Consumer Discretionary,NDX+SP500,2026-09-20
+ANET,Arista Networks,Information Technology,SP500,2026-09-20
+AON,Aon plc,Financials,SP500,2026-09-20
+AOS,A. O. Smith,Industrials,SP500,2026-09-20
+APA,APA Corporation,Energy,SP500,2026-09-20
+APD,Air Products,Materials,SP500,2026-09-20
+APH,Amphenol,Information Technology,SP500,2026-09-20
+APO,Apollo Global Management,Financials,SP500,2026-09-20
+APP,AppLovin,Communication Services,NDX+SP500,2026-09-20
+APTV,Aptiv,Consumer Discretionary,SP500,2026-09-20
+ARE,Alexandria Real Estate Equities,Real Estate,SP500,2026-09-20
+ARES,Ares Management,Financials,SP500,2026-09-20
+ARM,Arm Holdings,Technology,NDX,2026-09-20
+ASML,ASML Holding,Technology,NDX,2026-09-20
+ATO,Atmos Energy,Utilities,SP500,2026-09-20
+AVGO,Broadcom,Information Technology,NDX+SP500,2026-09-20
+AVY,Avery Dennison,Materials,SP500,2026-09-20
+AWK,American Water Works,Utilities,SP500,2026-09-20
+AXON,Axon Enterprise,Industrials,NDX+SP500,2026-09-20
+AXP,American Express,Financials,SP500,2026-09-20
+AZO,AutoZone,Consumer Discretionary,SP500,2026-09-20
+BA,Boeing,Industrials,SP500,2026-09-20
+BAC,Bank of America,Financials,SP500,2026-09-20
+BALL,Ball Corporation,Materials,SP500,2026-09-20
+BAX,Baxter International,Health Care,SP500,2026-09-20
+BBY,Best Buy,Consumer Discretionary,SP500,2026-09-20
+BDX,Becton Dickinson,Health Care,SP500,2026-09-20
+BEN,Franklin Resources,Financials,SP500,2026-09-20
+BF-B,Brown–Forman,Consumer Staples,SP500,2026-09-20
+BG,Bunge Global,Consumer Staples,SP500,2026-09-20
+BIIB,Biogen,Health Care,SP500,2026-09-20
+BKNG,Booking Holdings,Consumer Discretionary,NDX+SP500,2026-09-20
+BKR,Baker Hughes,Energy,NDX+SP500,2026-09-20
+BLDR,Builders FirstSource,Industrials,SP500,2026-09-20
+BLK,BlackRock,Financials,SP500,2026-09-20
+BMY,Bristol Myers Squibb,Health Care,SP500,2026-09-20
+BNY,BNY Mellon,Financials,SP500,2026-09-20
+BR,Broadridge Financial Solutions,Industrials,SP500,2026-09-20
+BRK-B,Berkshire Hathaway,Financials,SP500,2026-09-20
+BRO,Brown & Brown,Financials,SP500,2026-09-20
+BSX,Boston Scientific,Health Care,SP500,2026-09-20
+BX,Blackstone Inc.,Financials,SP500,2026-09-20
+BXP,"BXP, Inc.",Real Estate,SP500,2026-09-20
+C,Citigroup,Financials,SP500,2026-09-20
+CAH,Cardinal Health,Health Care,SP500,2026-09-20
+CARR,Carrier Global,Industrials,SP500,2026-09-20
+CASY,Casey's,Consumer Staples,SP500,2026-09-20
+CAT,Caterpillar Inc.,Industrials,SP500,2026-09-20
+CB,Chubb Limited,Financials,SP500,2026-09-20
+CBOE,Cboe Global Markets,Financials,SP500,2026-09-20
+CBRE,CBRE Group,Real Estate,SP500,2026-09-20
+CCEP,Coca-Cola Europacific Partners,Consumer Staples,NDX,2026-09-20
+CCI,Crown Castle,Real Estate,SP500,2026-09-20
+CCL,Carnival Corporation,Consumer Discretionary,SP500,2026-09-20
+CDNS,Cadence Design Systems,Information Technology,NDX+SP500,2026-09-20
+CDW,CDW Corporation,Information Technology,SP500,2026-09-20
+CEG,Constellation Energy,Utilities,NDX+SP500,2026-09-20
+CF,CF Industries,Materials,SP500,2026-09-20
+CFG,Citizens Financial Group,Financials,SP500,2026-09-20
+CHD,Church & Dwight,Consumer Staples,SP500,2026-09-20
+CHRW,C.H. Robinson,Industrials,SP500,2026-09-20
+CHTR,Charter Communications,Communication Services,SP500,2026-09-20
+CI,Cigna,Health Care,SP500,2026-09-20
+CIEN,Ciena,Information Technology,SP500,2026-09-20
+CINF,Cincinnati Financial,Financials,SP500,2026-09-20
+CL,Colgate-Palmolive,Consumer Staples,SP500,2026-09-20
+CLX,Clorox,Consumer Staples,SP500,2026-09-20
+CMCSA,Comcast,Communication Services,NDX+SP500,2026-09-20
+CME,CME Group,Financials,SP500,2026-09-20
+CMG,Chipotle Mexican Grill,Consumer Discretionary,SP500,2026-09-20
+CMI,Cummins,Industrials,SP500,2026-09-20
+CMS,CMS Energy,Utilities,SP500,2026-09-20
+CNC,Centene Corporation,Health Care,SP500,2026-09-20
+CNP,CenterPoint Energy,Utilities,SP500,2026-09-20
+COF,Capital One,Financials,SP500,2026-09-20
+COHR,Coherent Corp.,Information Technology,SP500,2026-09-20
+COIN,Coinbase,Financials,SP500,2026-09-20
+COO,Cooper Companies (The),Health Care,SP500,2026-09-20
+COP,ConocoPhillips,Energy,SP500,2026-09-20
+COR,Cencora,Health Care,SP500,2026-09-20
+COST,Costco,Consumer Staples,NDX+SP500,2026-09-20
+CPAY,Corpay,Financials,SP500,2026-09-20
+CPRT,Copart,Industrials,NDX+SP500,2026-09-20
+CPT,Camden Property Trust,Real Estate,SP500,2026-09-20
+CRH,CRH plc,Materials,SP500,2026-09-20
+CRL,Charles River Laboratories,Health Care,SP500,2026-09-20
+CRM,Salesforce,Information Technology,SP500,2026-09-20
+CRWD,CrowdStrike,Information Technology,NDX+SP500,2026-09-20
+CRWV,CoreWeave,Technology,NDX,2026-09-20
+CSCO,Cisco,Information Technology,NDX+SP500,2026-09-20
+CSGP,CoStar Group,Real Estate,SP500,2026-09-20
+CSX,CSX Corporation,Industrials,NDX+SP500,2026-09-20
+CTAS,Cintas,Industrials,NDX+SP500,2026-09-20
+CTSH,Cognizant,Information Technology,SP500,2026-09-20
+CTVA,Corteva,Materials,SP500,2026-09-20
+CVNA,Carvana,Consumer Discretionary,SP500,2026-09-20
+CVS,CVS Health,Health Care,SP500,2026-09-20
+CVX,Chevron Corporation,Energy,SP500,2026-09-20
+D,Dominion Energy,Utilities,SP500,2026-09-20
+DAL,Delta Air Lines,Industrials,SP500,2026-09-20
+DASH,DoorDash,Consumer Discretionary,NDX+SP500,2026-09-20
+DD,DuPont,Industrials,SP500,2026-09-20
+DDOG,Datadog,Information Technology,NDX+SP500,2026-09-20
+DE,Deere & Company,Industrials,SP500,2026-09-20
+DECK,Deckers Brands,Consumer Discretionary,SP500,2026-09-20
+DELL,Dell Technologies,Information Technology,SP500,2026-09-20
+DG,Dollar General,Consumer Staples,SP500,2026-09-20
+DGX,Quest Diagnostics,Health Care,SP500,2026-09-20
+DHI,D. R. Horton,Consumer Discretionary,SP500,2026-09-20
+DHR,Danaher Corporation,Health Care,SP500,2026-09-20
+DIS,Walt Disney Company (The),Communication Services,SP500,2026-09-20
+DLR,Digital Realty,Real Estate,SP500,2026-09-20
+DLTR,Dollar Tree,Consumer Staples,SP500,2026-09-20
+DOC,Healthpeak Properties,Real Estate,SP500,2026-09-20
+DOV,Dover Corporation,Industrials,SP500,2026-09-20
+DOW,Dow Inc.,Materials,SP500,2026-09-20
+DPZ,Domino's,Consumer Discretionary,SP500,2026-09-20
+DRI,Darden Restaurants,Consumer Discretionary,SP500,2026-09-20
+DTE,DTE Energy,Utilities,SP500,2026-09-20
+DUK,Duke Energy,Utilities,SP500,2026-09-20
+DVA,DaVita,Health Care,SP500,2026-09-20
+DVN,Devon Energy,Energy,SP500,2026-09-20
+DXCM,Dexcom,Health Care,NDX+SP500,2026-09-20
+EBAY,eBay Inc.,Consumer Discretionary,SP500,2026-09-20
+ECHO,EchoStar,Communication Services,SP500,2026-09-20
+ECL,Ecolab,Materials,SP500,2026-09-20
+ED,Consolidated Edison,Utilities,SP500,2026-09-20
+EFX,Equifax,Industrials,SP500,2026-09-20
+EG,Everest Group,Financials,SP500,2026-09-20
+EIX,Edison International,Utilities,SP500,2026-09-20
+EL,Estée Lauder Companies (The),Consumer Staples,SP500,2026-09-20
+ELV,Elevance Health,Health Care,SP500,2026-09-20
+EME,Emcor,Industrials,SP500,2026-09-20
+EMR,Emerson Electric,Industrials,SP500,2026-09-20
+EOG,EOG Resources,Energy,SP500,2026-09-20
+EQIX,Equinix,Real Estate,SP500,2026-09-20
+EQT,EQT Corporation,Energy,SP500,2026-09-20
+ERIE,Erie Indemnity,Financials,SP500,2026-09-20
+ES,Eversource Energy,Utilities,SP500,2026-09-20
+ESS,Essex Property Trust,Real Estate,SP500,2026-09-20
+ETN,Eaton Corporation,Industrials,SP500,2026-09-20
+ETR,Entergy,Utilities,SP500,2026-09-20
+EVRG,Evergy,Utilities,SP500,2026-09-20
+EW,Edwards Lifesciences,Health Care,SP500,2026-09-20
+EXC,Exelon,Utilities,NDX+SP500,2026-09-20
+EXE,Expand Energy,Energy,SP500,2026-09-20
+EXPD,Expeditors International,Industrials,SP500,2026-09-20
+EXPE,Expedia Group,Consumer Discretionary,SP500,2026-09-20
+EXR,Extra Space Storage,Real Estate,SP500,2026-09-20
+F,Ford Motor Company,Consumer Discretionary,SP500,2026-09-20
+FANG,Diamondback Energy,Energy,NDX+SP500,2026-09-20
+FAST,Fastenal,Industrials,NDX+SP500,2026-09-20
+FCX,Freeport-McMoRan,Materials,SP500,2026-09-20
+FDS,FactSet,Financials,SP500,2026-09-20
+FDX,FedEx,Industrials,SP500,2026-09-20
+FDXF,FedEx Freight,Industrials,SP500,2026-09-20
+FE,FirstEnergy,Utilities,SP500,2026-09-20
+FER,Ferrovial,Industrials,NDX,2026-09-20
+FERG,Ferguson Enterprises,Industrials,SP500,2026-09-20
+FFIV,"F5, Inc.",Information Technology,SP500,2026-09-20
+FICO,Fair Isaac,Information Technology,SP500,2026-09-20
+FIS,Fidelity National Information Services,Financials,SP500,2026-09-20
+FISV,Fiserv,Financials,SP500,2026-09-20
+FITB,Fifth Third Bancorp,Financials,SP500,2026-09-20
+FIX,Comfort Systems USA,Industrials,SP500,2026-09-20
+FLEX,Flex Ltd.,Information Technology,SP500,2026-09-20
+FOX,Fox Corporation (Class B),Communication Services,SP500,2026-09-20
+FOXA,Fox Corporation (Class A),Communication Services,SP500,2026-09-20
+FRT,Federal Realty Investment Trust,Real Estate,SP500,2026-09-20
+FSLR,First Solar,Information Technology,SP500,2026-09-20
+FTNT,Fortinet,Information Technology,NDX+SP500,2026-09-20
+FTV,Fortive,Industrials,SP500,2026-09-20
+GD,General Dynamics,Industrials,SP500,2026-09-20
+GDDY,GoDaddy,Information Technology,SP500,2026-09-20
+GE,GE Aerospace,Industrials,SP500,2026-09-20
+GEHC,GE HealthCare,Health Care,NDX+SP500,2026-09-20
+GEN,Gen Digital,Information Technology,SP500,2026-09-20
+GEV,GE Vernova,Industrials,SP500,2026-09-20
+GILD,Gilead Sciences,Health Care,NDX+SP500,2026-09-20
+GIS,General Mills,Consumer Staples,SP500,2026-09-20
+GL,Globe Life,Financials,SP500,2026-09-20
+GLW,Corning Inc.,Information Technology,SP500,2026-09-20
+GM,General Motors,Consumer Discretionary,SP500,2026-09-20
+GNRC,Generac,Industrials,SP500,2026-09-20
+GOOG,Alphabet Inc. (Class C),Communication Services,NDX+SP500,2026-09-20
+GOOGL,Alphabet Inc. (Class A),Communication Services,NDX+SP500,2026-09-20
+GPC,Genuine Parts Company,Consumer Discretionary,SP500,2026-09-20
+GPN,Global Payments,Financials,SP500,2026-09-20
+GRMN,Garmin,Consumer Discretionary,SP500,2026-09-20
+GS,Goldman Sachs,Financials,SP500,2026-09-20
+GWW,W. W. Grainger,Industrials,SP500,2026-09-20
+HAL,Halliburton,Energy,SP500,2026-09-20
+HAS,Hasbro,Consumer Discretionary,SP500,2026-09-20
+HBAN,Huntington Bancshares,Financials,SP500,2026-09-20
+HCA,HCA Healthcare,Health Care,SP500,2026-09-20
+HD,Home Depot (The),Consumer Discretionary,SP500,2026-09-20
+HIG,Hartford (The),Financials,SP500,2026-09-20
+HII,Huntington Ingalls Industries,Industrials,SP500,2026-09-20
+HLT,Hilton Worldwide,Consumer Discretionary,SP500,2026-09-20
+HON,Honeywell Technologies,Industrials,NDX+SP500,2026-09-20
+HONA,Honeywell Aerospace,Industrials,NDX+SP500,2026-09-20
+HOOD,Robinhood Markets,Financials,SP500,2026-09-20
+HPE,Hewlett Packard Enterprise,Information Technology,SP500,2026-09-20
+HPQ,HP Inc.,Information Technology,SP500,2026-09-20
+HRL,Hormel Foods,Consumer Staples,SP500,2026-09-20
+HSIC,Henry Schein,Health Care,SP500,2026-09-20
+HST,Host Hotels & Resorts,Real Estate,SP500,2026-09-20
+HSY,Hershey Company (The),Consumer Staples,SP500,2026-09-20
+HUBB,Hubbell Incorporated,Industrials,SP500,2026-09-20
+HUM,Humana,Health Care,SP500,2026-09-20
+HWM,Howmet Aerospace,Industrials,SP500,2026-09-20
+IBKR,Interactive Brokers,Financials,SP500,2026-09-20
+IBM,IBM,Information Technology,SP500,2026-09-20
+ICE,Intercontinental Exchange,Financials,SP500,2026-09-20
+IDXX,Idexx Laboratories,Health Care,NDX+SP500,2026-09-20
+IEX,IDEX Corporation,Industrials,SP500,2026-09-20
+IFF,International Flavors & Fragrances,Materials,SP500,2026-09-20
+INCY,Incyte,Health Care,SP500,2026-09-20
+INTC,Intel,Information Technology,NDX+SP500,2026-09-20
+INTU,Intuit,Information Technology,NDX+SP500,2026-09-20
+INVH,Invitation Homes,Real Estate,SP500,2026-09-20
+IP,International Paper,Materials,SP500,2026-09-20
+IQV,IQVIA,Health Care,SP500,2026-09-20
+IR,Ingersoll Rand,Industrials,SP500,2026-09-20
+IRM,Iron Mountain,Real Estate,SP500,2026-09-20
+ISRG,Intuitive Surgical,Health Care,NDX+SP500,2026-09-20
+IT,Gartner,Information Technology,SP500,2026-09-20
+ITW,Illinois Tool Works,Industrials,SP500,2026-09-20
+IVZ,Invesco,Financials,SP500,2026-09-20
+J,Jacobs Solutions,Industrials,SP500,2026-09-20
+JBHT,J.B. Hunt,Industrials,SP500,2026-09-20
+JBL,Jabil,Information Technology,SP500,2026-09-20
+JCI,Johnson Controls,Industrials,SP500,2026-09-20
+JKHY,Jack Henry & Associates,Financials,SP500,2026-09-20
+JNJ,Johnson & Johnson,Health Care,SP500,2026-09-20
+JPM,JPMorgan Chase,Financials,SP500,2026-09-20
+KDP,Keurig Dr Pepper,Consumer Staples,NDX+SP500,2026-09-20
+KEY,KeyCorp,Financials,SP500,2026-09-20
+KEYS,Keysight Technologies,Information Technology,SP500,2026-09-20
+KHC,Kraft Heinz,Consumer Staples,SP500,2026-09-20
+KIM,Kimco Realty,Real Estate,SP500,2026-09-20
+KKR,KKR & Co.,Financials,SP500,2026-09-20
+KLAC,KLA Corporation,Information Technology,NDX+SP500,2026-09-20
+KMB,Kimberly-Clark,Consumer Staples,SP500,2026-09-20
+KMI,Kinder Morgan,Energy,SP500,2026-09-20
+KO,Coca-Cola Company (The),Consumer Staples,SP500,2026-09-20
+KR,Kroger,Consumer Staples,SP500,2026-09-20
+KVUE,Kenvue,Consumer Staples,SP500,2026-09-20
+L,Loews Corporation,Financials,SP500,2026-09-20
+LDOS,Leidos,Industrials,SP500,2026-09-20
+LEN,Lennar,Consumer Discretionary,SP500,2026-09-20
+LH,Labcorp,Health Care,SP500,2026-09-20
+LHX,L3Harris,Industrials,SP500,2026-09-20
+LII,Lennox International,Industrials,SP500,2026-09-20
+LIN,Linde plc,Materials,NDX+SP500,2026-09-20
+LITE,Lumentum,Information Technology,NDX+SP500,2026-09-20
+LLY,Lilly (Eli),Health Care,SP500,2026-09-20
+LMT,Lockheed Martin,Industrials,SP500,2026-09-20
+LNT,Alliant Energy,Utilities,SP500,2026-09-20
+LOW,Lowe's,Consumer Discretionary,SP500,2026-09-20
+LRCX,Lam Research,Information Technology,NDX+SP500,2026-09-20
+LULU,Lululemon Athletica,Consumer Discretionary,SP500,2026-09-20
+LUV,Southwest Airlines,Industrials,SP500,2026-09-20
+LVS,Las Vegas Sands,Consumer Discretionary,SP500,2026-09-20
+LYB,LyondellBasell,Materials,SP500,2026-09-20
+LYV,Live Nation Entertainment,Communication Services,SP500,2026-09-20
+MA,Mastercard,Financials,SP500,2026-09-20
+MAA,Mid-America Apartment Communities,Real Estate,SP500,2026-09-20
+MAR,Marriott International,Consumer Discretionary,NDX+SP500,2026-09-20
+MAS,Masco,Industrials,SP500,2026-09-20
+MCD,McDonald's,Consumer Discretionary,SP500,2026-09-20
+MCHP,Microchip Technology,Information Technology,NDX+SP500,2026-09-20
+MCK,McKesson Corporation,Health Care,SP500,2026-09-20
+MCO,Moody's Corporation,Financials,SP500,2026-09-20
+MDLZ,Mondelez International,Consumer Staples,NDX+SP500,2026-09-20
+MDT,Medtronic,Health Care,SP500,2026-09-20
+MELI,Mercado Libre,Consumer Discretionary,NDX,2026-09-20
+MET,MetLife,Financials,SP500,2026-09-20
+META,Meta Platforms,Communication Services,NDX+SP500,2026-09-20
+MGM,MGM Resorts,Consumer Discretionary,SP500,2026-09-20
+MKC,McCormick & Company,Consumer Staples,SP500,2026-09-20
+MLM,Martin Marietta Materials,Materials,SP500,2026-09-20
+MMM,3M,Industrials,SP500,2026-09-20
+MNST,Monster Beverage,Consumer Staples,NDX+SP500,2026-09-20
+MO,Altria,Consumer Staples,SP500,2026-09-20
+MOS,Mosaic Company (The),Materials,SP500,2026-09-20
+MPC,Marathon Petroleum,Energy,SP500,2026-09-20
+MPWR,Monolithic Power Systems,Information Technology,NDX+SP500,2026-09-20
+MRK,Merck & Co.,Health Care,SP500,2026-09-20
+MRNA,Moderna,Health Care,SP500,2026-09-20
+MRSH,Marsh McLennan,Financials,SP500,2026-09-20
+MRVL,Marvell Technology,Information Technology,NDX+SP500,2026-09-20
+MS,Morgan Stanley,Financials,SP500,2026-09-20
+MSCI,MSCI,Financials,SP500,2026-09-20
+MSFT,Microsoft,Information Technology,NDX+SP500,2026-09-20
+MSI,Motorola Solutions,Information Technology,SP500,2026-09-20
+MSTR,MicroStrategy,Technology,NDX,2026-09-20
+MTB,M&T Bank,Financials,SP500,2026-09-20
+MTD,Mettler Toledo,Health Care,SP500,2026-09-20
+MU,Micron Technology,Information Technology,NDX+SP500,2026-09-20
+NBIS,Nebius Group,Technology,NDX,2026-09-20
+NCLH,Norwegian Cruise Line Holdings,Consumer Discretionary,SP500,2026-09-20
+NDAQ,"Nasdaq, Inc.",Financials,SP500,2026-09-20
+NDSN,Nordson Corporation,Industrials,SP500,2026-09-20
+NEE,NextEra Energy,Utilities,SP500,2026-09-20
+NEM,Newmont,Materials,SP500,2026-09-20
+NFLX,Netflix,Communication Services,NDX+SP500,2026-09-20
+NI,NiSource,Utilities,SP500,2026-09-20
+NKE,"Nike, Inc.",Consumer Discretionary,SP500,2026-09-20
+NOC,Northrop Grumman,Industrials,SP500,2026-09-20
+NOW,ServiceNow,Information Technology,SP500,2026-09-20
+NRG,NRG Energy,Utilities,SP500,2026-09-20
+NSC,Norfolk Southern,Industrials,SP500,2026-09-20
+NTAP,NetApp,Information Technology,SP500,2026-09-20
+NTRS,Northern Trust,Financials,SP500,2026-09-20
+NUE,Nucor,Materials,SP500,2026-09-20
+NVDA,Nvidia,Information Technology,NDX+SP500,2026-09-20
+NVR,"NVR, Inc.",Consumer Discretionary,SP500,2026-09-20
+NWS,News Corp (Class B),Communication Services,SP500,2026-09-20
+NWSA,News Corp (Class A),Communication Services,SP500,2026-09-20
+NXPI,NXP Semiconductors,Information Technology,NDX+SP500,2026-09-20
+O,Realty Income,Real Estate,SP500,2026-09-20
+ODFL,Old Dominion,Industrials,NDX+SP500,2026-09-20
+OKE,Oneok,Energy,SP500,2026-09-20
+OMC,Omnicom Group,Communication Services,SP500,2026-09-20
+ON,ON Semiconductor,Information Technology,SP500,2026-09-20
+ORCL,Oracle Corporation,Information Technology,SP500,2026-09-20
+ORLY,O'Reilly Automotive,Consumer Discretionary,NDX+SP500,2026-09-20
+OTIS,Otis Worldwide,Industrials,SP500,2026-09-20
+OXY,Occidental Petroleum,Energy,SP500,2026-09-20
+PANW,Palo Alto Networks,Information Technology,NDX+SP500,2026-09-20
+PAYX,Paychex,Industrials,NDX+SP500,2026-09-20
+PCAR,Paccar,Industrials,NDX+SP500,2026-09-20
+PCG,PG&E Corporation,Utilities,SP500,2026-09-20
+PDD,PDD Holdings,Technology,NDX,2026-09-20
+PEG,Public Service Enterprise Group,Utilities,SP500,2026-09-20
+PEP,PepsiCo,Consumer Staples,NDX+SP500,2026-09-20
+PFE,Pfizer,Health Care,SP500,2026-09-20
+PFG,Principal Financial Group,Financials,SP500,2026-09-20
+PG,Procter & Gamble,Consumer Staples,SP500,2026-09-20
+PGR,Progressive Corporation,Financials,SP500,2026-09-20
+PH,Parker Hannifin,Industrials,SP500,2026-09-20
+PHM,PulteGroup,Consumer Discretionary,SP500,2026-09-20
+PKG,Packaging Corporation of America,Materials,SP500,2026-09-20
+PLD,Prologis,Real Estate,SP500,2026-09-20
+PLTR,Palantir Technologies,Information Technology,NDX+SP500,2026-09-20
+PM,Philip Morris International,Consumer Staples,SP500,2026-09-20
+PNC,PNC Financial Services,Financials,SP500,2026-09-20
+PNR,Pentair,Industrials,SP500,2026-09-20
+PNW,Pinnacle West Capital,Utilities,SP500,2026-09-20
+PODD,Insulet Corporation,Health Care,SP500,2026-09-20
+PPG,PPG Industries,Materials,SP500,2026-09-20
+PPL,PPL Corporation,Utilities,SP500,2026-09-20
+PRU,Prudential Financial,Financials,SP500,2026-09-20
+PSA,Public Storage,Real Estate,SP500,2026-09-20
+PSKY,Paramount Skydance Corporation,Communication Services,SP500,2026-09-20
+PSX,Phillips 66,Energy,SP500,2026-09-20
+PTC,PTC Inc.,Information Technology,SP500,2026-09-20
+PWR,Quanta Services,Industrials,SP500,2026-09-20
+PYPL,PayPal,Financials,NDX+SP500,2026-09-20
+Q,Qnity Electronics,Information Technology,SP500,2026-09-20
+QCOM,Qualcomm,Information Technology,NDX+SP500,2026-09-20
+RCL,Royal Caribbean Group,Consumer Discretionary,SP500,2026-09-20
+RDDT,Reddit,Communication Services,SP500,2026-09-20
+REG,Regency Centers,Real Estate,SP500,2026-09-20
+REGN,Regeneron Pharmaceuticals,Health Care,NDX+SP500,2026-09-20
+RF,Regions Financial Corporation,Financials,SP500,2026-09-20
+RJF,Raymond James Financial,Financials,SP500,2026-09-20
+RKLB,Rocket Lab,Industrials,NDX,2026-09-20
+RL,Ralph Lauren Corporation,Consumer Discretionary,SP500,2026-09-20
+RMD,ResMed|,Health Care,SP500,2026-09-20
+ROK,Rockwell Automation,Industrials,SP500,2026-09-20
+ROL,"Rollins, Inc.",Industrials,SP500,2026-09-20
+ROP,Roper Technologies,Information Technology,NDX+SP500,2026-09-20
+ROST,Ross Stores,Consumer Discretionary,NDX+SP500,2026-09-20
+RSG,Republic Services,Industrials,SP500,2026-09-20
+RTX,RTX Corporation,Industrials,SP500,2026-09-20
+RVTY,Revvity,Health Care,SP500,2026-09-20
+SBAC,SBA Communications,Real Estate,SP500,2026-09-20
+SBUX,Starbucks,Consumer Discretionary,NDX+SP500,2026-09-20
+SCHW,Charles Schwab Corporation,Financials,SP500,2026-09-20
+SHOP,Shopify,Technology,NDX,2026-09-20
+SHW,Sherwin-Williams,Materials,SP500,2026-09-20
+SJM,J.M. Smucker Company (The),Consumer Staples,SP500,2026-09-20
+SLB,Schlumberger,Energy,SP500,2026-09-20
+SMCI,Supermicro,Information Technology,SP500,2026-09-20
+SNA,Snap-on,Industrials,SP500,2026-09-20
+SNDK,Sandisk,Information Technology,NDX+SP500,2026-09-20
+SNPS,Synopsys,Information Technology,NDX+SP500,2026-09-20
+SO,Southern Company,Utilities,SP500,2026-09-20
+SOLV,Solventum,Health Care,SP500,2026-09-20
+SPCX,SpaceX,Telecommunications,NDX,2026-09-20
+SPG,Simon Property Group,Real Estate,SP500,2026-09-20
+SPGI,S&P Global,Financials,SP500,2026-09-20
+SRE,Sempra,Utilities,SP500,2026-09-20
+STE,Steris,Health Care,SP500,2026-09-20
+STLD,Steel Dynamics,Materials,SP500,2026-09-20
+STT,State Street Corporation,Financials,SP500,2026-09-20
+STX,Seagate Technology,Information Technology,NDX+SP500,2026-09-20
+STZ,Constellation Brands,Consumer Staples,SP500,2026-09-20
+SW,Smurfit Westrock,Materials,SP500,2026-09-20
+SWK,Stanley Black & Decker,Industrials,SP500,2026-09-20
+SWKS,Skyworks Solutions,Information Technology,SP500,2026-09-20
+SYF,Synchrony Financial,Financials,SP500,2026-09-20
+SYK,Stryker Corporation,Health Care,SP500,2026-09-20
+SYY,Sysco,Consumer Staples,SP500,2026-09-20
+T,AT&T,Communication Services,SP500,2026-09-20
+TAP,Molson Coors Beverage Company,Consumer Staples,SP500,2026-09-20
+TDG,TransDigm Group,Industrials,SP500,2026-09-20
+TDY,Teledyne Technologies,Information Technology,SP500,2026-09-20
+TECH,Bio-Techne,Health Care,SP500,2026-09-20
+TEL,TE Connectivity,Information Technology,SP500,2026-09-20
+TER,Teradyne,Information Technology,NDX+SP500,2026-09-20
+TFC,Truist Financial,Financials,SP500,2026-09-20
+TGT,Target Corporation,Consumer Staples,SP500,2026-09-20
+TJX,TJX Companies,Consumer Discretionary,SP500,2026-09-20
+TKO,TKO Group Holdings,Communication Services,SP500,2026-09-20
+TMO,Thermo Fisher Scientific,Health Care,SP500,2026-09-20
+TMUS,T-Mobile US,Communication Services,NDX+SP500,2026-09-20
+TPL,Texas Pacific Land Corporation,Energy,SP500,2026-09-20
+TPR,"Tapestry, Inc.",Consumer Discretionary,SP500,2026-09-20
+TRGP,Targa Resources,Energy,SP500,2026-09-20
+TRI,Thomson Reuters,Technology,NDX,2026-09-20
+TRMB,Trimble Inc.,Information Technology,SP500,2026-09-20
+TROW,T. Rowe Price,Financials,SP500,2026-09-20
+TRV,Travelers Companies (The),Financials,SP500,2026-09-20
+TSCO,Tractor Supply,Consumer Discretionary,SP500,2026-09-20
+TSLA,"Tesla, Inc.",Consumer Discretionary,NDX+SP500,2026-09-20
+TSN,Tyson Foods,Consumer Staples,SP500,2026-09-20
+TT,Trane Technologies,Industrials,SP500,2026-09-20
+TTD,Trade Desk (The),Communication Services,SP500,2026-09-20
+TTWO,Take-Two Interactive,Communication Services,NDX+SP500,2026-09-20
+TXN,Texas Instruments,Information Technology,NDX+SP500,2026-09-20
+TXT,Textron,Industrials,SP500,2026-09-20
+TYL,Tyler Technologies,Information Technology,SP500,2026-09-20
+UAL,United Airlines Holdings,Industrials,SP500,2026-09-20
+UBER,Uber,Industrials,SP500,2026-09-20
+UDR,"UDR, Inc.",Real Estate,SP500,2026-09-20
+UHS,Universal Health Services,Health Care,SP500,2026-09-20
+ULTA,Ulta Beauty,Consumer Discretionary,SP500,2026-09-20
+UNH,UnitedHealth Group,Health Care,SP500,2026-09-20
+UNP,Union Pacific Corporation,Industrials,SP500,2026-09-20
+UPS,United Parcel Service,Industrials,SP500,2026-09-20
+URI,United Rentals,Industrials,SP500,2026-09-20
+USB,U.S. Bancorp,Financials,SP500,2026-09-20
+V,Visa Inc.,Financials,SP500,2026-09-20
+VEEV,Veeva Systems,Health Care,SP500,2026-09-20
+VICI,Vici Properties,Real Estate,SP500,2026-09-20
+VLO,Valero Energy,Energy,SP500,2026-09-20
+VLTO,Veralto,Industrials,SP500,2026-09-20
+VMC,Vulcan Materials Company,Materials,SP500,2026-09-20
+VMRK,Vivmark Residential,Real Estate,SP500,2026-09-20
+VRSK,Verisk Analytics,Industrials,SP500,2026-09-20
+VRSN,Verisign,Information Technology,SP500,2026-09-20
+VRT,Vertiv,Industrials,SP500,2026-09-20
+VRTX,Vertex Pharmaceuticals,Health Care,NDX+SP500,2026-09-20
+VST,Vistra Corp.,Utilities,SP500,2026-09-20
+VTR,Ventas,Real Estate,SP500,2026-09-20
+VTRS,Viatris,Health Care,SP500,2026-09-20
+VZ,Verizon,Communication Services,SP500,2026-09-20
+WAB,Wabtec,Industrials,SP500,2026-09-20
+WAT,Waters Corporation,Health Care,SP500,2026-09-20
+WBD,Warner Bros. Discovery,Communication Services,NDX+SP500,2026-09-20
+WDAY,"Workday, Inc.",Information Technology,NDX+SP500,2026-09-20
+WDC,Western Digital,Information Technology,NDX+SP500,2026-09-20
+WEC,WEC Energy Group,Utilities,SP500,2026-09-20
+WELL,Welltower,Real Estate,SP500,2026-09-20
+WFC,Wells Fargo,Financials,SP500,2026-09-20
+WM,Waste Management,Industrials,SP500,2026-09-20
+WMB,Williams Companies,Energy,SP500,2026-09-20
+WMT,Walmart,Consumer Staples,NDX+SP500,2026-09-20
+WRB,W. R. Berkley Corporation,Financials,SP500,2026-09-20
+WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,SP500,2026-09-20
+WST,West Pharmaceutical Services,Health Care,SP500,2026-09-20
+WTW,Willis Towers Watson,Financials,SP500,2026-09-20
+WY,Weyerhaeuser,Real Estate,SP500,2026-09-20
+WYNN,Wynn Resorts,Consumer Discretionary,SP500,2026-09-20
+XEL,Xcel Energy,Utilities,NDX+SP500,2026-09-20
+XOM,ExxonMobil,Energy,SP500,2026-09-20
+XYL,Xylem Inc.,Industrials,SP500,2026-09-20
+XYZ,"Block, Inc.",Financials,SP500,2026-09-20
+YUM,Yum! Brands,Consumer Discretionary,SP500,2026-09-20
+ZBH,Zimmer Biomet,Health Care,SP500,2026-09-20
+ZBRA,Zebra Technologies,Information Technology,SP500,2026-09-20
+ZTS,Zoetis,Health Care,SP500,2026-09-20

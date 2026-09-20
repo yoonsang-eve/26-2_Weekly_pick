@@ -6,11 +6,12 @@
 
 | 우선순위 | 자료 | 이유 |
 |---|---|---|
-| 필수 | `CLAUDE.md`, `docs/prompts_v1.md` | 프로젝트 루트에 두면 Claude Code가 자동 인식 |
+| 필수 | `CLAUDE.md`, `docs/prompts_v2.md` | 프로젝트 루트에 두면 Claude Code가 자동 인식 |
 | 필수 | 수업 사이트 **규칙 탭 / 일정표 탭 캡처** | 휴장일 처리, 매수·매도 기준가 정의, 순위 산정 방식의 원문 확인용. 내 요약이 아니라 원문이 필요하다 |
 | 필수 | pykrx README | 함수 시그니처가 자주 바뀐다. 기억으로 짜면 틀린다 |
 | 필수 | yfinance README | 동상 |
-| 상황별 | Anthropic API 문서 (auto 모드 구현 시) | 모델 문자열, web search tool 스펙 |
+| 필수 | **Letsur 플랫폼 > AI 게이트웨이 > 'API 사용 가이드'** | auto 모드의 base_url·인증 헤더·모델(에셋) 이름. 캡처가 아니라 원문이 필요하다 |
+| 상황별 | Anthropic API 문서 (provider: anthropic 사용 시) | 모델 문자열, web search tool 스펙 |
 | 상황별 | mplfinance 문서 (chart.py 작업 시) | |
 | 참고 | 이전 프로젝트 repo | pykrx 데이터 로딩·캐싱 코드 재활용 |
 
@@ -24,7 +25,7 @@ TradingAgents repo는 **붙이지 않는다.** 아키텍처 아이디어만 빌�
 |---|---|---|
 | pykrx | https://github.com/sharebook-kr/pykrx | KRX 전종목 OHLCV, 시가총액, 투자자별 매매동향, 공매도 잔고 |
 | FinanceDataReader | https://github.com/FinanceData/FinanceDataReader | 종목 마스터, 보조 |
-| yfinance | https://github.com/ranaroussi/yfinance | 미국 주식 OHLCV, earnings calendar |
+| yfinance | https://github.com/ranaroussi/yfinance | 미국 주식 OHLCV, 시가총액(fast_info), earnings calendar |
 | mplfinance | https://github.com/matplotlib/mplfinance | 캔들차트 |
 | OpenDART | https://opendart.fss.or.kr | 공시 원문 (유상증자, 전환사채, 보호예수) |
 | pandas_market_calendars | https://github.com/rsheftel/pandas_market_calendars | 휴장일 처리 |
@@ -34,9 +35,38 @@ TradingAgents repo는 **붙이지 않는다.** 아키텍처 아이디어만 빌�
 
 ---
 
-## C. Anthropic API
+## C. LLM API
 
-`agents.py`의 auto 모드 구현 시에만 필요하다. **모델 문자열과 tool 스펙은 기억에 의존하지 말고 아래에서 확인할 것.**
+`agents.py`의 auto 모드에서 쓴다. 백엔드는 `config.yaml`의 `llm.provider`로 고른다.
+
+### C-1. Letsur AI 게이트웨이 (`provider: openai_compat`) — 수업에서 받은 계정
+
+플랫폼: https://platform.letsur.ai (연세대학교_DSL 스페이스)
+
+콘솔의 **AI 게이트웨이 > API 사용 가이드**에서 아래를 확인해 `config.yaml`에 채운다.
+이 값들은 로그인해야 보이므로 문서에 적어 두지 말고 콘솔에서 직접 확인할 것.
+
+문서: https://docs.platform.letsur.ai/ai-gateway/api-reference/authentication
+
+| 항목 | 값 | 들어갈 자리 |
+|---|---|---|
+| OpenAI 호환 base URL | `https://gw.letsur.ai/v1` | `llm.openai_compat.base_url` |
+| Anthropic 포맷 base URL | `https://gw.letsur.ai` (**`/v1` 붙이지 말 것** — SDK가 `/v1/messages`를 내부에서 붙여 `/v1/v1/messages`가 된다) | `llm.anthropic.base_url` |
+| 인증 | OpenAI 호환은 `Authorization: Bearer <KEY>`, Anthropic 포맷은 `x-api-key: <KEY>` | `auth_header` / `auth_prefix` |
+| 모델(에셋) 이름 | 콘솔 **에셋** 탭 기준. `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5-20251001` 등 | `llm.models.{단계}` |
+| 웹 검색 툴 중계 여부 | 미확인. `--check`로 확인 후 설정 | `llm.openai_compat.web_search` |
+
+과금은 unit 단위이며 에셋별 단가는 콘솔 **에셋** 탭에 있다 (claude-sonnet-5 입력 2.00 /
+출력 10.00 unit per 1M token, claude-opus-5 입력 5.00 / 출력 25.00). 보유 unit이 소진되면
+API 호출이 중단되므로 **유닛** 탭에서 잔량과 만료일을 확인할 것.
+
+API 키는 **AI 게이트웨이 > API 키**에서 발급하고, 저장소에 커밋하지 말고 환경변수로만 넣는다
+(`llm.openai_compat.api_key_env`, 기본값 `LETSUR_API_KEY`).
+사용량은 **AI 게이트웨이 > 분석**에서 에셋별·API 키별로 확인할 수 있다.
+
+### C-2. Anthropic API (`provider: anthropic`)
+
+**모델 문자열과 tool 스펙은 기억에 의존하지 말고 아래에서 확인할 것.**
 
 - API 문서: https://docs.claude.com/en/api/overview
 - 문서 맵: https://docs.claude.com/en/docs_site_map.md
