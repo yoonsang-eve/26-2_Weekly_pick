@@ -1,0 +1,11 @@
+{
+  "market": "KR",
+  "week": 3,
+  "ref_date": "2026-09-11",
+  "buy_date": "2026-09-14",
+  "sell_date": "2026-09-18",
+  "holding_days": 5,
+  "n_candidates": 20,
+  "config_version": 2,
+  "note": "wk3는 screen_meta.json 도입 전 주차라 사후에 채웠다 (날짜는 당시 config.yaml 기준)."
+}

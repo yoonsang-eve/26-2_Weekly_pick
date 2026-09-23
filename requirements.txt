@@ -9,3 +9,5 @@ lxml>=5.0               # us_universe.py --refresh (위키피디아 표 파싱)
 
 # llm.provider: anthropic 을 쓸 때만 필요하다
 anthropic>=0.40
+
+# 발표 자료(src/deck/)는 별도다: pip install -r requirements-deck.txt

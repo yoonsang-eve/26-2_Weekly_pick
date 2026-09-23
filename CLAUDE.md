@@ -47,11 +47,10 @@ KR과 US를 완전히 분리해 같은 파이프라인을 두 번 돌린다.
 [Step 2] agents.py     Analyst            LLM + web search → 후보 20개 중 3개로 압축 (탈락시키는 단계)
    ↓
 [Step 3] agents.py     Bull / Bear / Trader  LLM           → 최종 1종목 (선택하는 단계) → pick.json
-   ↓
-         chart.py      6개월 일봉 PNG
-         report.py     발표 뼈대 + 제출용 프롬프트 렌더링본
    ↓ (금요일 장마감 후)
          settle.py     실제 수익률 정산 → log.csv 누적
+   ↓
+         src/deck/     발표 자료 8슬라이드 pptx  ← 파이프라인과 분리된 모듈
 ```
 
 ### 시장을 분리하는 이유
@@ -87,9 +86,10 @@ weekly_pick/
 │   ├── us_universe.py         # US 유니버스 로드·갱신
 │   ├── llm.py                 # LLM 호출 계층 (openai_compat / anthropic)
 │   ├── agents.py              # Step 2, 3 (manual / auto)
-│   ├── chart.py               # 차트 생성
-│   ├── report.py              # 리포트 조립
-│   └── settle.py              # 금요일 정산
+│   ├── settle.py              # 금요일 정산 → log.csv
+│   └── deck/                  # 발표 자료 — 지워도 파이프라인은 돈다
+│       ├── chart.py           #   6개월 일봉 PNG
+│       └── build.py           #   8슬라이드 pptx
 ├── prompts/
 │   ├── v1/                    # analyst.txt, bull.txt, bear.txt, trader.txt (보존)
 │   └── v2/                    # 현행. 시장 컨텍스트 블록 추가
@@ -102,8 +102,10 @@ weekly_pick/
 │           ├── responses/*.md        # LLM 응답 원문
 │           ├── run_meta.json         # 모델·토큰 사용량·소요시간
 │           ├── pick.json             # trader의 구조화 출력
-│           ├── chart_{ticker}.png
-│           └── report.md             # 발표 뼈대
+│           ├── chart_{ticker}.png          # deck 산출물
+│           └── deck_wk{N}_{시장}_{ticker}.pptx
+├── requirements.txt           # 파이프라인 의존성
+├── requirements-deck.txt      # 발표 자료 전용 (deck을 지우면 같이 지운다)
 └── log.csv                    # 주차별 누적 기록
 ```
 
@@ -241,30 +243,56 @@ trader   : bull + bear 응답 → 최종 1종목, JSON 출력
 
 ## 6. chart.py / report.py / settle.py
 
-### chart.py
-- 6개월 일봉 캔들 + MA20/MA60 + 거래량 + RSI(14)
-- `mplfinance` 사용. **한글 종목명 사용 시 폰트 지정 필수** (Windows: `Malgun Gothic`, 미지정 시 네모 깨짐)
-- 최종 선택 종목 + 탈락한 2종목까지 생성 (발표 시 비교용)
+### src/deck/ — 발표 자료 (독립 모듈)
 
-### report.py
-`outputs/wk{N}/report.md`를 발표 8슬라이드에 1:1 대응시켜 생성한다.
+**파이프라인에서 완전히 분리되어 있다.** `outputs/` 산출물과 `log.csv`, `config.yaml`만
+읽고 screener·agents·llm을 import하지 않는다. **`src/deck/`와 `requirements-deck.txt`를
+통째로 지워도 파이프라인은 그대로 돈다.** 학기가 끝나고 추천 엔진만 계속 쓸 때를 위한
+경계이므로, 여기에 파이프라인 로직을 넣지 말 것 (역방향 import도 금지).
+
+- `deck/chart.py` — 6개월 일봉 캔들 + MA20/MA60 + 거래량 + RSI(14), 평가 구간 음영
+  - **한글 폰트는 `make_mpf_style(rc=...)`에 직접 넣어야 한다.** `matplotlib.rcParams`에만
+    설정하면 mplfinance 스타일이 덮어써서 조용히 DejaVu Sans로 되돌아가 네모로 깨진다
+  - addplot에 `secondary_y=False`를 명시하지 않으면 RSI가 오른쪽 축에 그려지고 왼쪽 축에
+    엉뚱한 눈금이 남는다
+- `deck/build.py` — 8슬라이드 pptx 생성
+
+```bash
+python src/deck/build.py --week 3 --market KR
+```
+
+**원칙은 '간단하게'다.** 발표하는 주차가 아니면 손대지 않고 그대로 제출할 수 있어야 하므로,
+모든 칸을 파일에서 기계적으로 채우고 없는 값은 비워 둔다. **없는 값을 그럴듯하게 채우지
+말 것** — 예컨대 manual 모드는 `web_search`를 기록하지 않는데, 이를 '미사용'으로 적으면
+거짓이 된다 (단계 규약으로 대체하거나 '기록 없음'으로 둔다).
+
+### 8슬라이드 구성
 
 | 슬라이드 | 내용 | 소스 |
 |---|---|---|
 | 1 | 종목·주차·최종 수익률 | log.csv |
 | 2 | 파이프라인 구조도 | 고정 |
-| 3 | 사용 모델 및 프롬프트 | run_meta.json + prompts/ |
-| 4 | Step 1 스크리닝 결과 (20 → 3) | candidates.csv |
-| 5 | 도메인·종목 설명 | analyst 응답 |
-| 6 | Bull vs Bear 요약 | bull/bear 응답 |
-| 7 | 6개월 일봉 + 기술적 근거 | chart.png + screener 지표값 |
-| 8 | 사후 검증: 예측 대비 실제, 틀린 부분 | settle.py |
+| 3 | 사용 모델 및 프롬프트 | run_meta.json |
+| 4 | Step 1 스크리닝 결과 (20 → 3) | candidates.csv + screen_meta.json |
+| 5 | 종목 설명·선정 근거 | pick.json (thesis / catalyst) |
+| 6 | Bull vs Bear 요약 | bull/bear 응답에서 해당 종목 섹션 추출 |
+| 7 | 6개월 일봉 + 기술적 근거 | chart PNG + candidates.csv 지표값 |
+| 8 | 사후 검증: 예측 대비 실제 | log.csv + pick.json |
+
+슬라이드 4는 상위 10종목만 싣되 **선택된 종목이 10위 밖이면 그 한 줄을 반드시 붙인다**
+(wk3 OCI홀딩스가 10위였다). 슬라이드 6의 섹션 추출은 후보 중 **가장 깊은 헤딩**을 고른다 —
+문서 맨 위의 `# 상승 논거 — A · B · C` 제목에도 종목명이 들어 있어서, 얕은 헤딩을 잡으면
+다른 종목의 논거를 가져온다.
 
 **제출용 프롬프트 문서**(`outputs/prompt_submission_v{n}.md`)는 report.py가 생성하지 않는다. 학기 전체에 1회 제출하고 필터를 바꿀 때만 갱신하는 문서라 자동 생성할 실익이 없어, **수기로 관리**한다. 주차별 내용(후보 종목, 선택 결과, 매크로 일정)은 절대 넣지 않는다 — 매주 바뀌는 값은 전부 placeholder로 남긴다. `config.yaml`의 필터 파라미터를 바꾸면 이 문서의 2절(Step 1 기준)을 직접 갱신하고 버전을 올릴 것. 제출 범위는 아래 7절 참조.
 
 ### settle.py
-- 월요일 시가 / 금요일 종가를 실제 데이터로 조회해 수익률 계산
-- `log.csv`에 append: `week, market, ticker, name, pick_date, buy_open, sell_close, ret_pct, benchmark_ret(KOSPI 또는 S&P500), predicted_range, primary_risk, rank(수동 입력), notes`
+- 매수일 시가 / 매도일 종가를 실제 데이터로 조회해 수익률 계산. 휴장이면 실제 거래일로 스냅한다
+- **과거 주차를 정산할 때 config를 믿으면 안 된다.** config의 `run` 블록은 '이번 주차' 값이라,
+  몇 주 뒤에 wk3을 정산하면 wk3이 아닌 날짜가 들어간다. `screen_meta.json`에 기록해 둔
+  매수·매도일을 먼저 보고, 없으면 `--buy-date/--sell-date`로 받는다
+- 벤치마크(KOSPI/S&P500)는 yfinance로 받는다. FDR의 KS11은 며칠 늦게 채워진다
+- `log.csv`에 append하며 같은 (week, market)은 덮어쓰되 `rank`·`notes` 수동 입력분은 보존한다
 - 누적되면 학기 말에 "LLM 에이전트 기반 종목 선정의 hit rate 분석"이 공짜로 나온다. 발표 차별화 포인트이므로 초기부터 빠짐없이 기록할 것
 
 ---
@@ -306,6 +334,9 @@ trader   : bull + bear 응답 → 최종 1종목, JSON 출력
 2. ~~`screener.py`에 US 유니버스 추가, 시차 처리~~ **완료** (config_version 3)
 3. ~~`prompts/*.txt` 배치 + `agents.py` manual 모드~~ **완료**
 4. ~~`agents.py` auto 모드 (API 연동)~~ **완료** (`src/llm.py`)
-5. `report.py` — 제출용 문서 생성까지  ← 다음
-6. `chart.py`
-7. `settle.py` + `log.csv` 스키마 확정 — 시장 컬럼과 벤치마크(KS11 / US500)를 시장별로 남길 것
+5. ~~`settle.py` + `log.csv` 스키마 확정~~ **완료**
+6. ~~`chart.py` → `src/deck/chart.py`~~ **완료**
+7. ~~발표 자료 생성 → `src/deck/build.py` (8슬라이드 pptx)~~ **완료**
+8. 슬라이드 5·6의 요약 품질 — 현재는 파일에서 기계적으로 추출한다. 발표하는 주차에만
+   LLM으로 요약하는 `--full` 경로를 붙일 수 있다 (deck은 llm을 import하지 않으므로
+   지연 import로 처리하고, 없으면 기계 추출로 떨어지게 할 것)

@@ -165,8 +165,14 @@ def emit(d: pd.DataFrame, market: str, week: int, ref: pd.Timestamp,
 
     # 기준일은 US에서 시차 때문에 달력 금요일과 달라질 수 있다. agents.py가 프롬프트에
     # 그대로 넣어야 하므로 파일로 남긴다.
+    # 매수·매도일도 같이 남긴다. config는 '이번 주차' 값이라 몇 주 뒤에 과거 주차를
+    # 정산·발표자료화할 때 그 주의 날짜를 복원할 방법이 없어진다.
+    mk = cfg["markets"][market]
     (dst.parent / "screen_meta.json").write_text(json.dumps({
         "market": market, "week": week, "ref_date": f"{ref:%Y-%m-%d}",
+        "buy_date": str(mk.get("buy_date") or cfg["run"]["buy_date"]),
+        "sell_date": str(mk.get("sell_date") or cfg["run"]["sell_date"]),
+        "holding_days": mk.get("holding_days"),
         "n_candidates": len(out), "config_version": cfg["meta"]["config_version"],
         "screened_at": datetime.now().isoformat(timespec="seconds"),
     }, ensure_ascii=False, indent=2), encoding="utf-8")

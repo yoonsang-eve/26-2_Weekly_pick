@@ -1,0 +1,2 @@
+﻿week,market,ticker,name,buy_date,sell_date,holding_days,buy_open,sell_close,ret_pct,benchmark,benchmark_ret_pct,excess_pct,predicted_low,predicted_high,hit_range,catalyst,primary_risk,rank,notes
+3,KR,010060,OCI홀딩스,2026-09-14,2026-09-18,5,214500.0,203500.0,-5.13,KOSPI,3.01,-8.14,-8,10,Y,"2026-09-17(한국시간, 미국 현지 9/16 오후) FOMC 성명·SEP·점도표 발표","FOMC가 시장 컨센서스(25bp 인상, 확률 약 86%)대로 인상하되 점도표가 추가 긴축 경로를 시사하는 매파적 방향으로 나올 경우, '예상대로'라는 이유만으로 sell-the-news 성격의 차익실현 매물이 쏟아질 위험",,

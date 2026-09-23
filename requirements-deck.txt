@@ -1,0 +1,6 @@
+# 발표 자료(src/deck/) 전용 의존성.
+# 파이프라인만 돌릴 거면 설치할 필요가 없고, src/deck/를 지우면 이 파일도 같이 지운다.
+#   pip install -r requirements-deck.txt
+mplfinance>=0.12.10b0    # 6개월 일봉 캔들차트
+python-pptx>=1.0         # 8슬라이드 pptx 생성
+matplotlib>=3.8          # mplfinance 백엔드
