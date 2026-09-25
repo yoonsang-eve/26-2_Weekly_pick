@@ -69,10 +69,25 @@ src/llm.py                      LLM 호출 계층 (openai_compat / anthropic)
 src/agents.py                   Step 2·3 (manual / auto)
 src/events.py                   데스크 UI용 이벤트 기록 (events.jsonl)
 src/settle.py · src/cohort.py   금요일 정산 · 후보군 정산
-app/                            로컬 대시보드 서버 (데스크 UI + 피드백)
+src/final.py                    사용자 최종 선택 정산 (final_log.csv)
+src/broker/                     증권사 연동 (한국투자증권 Open API)
+src/deck/                       주간 리포트 pptx
+app/                            로컬 데스크 서버 (데스크·시장·성과·계좌·안내)
+tools/export_static.py          보기 전용 정적 사이트 굽기
+.github/workflows/publish.yml   정적 사이트 자동 게시 (Cloudflare Pages)
+setup.bat / start.bat / publish.bat   설치 / 데스크 켜기 / 결과 게시
 outputs/prompt_submission_v2.md 수업 제출용 프롬프트 문서
-outputs/wk{N}/{KR,US}/          시장별 후보·렌더링 결과·LLM 응답 원문·pick.json
+outputs/wk{N}/{KR,US,final}/    시장별 후보·렌더링 결과·LLM 응답 원문·pick.json·리포트
 ```
+
+## 처음 설치 (Windows)
+
+1. Python 3.11 이상과 Git을 설치한다.
+2. 저장소를 받는다: `git clone https://github.com/yoonsang-eve/26-2_Weekly_pick.git`
+3. 폴더 안의 `setup.bat`을 더블클릭한다. 가상환경(.venv)을 만들고 필요한 패키지를 설치하며, `.env.example`을 `.env`로 복사한다.
+4. `.env`에 자기 키를 채운다. LLM 키(auto 모드용)와 한국투자증권 키(계좌 화면용)는 없어도 된다. 없으면 manual 모드(Claude 웹에 붙여넣기)와 스크리닝·시장·성과 화면만 쓴다.
+5. `config.yaml`의 `llm.anthropic.base_url`은 이 저장소 주인이 쓰는 게이트웨이 주소다. Anthropic API를 직접 쓰려면 빈 값("")으로 두고 `api_key_env`를 `ANTHROPIC_API_KEY`로 바꾼다.
+6. `start.bat`을 더블클릭하면 데스크가 열린다.
 
 ## 실행
 
@@ -131,11 +146,7 @@ pip install -r requirements-app.txt
 
 **켜기** — `start.bat`을 더블클릭하면 서버가 켜지고 브라우저가 열린다.
 
-**항상 열려 있는 보기 전용 사이트** — PC를 꺼도 되는 공유 방법이다. GitHub Actions(`.github/workflows/publish.yml`)가 `tools/export_static.py`로 보기 전용 화면과 데이터를 파일로 구워 Cloudflare Pages에 올린다. 결과가 푸시될 때(`publish.bat`), 매일 07:00·16:00 KST(시세 갱신), 수동 실행 때 돈다. 주소는 `https://<프로젝트>.pages.dev/<SITE_KEY>/#desk`이고 SITE_KEY 경로를 아는 사람만 들어온다. 서버가 없으므로 실행·계좌 기능은 애초에 없다. 저장소 Secrets에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SITE_KEY`가 필요하다.
-
-**보기 전용으로 공유하기** — `share.bat`을 더블클릭하면 읽기만 되는 서버(8766)를 따로 띄우고 인터넷 링크를 만들어 클립보드에 복사한다. 받는 사람은 설치 없이 링크만 누르면 된다. 이 서버는 읽기(GET)만 허용하고, 계좌 화면·실행 버튼·설정 저장을 서버 쪽에서 막는다. 링크에는 `.env`의 `VIEWER_TOKEN`이 붙어 있어야 열린다(지우면 기존 링크가 모두 막힌다). 이 PC에 Tailscale이 설치·로그인돼 있으면 Funnel로 **고정 주소**(`https://<PC이름>.<tailnet>.ts.net`)를 쓰고, 없으면 cloudflared 빠른 터널의 임시 주소를 쓴다. 어느 쪽이든 PC가 켜져 있고 창이 열려 있을 때만 열린다.
-
-LLM API를 쓰는 동작은 에이전트 auto 하나뿐이고, 화면에서 한 번 더 확인해야 실행된다. 스크립트는 `app/tasks.py`의 화이트리스트로만 돈다.
+**보기 전용 사이트 (남에게 보여 주기)** — PC를 꺼도 열린다. GitHub Actions(`.github/workflows/publish.yml`)가 `tools/export_static.py`로 보기 전용 화면과 데이터를 파일로 구워 Cloudflare Pages에 올린다. 결과가 푸시될 때(`publish.bat`), 매일 07:00·16:00 KST(시세 갱신), 수동 실행 때 돈다. 주소는 `https://<프로젝트>.pages.dev/<SITE_KEY>/#desk`이고 SITE_KEY 경로를 아는 사람만 들어온다. 서버가 없으므로 실행·계좌 기능은 애초에 없다. 저장소 Secrets에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SITE_KEY`가 필요하다.
 
 **후보군 정산** — 단계별 기여도는 추천 1종목뿐 아니라 후보 20종목 전체의 같은 주 수익률이 있어야 나온다.
 
