@@ -92,6 +92,23 @@ def cloudflare_url(cf: str) -> tuple[str | None, subprocess.Popen]:
     return None, tunnel
 
 
+def wait_server(server: subprocess.Popen, secs: int = 30) -> bool:
+    """서버가 실제로 응답할 때까지 기다린다. 응답 전에 링크를 주면 받는 쪽에서 오류가 난다."""
+    import urllib.error
+    import urllib.request
+    for _ in range(secs * 2):
+        if server.poll() is not None:
+            return False
+        try:
+            urllib.request.urlopen(f"http://127.0.0.1:{PORT}/api/app", timeout=2)
+            return True
+        except urllib.error.HTTPError:
+            return True                                   # 403이라도 서버는 떠 있다
+        except Exception:
+            time.sleep(0.5)
+    return False
+
+
 def main() -> int:
     ts = find("tailscale", Path(os.environ.get("ProgramFiles", "")) / "Tailscale" / "tailscale.exe")
     cf = find("cloudflared", Path(os.environ.get("ProgramFiles(x86)", "")) / "cloudflared" / "cloudflared.exe",
@@ -104,10 +121,15 @@ def main() -> int:
     t = token()
     env = {**os.environ, "APP_MODE": "viewer", "VIEWER_TOKEN": t, "PYTHONUTF8": "1"}
     py = str(PY if PY.exists() else sys.executable)
+    log = open(ROOT / "cache" / "share_server.log", "w", encoding="utf-8")   # 서버가 죽으면 이유를 남긴다
     server = subprocess.Popen([py, "-m", "uvicorn", "app.server:app", "--port", str(PORT)], cwd=ROOT, env=env,
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                              stdout=log, stderr=subprocess.STDOUT)
     tunnel = None
     try:
+        if not wait_server(server):
+            print("보기 전용 서버가 켜지지 않았습니다. cache/share_server.log 내용을 보내 주세요.")
+            input("엔터를 누르면 닫힙니다.")
+            return 1
         if ts:
             url, fixed = tailscale_url(ts), True
             if not url:
@@ -126,12 +148,18 @@ def main() -> int:
             print("고정 주소입니다. 한 번 보내 두면 다음에도 같은 링크로 들어옵니다.")
         else:
             print("임시 주소입니다. 다시 실행하면 주소가 바뀌니 새 링크를 보내야 합니다.")
-        print("이 창을 닫으면 링크가 열리지 않습니다. (Ctrl+C 또는 창 닫기로 종료)")
+        print("=" * 60)
+        print("  이 창을 닫지 마세요. 닫으면 링크가 열리지 않습니다.")
+        print("  최소화(ㅡ 버튼)해 두는 것은 괜찮습니다.")
+        print("=" * 60)
+        os.system("title 주간픽 공유 중 - 이 창을 닫지 마세요")
         if tunnel:
             for _ in tunnel.stdout:
                 pass
         else:
             server.wait()
+            print("\n보기 전용 서버가 멈췄습니다. cache/share_server.log 내용을 보내 주세요.")
+            input("엔터를 누르면 닫힙니다.")
     except KeyboardInterrupt:
         pass
     finally:
