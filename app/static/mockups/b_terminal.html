@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desk 목업 B · 트레이딩 플로어</title>
+<style>
+  :root { --bg:#07090c; --panel:#0e1217; --line:#1d242e; --amber:#ffb000; --green:#39d98a; --red:#ff5a5f; --blue:#5aa9ff; --dim:#6c7684; --ink:#d9e1ea; }
+  * { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--ink); font:13px/1.45 "JetBrains Mono","Cascadia Mono",Consolas,"Malgun Gothic",monospace; }
+  .top { display:flex; gap:18px; align-items:center; padding:8px 16px; border-bottom:1px solid var(--line); background:#0a0d11; font-size:12px }
+  .top b { color:var(--amber) } .top .sp { margin-left:auto; color:var(--dim) }
+  .tick { overflow:hidden; white-space:nowrap; border-bottom:1px solid var(--line); color:var(--dim); font-size:12px; padding:4px 0 }
+  .tick span { display:inline-block; padding-left:100%; animation: mq 40s linear infinite } @keyframes mq { to { transform:translateX(-100%) } }
+  .grid { display:grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto; gap:1px; background:var(--line); margin:12px 16px; border:1px solid var(--line) }
+  .st { background:var(--panel); padding:12px 14px; min-height:210px; position:relative }
+  .st h3 { margin:0; font-size:12px; letter-spacing:.08em; color:var(--dim); font-weight:500 }
+  .st .who { display:flex; align-items:center; gap:10px; margin:8px 0 10px }
+  .st .who b { font-size:15px; color:var(--ink) }
+  .lamp { width:9px; height:9px; border-radius:50%; background:#3a4350 }
+  .done .lamp { background:var(--green); box-shadow:0 0 8px var(--green) }
+  .work .lamp { background:var(--amber); box-shadow:0 0 10px var(--amber); animation: bl 1s steps(2) infinite } @keyframes bl { 50% { opacity:.3 } }
+  .work { outline:1px solid var(--amber); outline-offset:-1px }
+  .off { opacity:.4 }
+  pre { margin:0; font:inherit; color:#aeb8c5; white-space:pre-wrap }
+  .g { color:var(--green) } .r { color:var(--red) } .a { color:var(--amber) } .bl { color:var(--blue) } .d { color:var(--dim) }
+  .bar { height:4px; background:#1a2029; margin-top:10px } .bar i { display:block; height:100%; background:var(--amber) }
+  .foot { margin:0 16px; display:grid; grid-template-columns: 2fr 1fr; gap:12px }
+  .box { border:1px solid var(--line); background:var(--panel); padding:10px 14px }
+  .box h3 { margin:0 0 6px; font-size:12px; color:var(--dim); font-weight:500; letter-spacing:.08em }
+  .cursor::after { content:"█"; color:var(--amber); animation: bl 1s steps(2) infinite }
+  .note { color:var(--dim); font-size:12px; padding:10px 16px }
+</style></head><body>
+<div class="top"><b>WEEKLY·PICK</b><span>WK4</span><span>KR <span class="g">●</span></span><span>US <span class="d">○</span></span><span>MODE auto</span><span>PROMPT v2</span><span class="sp">B · 트레이딩 플로어 (다크 터미널) · KST 23:07:12</span></div>
+<div class="tick"><span>KS11 2,631.4 <span class="g">+0.8%</span> · 131290 티에스이 243,500 · 417840 저스템 · 122640 예스티 · FOMC 9/16 25bp 인상 · 관세청 9월 1~20일 수출입 동향 9/21 예정 · USDKRW 1,391.2 · SPX 5,712 <span class="r">-0.3%</span></span></div>
+
+<div class="grid">
+  <div class="st done"><h3>STEP 1 · SCREEN</h3><div class="who"><i class="lamp"></i><b>Screener</b><span class="d">no LLM</span></div>
+<pre>universe  <span class="bl">2,641</span>
+adv20 top300   → <span class="bl">300</span>
+mktcap ≥2000억 → <span class="bl">241</span>
+mom top40%     → <span class="bl"> 96</span>
+ret5 ≤ 0       → <span class="bl"> 41</span>
+sort atr20%    → <span class="g">20</span></pre></div>
+
+  <div class="st done"><h3>STEP 2 · ANALYST</h3><div class="who"><i class="lamp"></i><b>Analyst</b><span class="d">sonnet-5 · 273s</span></div>
+<pre><span class="d">search 24/24 · in 107k out 18k</span>
+<span class="g">PASS</span> 131290 티에스이
+<span class="g">PASS</span> 417840 저스템
+<span class="g">PASS</span> 122640 예스티
+<span class="r">DROP</span> 17 others <span class="d">(catalyst 확인 불가)</span></pre></div>
+
+  <div class="st done"><h3>STEP 3a · BULL</h3><div class="who"><i class="lamp"></i><b>Bull</b><span class="d">sonnet-5 · 73s</span></div>
+<pre>131290 <span class="g">▲</span> 관세청 수출지표 서프라이즈
+417840 <span class="g">▲</span> 전환 물량 소화 후 반등
+122640 <span class="g">▲</span> HBM 장비 수주 기대
+<span class="d">→ 컨텍스트 분리: Bear에 응답 텍스트만 전달</span></pre></div>
+
+  <div class="st work"><h3>STEP 3b · BEAR</h3><div class="who"><i class="lamp"></i><b>Bear</b><span class="a">검색 중 9/15</span></div>
+<pre>> "저스템 CB 전환 2026"
+  <span class="r">!</span> 잔여 45억 신주 전환 확인
+> "예스티 HPSP 특허소송"
+  <span class="r">!</span> 과거 유사 절차 -68%
+> "티에스이 프로브카드 3Q<span class="cursor"></span></pre>
+<div class="bar"><i style="width:60%"></i></div></div>
+
+  <div class="st"><h3>STEP 3c · TRADER</h3><div class="who"><i class="lamp"></i><b>Trader</b><span class="d">대기 · Bull+Bear 필요</span></div>
+<pre class="d">{ "ticker": …,
+  "expected_return_range": […],
+  "rejected": [ … ] }</pre></div>
+
+  <div class="st off"><h3>EXEC · BROKER</h3><div class="who"><i class="lamp"></i><b>Order Desk</b><span class="d">Phase C · 미연결</span></div>
+<pre class="d">KIS  ─ not connected
+mode  dry-run
+limit ₩ — / week</pre></div>
+</div>
+
+<div class="foot">
+  <div class="box"><h3>EVENT LOG</h3><pre><span class="d">22:01:52</span> screener  KR 20 candidates written
+<span class="d">23:00:03</span> analyst   start  (budget 24 searches)
+<span class="d">23:04:36</span> analyst   <span class="g">done</span>   20 → 3
+<span class="d">23:05:49</span> bull      <span class="g">done</span>
+<span class="d">23:05:49</span> bear      <span class="a">start</span>  (budget 8 → 15 used)</pre></div>
+  <div class="box"><h3>COST</h3><pre>in   <span class="bl">643k</span> tok
+out  <span class="bl"> 46k</span> tok
+≈ <span class="a">1.7</span> unit / 4.0</pre></div>
+</div>
+<p class="note">각 칸 = 에이전트 한 명의 모니터. 사람 캐릭터 대신 상태등·실시간 로그로 표현. 발표 화면에서 "뭘 검색했는지"가 바로 보인다.</p>
+</body></html>

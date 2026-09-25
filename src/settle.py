@@ -141,8 +141,13 @@ def settle_one(cfg: dict, week: int, market: str,
     ticker, name = str(pick["ticker"]), pick.get("name", "")
 
     buy, sell = resolve_dates(cfg, week, market, out, cli_buy, cli_sell)
+    if pd.Timestamp(sell) >= pd.Timestamp.now().normalize():
+        # 매도일 종가가 아직 없으면 window()가 직전 거래일로 스냅해 틀린 값이 기록된다
+        print(f"  [{market}] 매도일 {sell}의 종가가 아직 확정되지 않았다 — 건너뛴다",
+              file=sys.stderr)
+        return None
 
-    start = (pd.Timestamp(buy) - timedelta(days=10)).date()
+    start =(pd.Timestamp(buy) - timedelta(days=10)).date()
     end = (pd.Timestamp(sell) + timedelta(days=5)).date()
 
     h = fetch(ticker, market, start, end)

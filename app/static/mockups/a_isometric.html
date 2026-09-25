@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desk 목업 A · 아이소메트릭</title>
+<style>
+  :root { --bg:#eef1f6; --ink:#1d2433; --ink2:#5b6478; --line:#d7dce6; --card:#fff; }
+  * { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { display:grid; grid-template-columns: 1fr 300px; height:100vh; }
+  header { position:absolute; left:20px; top:14px; z-index:2 }
+  header h1 { margin:0; font-size:16px } header p { margin:0; color:var(--ink2); font-size:12.5px }
+  .stage { position:relative; overflow:hidden; background: radial-gradient(1200px 600px at 40% 40%, #fbfcfe, var(--bg)); }
+  svg { width:100%; height:100%; display:block }
+  aside { background:var(--card); border-left:1px solid var(--line); padding:18px; overflow:auto }
+  aside h2 { font-size:13px; color:var(--ink2); margin:0 0 10px; font-weight:600 }
+  .ag { display:flex; gap:10px; align-items:center; padding:8px 6px; border-radius:10px }
+  .ag.on { background:#f1f5ff }
+  .av { width:30px; height:30px; border-radius:50%; flex:none }
+  .ag b { display:block; font-size:13.5px } .ag span { font-size:12px; color:var(--ink2) }
+  .st { margin-left:auto; font-size:11px; padding:2px 8px; border-radius:99px; background:#eef0f4; color:var(--ink2) }
+  .st.work { background:#fff1d6; color:#8a5a00 } .st.done { background:#dcf3e3; color:#146c2e }
+  .log { margin-top:18px; border-top:1px solid var(--line); padding-top:12px; font-size:12.5px; color:var(--ink2) }
+  .log div { padding:4px 0 } .log time { color:#9aa3b5; margin-right:6px; font-variant-numeric:tabular-nums }
+  .bub { font:600 11.5px system-ui,"Malgun Gothic"; }
+  @keyframes bob { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-3px) } }
+  .working { animation: bob 1.1s ease-in-out infinite }
+  @keyframes dash { to { stroke-dashoffset:-20 } }
+  .flow { stroke-dasharray:6 4; animation: dash 1s linear infinite }
+</style></head><body>
+<div class="wrap">
+  <div class="stage">
+    <header><h1>A · 아이소메트릭 오피스</h1><p>3/4 시점. 방 = 파이프라인 단계, 서류 흐름이 점선으로 이동</p></header>
+    <svg id="s" viewBox="0 0 1000 700"></svg>
+  </div>
+  <aside>
+    <h2>에이전트 · wk4 KR</h2>
+    <div id="agents"></div>
+    <div class="log"><h2>활동</h2>
+      <div><time>22:01</time>Screener: 2,641 → 20종목</div>
+      <div><time>23:00</time>Analyst: 검색 24회, 20 → 3</div>
+      <div><time>23:04</time>Bull: 3종목 상승 시나리오 작성</div>
+      <div><time>23:05</time><b>Bear: 반박 자료 검색 중 (9/15)</b></div>
+    </div>
+  </aside>
+</div>
+<script>
+const NS="http://www.w3.org/2000/svg", s=document.getElementById("s");
+const T=26, OX=470, OY=150;                       // 타일 크기, 원점
+const P=(x,y,z=0)=>[OX+(x-y)*T, OY+(x+y)*T/2 - z*T]; // 아이소 투영
+const el=(t,a,p=s)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+const poly=(pts,fill,stroke="none",p)=>el("polygon",{points:pts.map(q=>q.join(",")).join(" "),fill,stroke,"stroke-width":1},p);
+
+function box(x,y,z,w,d,h,top,left,right,p){       // 직육면체
+  poly([P(x,y+d,z),P(x+w,y+d,z),P(x+w,y+d,z+h),P(x,y+d,z+h)],left,"none",p);
+  poly([P(x+w,y,z),P(x+w,y+d,z),P(x+w,y+d,z+h),P(x+w,y,z+h)],right,"none",p);
+  poly([P(x,y,z+h),P(x+w,y,z+h),P(x+w,y+d,z+h),P(x,y+d,z+h)],top,"none",p);
+}
+const rooms=[
+  {x:0,y:0,w:5,d:5,c:"#e6ecf7",n:"스크리닝실",tag:"Step 1"},
+  {x:6,y:0,w:5,d:5,c:"#e9f2ea",n:"Analyst",tag:"Step 2"},
+  {x:12,y:0,w:6,d:5,c:"#fbeee3",n:"토론실 Bull·Bear",tag:"Step 3"},
+  {x:0,y:6,w:5,d:5,c:"#f2ecf8",n:"Trader",tag:"결정"},
+  {x:6,y:6,w:5,d:5,c:"#eef1f3",n:"정산·복기",tag:"금요일"},
+  {x:12,y:6,w:6,d:5,c:"#f4f4f4",n:"주문 데스크",tag:"Phase C",off:true},
+];
+// 바닥
+poly([P(-1,-1),P(19,-1),P(19,12),P(-1,12)],"#dde3ec");
+rooms.forEach(r=>{
+  poly([P(r.x,r.y),P(r.x+r.w,r.y),P(r.x+r.w,r.y+r.d),P(r.x,r.y+r.d)],r.c,"#c9d0dc");
+  box(r.x,r.y,0,r.w,0.25,1.4,"#cfd6e2","#bcc4d2","#aeb7c6");        // 뒷벽
+  box(r.x,r.y,0,0.25,r.d,1.4,"#cfd6e2","#c4ccd9","#b7c0cf");        // 옆벽
+  const [lx,ly]=P(r.x+r.w/2,r.y+r.d/2,0);
+  const g=el("g",{opacity:r.off?.45:1});
+  el("rect",{x:lx-58,y:ly+36,width:116,height:22,rx:11,fill:"#fff",stroke:"#d4dae5"},g);
+  const t=el("text",{x:lx,y:ly+51,"text-anchor":"middle","font-size":12,"font-weight":600,fill:"#1d2433"},g); t.textContent=`${r.n} · ${r.tag}`;
+});
+// 흐름 경로
+const path=[[2.5,2.5],[8.5,2.5],[15,2.5],[15,5.5],[2.5,5.5],[2.5,8.5],[8.5,8.5]].map(q=>P(q[0],q[1],0.05));
+el("polyline",{points:path.map(q=>q.join(",")).join(" "),fill:"none",stroke:"#7b8bb0","stroke-width":2,class:"flow"});
+
+const agents=[
+  {n:"Screener",r:"기계적 필터",x:1.6,y:2.2,c:"#6b7a99",st:"done"},
+  {n:"Analyst",r:"20 → 3 탈락",x:7.6,y:2.2,c:"#2f8f5b",st:"done"},
+  {n:"Bull",r:"상승 시나리오",x:13.4,y:2.0,c:"#1f7ae0",st:"done"},
+  {n:"Bear",r:"반박 · 검색 9/15",x:16.2,y:2.8,c:"#e0563a",st:"work",say:"CB 오버행 발견"},
+  {n:"Trader",r:"최종 1종목",x:2.4,y:8.2,c:"#7a4cc2",st:"idle"},
+  {n:"Settler",r:"월→금 정산",x:8.4,y:8.2,c:"#8a8f99",st:"idle"},
+];
+agents.forEach(a=>{
+  box(a.x-0.3,a.y-0.2,0,1.4,0.8,0.55,"#caa97e","#b8966a","#a88559"); // 책상
+  box(a.x+0.2,a.y-0.1,0.55,0.6,0.1,0.45,"#2b3244","#232a39","#1c2230"); // 모니터
+  const g=el("g",{class:a.st==="work"?"working":""});
+  const [cx,cy]=P(a.x+0.5,a.y+1.1,0);
+  el("ellipse",{cx,cy:cy+2,rx:12,ry:5,fill:"rgba(0,0,0,.12)"},g);
+  el("rect",{x:cx-9,y:cy-30,width:18,height:28,rx:8,fill:a.c},g);
+  el("circle",{cx,cy:cy-38,r:9,fill:"#f3d2b5",stroke:a.c,"stroke-width":2},g);
+  const dot=a.st==="done"?"#22a55a":a.st==="work"?"#f5a524":"#b7bdc9";
+  el("circle",{cx:cx+12,cy:cy-44,r:5,fill:dot,stroke:"#fff","stroke-width":2},g);
+  if(a.say){ el("rect",{x:cx+14,y:cy-82,width:112,height:26,rx:8,fill:"#1d2433"},g);
+    const t=el("text",{x:cx+70,y:cy-64,"text-anchor":"middle",fill:"#fff",class:"bub"},g); t.textContent=a.say; }
+});
+document.getElementById("agents").innerHTML=agents.map(a=>`<div class="ag ${a.st==="work"?"on":""}"><div class="av" style="background:${a.c}"></div><div><b>${a.n}</b><span>${a.r}</span></div><span class="st ${a.st}">${{done:"완료",work:"작업 중",idle:"대기"}[a.st]}</span></div>`).join("");
+</script></body></html>
