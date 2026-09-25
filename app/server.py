@@ -1,4 +1,7 @@
-"""로컬 대시보드 서버 — outputs/와 log.csv를 읽기만 한다. LLM도 시세 API도 호출하지 않는다.
+"""로컬 대시보드 서버 — 데스크(도면 + 이번 주 작업), 성과, 계좌.
+
+읽기 API는 outputs/와 log.csv만 본다. 스크립트 실행은 app/tasks.py의 화이트리스트로만 하고,
+LLM API를 쓰는 agents auto는 요청에 명시적 동의(confirm_api)가 있어야 한다.
 
     .venv/Scripts/python -m uvicorn app.server:app --port 8765
     -> http://localhost:8765
@@ -13,7 +16,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,6 +25,21 @@ STATIC = Path(__file__).resolve().parent / "static"
 STAGES = ["analyst", "bull", "bear", "trader"]
 
 app = FastAPI(title="weekly_pick dashboard")
+
+from app.account import router as account_router  # noqa: E402
+from app.tasks import router as tasks_router  # noqa: E402
+
+app.include_router(tasks_router)
+app.include_router(account_router)
+
+
+@app.middleware("http")
+async def no_cache_static(request: Request, call_next):
+    # 로컬 도구라 캐시 이득이 없다. 코드를 고친 뒤 옛 JS가 남아 있는 혼란만 막는다.
+    resp = await call_next(request)
+    if request.url.path.startswith("/static") or request.url.path == "/":
+        resp.headers["Cache-Control"] = "no-cache"
+    return resp
 
 
 def _json(f: Path) -> dict | None:
@@ -274,12 +292,12 @@ async def run_stream(week: int, market: str, request: Request, since: int = 0):
 
 @app.get("/")
 def index():
-    return FileResponse(STATIC / "index.html")
+    return FileResponse(STATIC / "app" / "index.html")
 
 
 @app.get("/desk")
 def desk():
-    return FileResponse(STATIC / "desk.html")
+    return RedirectResponse("/#desk")
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")

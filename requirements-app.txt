@@ -1,0 +1,4 @@
+# 로컬 데스크 화면(app/) 전용 의존성.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+ruamel.yaml>=0.18        # config.yaml을 주석 그대로 두고 주차 값만 고친다

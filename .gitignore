@@ -12,3 +12,6 @@ venv/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 계좌 스냅샷 등 개인 데이터 — 절대 커밋하지 않는다
+private/

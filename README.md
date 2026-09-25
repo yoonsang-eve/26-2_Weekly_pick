@@ -116,16 +116,20 @@ python src/agents.py --mode manual --market KR
 
 게이트웨이가 웹 검색 툴을 중계하지 않으면 (`llm.openai_compat.web_search: false`) analyst·bear 프롬프트에 "검색 도구가 없으니 확인 불가는 확인 불가로 표기하라"는 지침이 자동으로 붙는다. 검색이 중요한 주차에는 그 두 단계만 manual로 돌리는 혼합 운용이 가능하다 — 단계별로 모드를 바꿔도 산출물 경로가 같기 때문이다.
 
-## 데스크 UI · 피드백 대시보드
+## 데스크 (로컬 웹 화면)
 
 ```bash
-.venv/Scripts/python -m uvicorn app.server:app --port 8765
+pip install -r requirements-app.txt
+.venv/Scripts/python -m uvicorn app.server:app --port 8765     # -> http://localhost:8765
 ```
 
-- `http://localhost:8765/desk` — **Day Desk**. 파이프라인 단계를 방으로, 에이전트를 캐릭터로 보여 준다. `screener`·`agents`·`settle`이 `outputs/wk{N}/{시장}/events.jsonl`에 남기는 이벤트를 읽어, 지금 돌고 있는 실행은 실시간(SSE)으로, 지난 주차는 재생으로 보여 준다. auto 모드에서는 analyst·bear의 웹 검색어가 들어오는 대로 뜬다. 방을 누르면 후보 목록·프롬프트·응답 원문이 열린다.
-- `http://localhost:8765/` — **피드백 대시보드**. 수익률·초과수익·예측범위 적중, 후보군 안에서 추천 종목의 위치, 단계별 기여도.
+한 화면에서 이번 주 작업을 처음부터 끝까지 한다. 터미널 명령은 서버 켜기 하나만 남는다.
 
-서버는 저장소 파일을 읽기만 한다. LLM도 시세 API도 호출하지 않는다. events.jsonl이 없는 주차(wk3·wk4)는 `run_meta.json`·`pick.json`·`log.csv`에 남은 값만으로 흐름을 복원한다 — 당시 검색어처럼 기록되지 않은 것은 만들어 넣지 않는다.
+- **데스크** — 왼쪽은 파이프라인 도면(방 = 단계). 지금 도는 실행은 실시간(SSE), 지난 주차는 재생. 방을 누르면 후보 목록과 프롬프트·응답 원문. 오른쪽은 **이번 주 작업** 패널: ① 주차 설정(날짜 제안, config.yaml에 저장) ② 스크리닝 ③ 에이전트(manual은 프롬프트 복사 + 응답 붙여넣기, auto는 API 사용 확인 후 실행) ④ 추천 확정(제출 문구 복사) ⑤ 정산(추천 + 후보 20종목) ⑥ 발표자료(pptx 생성, PowerPoint로 열기). 산출물은 모달에서 바로 본다.
+- **성과** — 수익률, 초과수익, 예측범위 적중, 후보군 안에서 추천 종목의 자리, 단계별 기여.
+- **계좌** — 한국투자증권 Open API 잔고·비중·평가손익, 숫자 기반 브리핑, 추천 종목 매수 초안. 키는 `.env`의 `KIS_*`에만 둔다 (`.env.example` 참고). 조회 기록은 `private/`(커밋 제외)에 쌓인다. 주문 실행은 아직 연결하지 않았다.
+
+LLM API를 쓰는 동작은 에이전트 auto 하나뿐이고, 화면에서 한 번 더 확인해야 실행된다. 스크립트는 `app/tasks.py`의 화이트리스트로만 돈다.
 
 **후보군 정산** — 단계별 기여도는 추천 1종목뿐 아니라 후보 20종목 전체의 같은 주 수익률이 있어야 나온다.
 
