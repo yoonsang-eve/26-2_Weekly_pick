@@ -110,13 +110,13 @@ body{margin:0;color:var(--ink);font:14px/1.5 var(--sans);background:
 const skin="#f4d3b5";
 function person(x,y,c,hair="#2b2240",flip=false){
   const s=flip?-1:1;
-  return `<g class="avatar" transform="translate(${x} ${y}) scale(${s} 1)">
+  return `<g transform="translate(${x} ${y}) scale(${s} 1)"><g class="avatar">
     <ellipse cx="0" cy="30" rx="20" ry="6" fill="rgba(0,0,0,.35)"/>
     <rect x="-17" y="0" width="34" height="30" rx="14" fill="${c}"/>
     <rect x="-17" y="0" width="34" height="30" rx="14" fill="url(#shade)"/>
     <circle cx="0" cy="-10" r="12" fill="${skin}"/>
     <path d="M-12 -12 a12 12 0 0 1 24 0 q-6 -4 -12 -3 q-7 0 -12 3z" fill="${hair}"/>
-  </g>`;
+  </g></g>`;
 }
 function desk(x,y,c,w=110){
   return `<g transform="translate(${x} ${y})">
@@ -185,7 +185,7 @@ function drawCorr(){
                   <path d="${d}" fill="none" stroke="rgba(252,211,77,.55)" stroke-width="2" stroke-dasharray="1 10" stroke-linecap="round"/>`;
   corr.style.zIndex=0; document.querySelectorAll(".room").forEach(r=>r.style.zIndex=1);
 }
-function moveEnv(id,count){const[x,y,a,f]=center(id);env.style.left=x+"px";env.style.top=(a.top-f.top-2)+"px";document.getElementById("envn").textContent=count}
+function moveEnv(id,count){const[x,y,a,f]=center(id);env.style.left=(x+a.width*.32)+"px";env.style.top=(a.top-f.top+a.height*.3)+"px";document.getElementById("envn").textContent=count}
 
 /* ---------- 사이드 ---------- */
 const STEPS=[["scr","Screener","20종목"],["ana","Analyst","273s · 검색 24"],["deb","Bull → Bear","73s / 251s"],["trd","Trader","46s"],["set","Settle","금 15:30"]];
