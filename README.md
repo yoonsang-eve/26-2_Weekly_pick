@@ -131,6 +131,8 @@ pip install -r requirements-app.txt
 
 **켜기** — `start.bat`을 더블클릭하면 서버가 켜지고 브라우저가 열린다.
 
+**항상 열려 있는 보기 전용 사이트** — PC를 꺼도 되는 공유 방법이다. GitHub Actions(`.github/workflows/publish.yml`)가 `tools/export_static.py`로 보기 전용 화면과 데이터를 파일로 구워 Cloudflare Pages에 올린다. 결과가 푸시될 때(`publish.bat`), 매일 07:00·16:00 KST(시세 갱신), 수동 실행 때 돈다. 주소는 `https://<프로젝트>.pages.dev/<SITE_KEY>/#desk`이고 SITE_KEY 경로를 아는 사람만 들어온다. 서버가 없으므로 실행·계좌 기능은 애초에 없다. 저장소 Secrets에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SITE_KEY`가 필요하다.
+
 **보기 전용으로 공유하기** — `share.bat`을 더블클릭하면 읽기만 되는 서버(8766)를 따로 띄우고 인터넷 링크를 만들어 클립보드에 복사한다. 받는 사람은 설치 없이 링크만 누르면 된다. 이 서버는 읽기(GET)만 허용하고, 계좌 화면·실행 버튼·설정 저장을 서버 쪽에서 막는다. 링크에는 `.env`의 `VIEWER_TOKEN`이 붙어 있어야 열린다(지우면 기존 링크가 모두 막힌다). 이 PC에 Tailscale이 설치·로그인돼 있으면 Funnel로 **고정 주소**(`https://<PC이름>.<tailnet>.ts.net`)를 쓰고, 없으면 cloudflared 빠른 터널의 임시 주소를 쓴다. 어느 쪽이든 PC가 켜져 있고 창이 열려 있을 때만 열린다.
 
 LLM API를 쓰는 동작은 에이전트 auto 하나뿐이고, 화면에서 한 번 더 확인해야 실행된다. 스크립트는 `app/tasks.py`의 화이트리스트로만 돈다.

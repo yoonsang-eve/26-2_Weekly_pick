@@ -218,7 +218,7 @@ const Plan = (() => {
 
   // ---------------------------------------------------------------- 재생 / 실시간
   const key = (r) => `${r.week}-${r.market}`;
-  const isLive = (r) => r.events_mtime && Date.now() / 1000 - r.events_mtime < 20 * 60 && !r.settled;
+  const isLive = (r) => !STATIC && r.events_mtime && Date.now() / 1000 - r.events_mtime < 20 * 60 && !r.settled;
   function stop() { clearTimeout(timer); timer = null; if (es) { es.close(); es = null; } }
   function reset() {
     stop();

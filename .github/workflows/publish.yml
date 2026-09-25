@@ -1,0 +1,47 @@
+# 보기 전용 데스크를 정적 사이트로 구워 Cloudflare Pages에 올린다 (PC가 꺼져 있어도 열리게).
+# 언제 도나: 결과가 푸시될 때(publish.bat), 매일 아침 7시·오후 4시(KST, 시세 갱신), 수동 실행.
+# 필요한 저장소 Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, SITE_KEY(주소 경로)
+name: publish-site
+
+on:
+  push:
+    branches: [main]
+    paths: ["outputs/**", "log.csv", "final_log.csv", "data/**", "config.yaml", "app/**", "tools/**", ".github/workflows/publish.yml"]
+  schedule:
+    - cron: "0 22 * * *"      # 07:00 KST — 미국장 마감 반영
+    - cron: "0 7 * * 1-5"     # 16:00 KST — 한국장 마감 반영
+  workflow_dispatch:
+
+concurrency:
+  group: publish-site
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-app.txt
+      - name: 사이트 굽기
+        run: python tools/export_static.py --out site
+        env:
+          SITE_KEY: ${{ secrets.SITE_KEY }}
+          TZ: Asia/Seoul
+      - name: Pages 프로젝트 만들기 (처음 한 번, 이미 있으면 넘어감)
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create weekly-pick-desk --production-branch=main
+      - name: 게시
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=weekly-pick-desk --branch=main --commit-dirty=true

@@ -11,8 +11,22 @@ const md = (s) => (s || "").slice(5).replace("-", ".");      // 2026-09-28 -> 09
 const DOW = "일월화수목금토";
 const dow = (s) => DOW[new Date(s + "T00:00:00").getDay()];
 
+// 정적 사이트(tools/export_static.py로 구운 것)에서는 서버가 없다. API 주소를 구워 둔 파일
+// 경로로 바꾼다: /api/x/y?a=b -> api/x/y__a-b.json, 글 원문은 .txt, 실제 파일은 경로 그대로.
+// 이 규칙은 export_static.py의 static_path()와 같아야 한다.
+const STATIC = !!window.STATIC_SITE;
+function U(path) {
+  if (!STATIC || !path.startsWith("/")) return path;
+  let [p, q] = path.split("?");
+  p = p.slice(1);
+  if (p.startsWith("static/") || p.includes("/file/")) return p;
+  const qs = (q || "").split("&").filter((x) => x && !/^(download|since)=/.test(x)).map((x) => x.replace("=", "-")).join("_");
+  return p + (qs ? "__" + qs : "") + (p.includes("/text/") ? ".txt" : ".json");
+}
+
 async function api(path, opt = {}) {
-  const r = await fetch(path, { headers: { "content-type": "application/json" }, ...opt,
+  if (STATIC && opt.method && opt.method !== "GET") throw new Error("보기 전용 사이트에서는 할 수 없는 동작입니다.");
+  const r = await fetch(U(path), { headers: { "content-type": "application/json" }, ...opt,
     body: opt.body && typeof opt.body !== "string" ? JSON.stringify(opt.body) : opt.body });
   const ct = r.headers.get("content-type") || "";
   const data = ct.includes("json") ? await r.json() : await r.text();

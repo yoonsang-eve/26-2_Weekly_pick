@@ -3,7 +3,7 @@ const Guide = (() => {
   let loaded = false;
   async function render() {
     if (loaded) return;
-    $("#guide").innerHTML = await (await fetch("/static/app/guide.html")).text();
+    $("#guide").innerHTML = await (await fetch(U("/static/app/guide.html"))).text();
     loaded = true;
   }
   return { render };

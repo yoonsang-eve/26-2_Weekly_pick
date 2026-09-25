@@ -28,7 +28,9 @@
   }
 
   async function init() {
-    App.viewer = (await api("/api/app").catch(() => ({}))).viewer;
+    const info = await api("/api/app").catch(() => ({}));
+    App.viewer = info.viewer;
+    if (info.static && info.built_at) $("#built").innerHTML = `업데이트 <strong class="num">${md(info.built_at.slice(0, 10))} ${info.built_at.slice(11, 16)}</strong>`;
     if (App.viewer) {
       document.body.classList.add("viewer");
       $('.nav a[data-view="account"]')?.remove();

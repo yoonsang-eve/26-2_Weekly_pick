@@ -92,7 +92,7 @@ const Tasks = (() => {
         <div class="acts"><button class="btn sm ${fs ? "ghost" : "primary"}" data-a="settle" ${dis || (!anyPassed ? "disabled" : "")}>${fs || settled ? "다시 정산" : "정산 실행"}</button></div>` });
 
     // 7 주간 리포트
-    const deckRow = (d, mk) => `<div class="acts"><span class="mono" style="font-size:11.5px;flex:1">${esc(d)}</span><button class="btn sm" data-a="open" data-mk="${mk}" data-f="${esc(d)}">PowerPoint로 열기</button><a class="btn sm ghost" href="/api/runs/${c.week_no}/${mk}/file/${encodeURIComponent(d)}?download=true">받기</a></div>`;
+    const deckRow = (d, mk) => `<div class="acts"><span class="mono" style="font-size:11.5px;flex:1">${esc(d)}</span><button class="btn sm" data-a="open" data-mk="${mk}" data-f="${esc(d)}">PowerPoint로 열기</button><a class="btn sm ghost" href="${U(`/api/runs/${c.week_no}/${mk}/file/${encodeURIComponent(d)}?download=true`)}">받기</a></div>`;
     items.push({ done: ST.decks.length + ST.final_decks.length > 0, h: "주간 리포트", body: `<p class="own">8장짜리 pptx 리포트. 최종 선택이 직접 지정 종목이면 에이전트 과정 대신 '에이전트 추천 vs 내 선택'과 선택 사유를 넣는다.</p>
       <div class="acts"><label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" id="deck-full"> 상세판</label>
         <button class="btn sm primary" data-a="deck-final" ${dis || (!FIN.final ? "disabled" : "")}>최종 선택으로 만들기</button>
@@ -288,10 +288,10 @@ const Files = (() => {
     show(Math.max(0, list.findIndex((f) => f.path === select)));
   }
   async function show(i) {
-    const f = list[i], url = `/api/runs/${W}/${M}/file/${encodeURIComponent(f.path).replace(/%2F/g, "/")}`;
+    const f = list[i], url = U(`/api/runs/${W}/${M}/file/${encodeURIComponent(f.path).replace(/%2F/g, "/")}`);
     $$("#m-body [data-i]").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === i));
     const pv = $("#pv");
-    const meta = `<p class="hint" style="margin:0 0 10px">${f.mtime.replace("T", " ")}  ${(f.size / 1024).toFixed(1)} KB  <a href="${url}?download=true">받기</a></p>`;
+    const meta = `<p class="hint" style="margin:0 0 10px">${f.mtime.replace("T", " ")}  ${(f.size / 1024).toFixed(1)} KB  <a href="${url}${STATIC ? "" : "?download=true"}" ${STATIC ? "download" : ""}>받기</a></p>`;
     if (f.kind === "deck") {
       pv.innerHTML = meta + `<p>pptx는 브라우저에서 바로 보이지 않는다. 이 PC의 PowerPoint로 연다.</p><button class="btn primary" id="pv-open">PowerPoint로 열기</button>`;
       $("#pv-open").onclick = () => api(`/api/runs/${W}/${M}/open/${encodeURIComponent(f.path)}`, { method: "POST" }).then(() => toast("열었다")).catch((e) => toast(e.message));
