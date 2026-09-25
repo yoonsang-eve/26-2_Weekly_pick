@@ -45,13 +45,13 @@ const Tasks = (() => {
 
     // 1 주차
     items.push({ done: !s.stale, h: "주차 설정", body: s.stale
-      ? `<p>오늘 기준으로는 <b>${sug.week_no}주차</b>(${md(sug.buy_date)} ~ ${md(sug.sell_date)})를 준비할 때다. 지금 설정은 ${c.week_no}주차.</p>
+      ? `<p class="own">오늘 기준으로는 <b>${sug.week_no}주차</b>(${md(sug.buy_date)} ~ ${md(sug.sell_date)})를 준비할 때다. 지금 설정은 ${c.week_no}주차.</p>
          <div class="acts"><button class="btn primary sm" data-a="week-new" ${dis}>${sug.week_no}주차로 넘기기</button></div>`
-      : `<p>${c.week_no}주차로 설정되어 있다. 휴장이 끼면 시장별 날짜를 고친다.</p><div class="acts"><button class="btn sm ghost" data-a="week-edit" ${dis}>날짜 고치기</button></div>` });
+      : `<p class="own">${c.week_no}주차로 설정되어 있다. 휴장이 끼면 시장별 날짜를 고친다.</p><div class="acts"><button class="btn sm ghost" data-a="week-edit" ${dis}>날짜 고치기</button></div>` });
 
     // 2 스크리닝
     items.push({ done: ST.screened, h: "스크리닝", tag: ST.screened ? `<span class="tag done">후보 ${ST.n_candidates}</span>` : "",
-      body: `<p>${MK[M]} 전종목에서 필터 1~4를 적용한다. 시세만 받고 LLM은 쓰지 않는다.</p>
+      body: `<p class="own">${MK[M]} 전종목에서 필터 1~4를 적용한다. 시세만 받고 LLM은 쓰지 않는다.</p>
         <div class="acts"><button class="btn sm ${ST.screened ? "ghost" : "primary"}" data-a="screener" ${dis}>${ST.screened ? "다시 스크리닝" : "스크리닝 실행"}</button>
         ${ST.screened ? `<button class="btn sm ghost" data-a="files">후보 보기</button>` : ""}</div>` });
 
@@ -67,7 +67,7 @@ const Tasks = (() => {
     items.push({ done: s.agentsDone, h: "에이전트", body: `
       <div class="acts" style="margin-top:6px"><div class="seg" role="group" aria-label="실행 방식">
         <button data-a="mode" data-m="manual" aria-pressed="${MODE === "manual"}">manual</button><button data-a="mode" data-m="auto" aria-pressed="${MODE === "auto"}">auto</button></div></div>
-      <p>${MODE === "manual" ? "프롬프트를 Claude 웹의 <b>새 대화</b>에 붙여넣고, 응답 전문을 다시 붙여넣는다. API를 쓰지 않는다."
+      <p class="own">${MODE === "manual" ? "프롬프트를 Claude 웹의 <b>새 대화</b>에 붙여넣고, 응답 전문을 다시 붙여넣는다. API를 쓰지 않는다."
         : "공용 LLM API로 4단계를 자동 호출한다. 실행 전에 한 번 더 확인한다."}</p>
       <div class="stages">${rows}</div>
       <div class="acts">${!ST.screened ? `<span class="muted" style="font-size:12px">스크리닝을 먼저 한다</span>`
@@ -88,12 +88,12 @@ const Tasks = (() => {
     const fs = FIN.settled, anyPassed = ["KR", "US"].some((m) => today() > c.markets[m].sell_date);
     items.push({ done: !!(fs || settled), h: "정산",
       tag: fs ? `<span class="tag ${+fs.ret_pct >= 0 ? "done" : "fail"} mono">최종 선택 ${pct(+fs.ret_pct)}</span>` : settled ? `<span class="tag ${+settled.ret_pct >= 0 ? "done" : "fail"} mono">${MK[M]} ${pct(+settled.ret_pct)}</span>` : "",
-      body: `<p>에이전트 추천(한국·미국), 후보 20종목, 최종 선택을 한 번에 정산한다. ${anyPassed ? "" : `${md(c.markets.KR.sell_date)} 장 마감 뒤에 할 수 있다.`}</p>
+      body: `<p class="own">에이전트 추천(한국·미국), 후보 20종목, 최종 선택을 한 번에 정산한다. ${anyPassed ? "" : `${md(c.markets.KR.sell_date)} 장 마감 뒤에 할 수 있다.`}</p>
         <div class="acts"><button class="btn sm ${fs ? "ghost" : "primary"}" data-a="settle" ${dis || (!anyPassed ? "disabled" : "")}>${fs || settled ? "다시 정산" : "정산 실행"}</button></div>` });
 
     // 7 주간 리포트
     const deckRow = (d, mk) => `<div class="acts"><span class="mono" style="font-size:11.5px;flex:1">${esc(d)}</span><button class="btn sm" data-a="open" data-mk="${mk}" data-f="${esc(d)}">PowerPoint로 열기</button><a class="btn sm ghost" href="/api/runs/${c.week_no}/${mk}/file/${encodeURIComponent(d)}?download=true">받기</a></div>`;
-    items.push({ done: ST.decks.length + ST.final_decks.length > 0, h: "주간 리포트", body: `<p>8장짜리 pptx 리포트. 최종 선택이 직접 지정 종목이면 에이전트 과정 대신 '에이전트 추천 vs 내 선택'과 선택 사유를 넣는다.</p>
+    items.push({ done: ST.decks.length + ST.final_decks.length > 0, h: "주간 리포트", body: `<p class="own">8장짜리 pptx 리포트. 최종 선택이 직접 지정 종목이면 에이전트 과정 대신 '에이전트 추천 vs 내 선택'과 선택 사유를 넣는다.</p>
       <div class="acts"><label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" id="deck-full"> 상세판</label>
         <button class="btn sm primary" data-a="deck-final" ${dis || (!FIN.final ? "disabled" : "")}>최종 선택으로 만들기</button>
         <button class="btn sm ghost" data-a="deck" ${dis || (!PICK ? "disabled" : "")}>${MK[M]} 에이전트 추천으로</button></div>

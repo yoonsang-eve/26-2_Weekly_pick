@@ -334,3 +334,12 @@ details.blk > summary::-webkit-details-marker { display: none; }
 .guide .flow div:last-child { border-right: 0; }
 .guide .flow b { display: block; font: 800 12px var(--mono); margin-bottom: 4px; }
 @media (max-width: 700px) { .guide .flow { grid-template-columns: 1fr; } .guide .flow div { border-right: 0; border-bottom: 1px solid var(--ink); } .guide dl { grid-template-columns: 1fr; } }
+
+.viewer .task p.own { display: none; }
+
+.guide .shot { margin: 14px 0 6px; } .guide .shot img { display: block; max-width: 100%; border: 1.5px solid var(--ink); }
+.guide .legend-n { list-style: none; padding: 0; counter-reset: n; margin: 8px 0 16px; }
+.guide .legend-n li { counter-increment: n; display: grid; grid-template-columns: 30px 1fr; gap: 6px; margin: 6px 0; }
+.guide .legend-n li::before { content: counter(n); width: 22px; height: 22px; border-radius: 50%; background: var(--mark); border: 2px solid var(--ink); font: 800 12px var(--mono); display: grid; place-items: center; margin-top: 3px; }
+.guide .shot-side { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 700px) { .guide .shot-side { grid-template-columns: 1fr; } }
