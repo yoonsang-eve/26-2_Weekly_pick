@@ -67,6 +67,9 @@ src/screener.py                 Step 1 (KR + US)
 src/us_universe.py              US 유니버스 관리·갱신
 src/llm.py                      LLM 호출 계층 (openai_compat / anthropic)
 src/agents.py                   Step 2·3 (manual / auto)
+src/events.py                   데스크 UI용 이벤트 기록 (events.jsonl)
+src/settle.py · src/cohort.py   금요일 정산 · 후보군 정산
+app/                            로컬 대시보드 서버 (데스크 UI + 피드백)
 outputs/prompt_submission_v2.md 수업 제출용 프롬프트 문서
 outputs/wk{N}/{KR,US}/          시장별 후보·렌더링 결과·LLM 응답 원문·pick.json
 ```
@@ -112,6 +115,24 @@ python src/agents.py --mode manual --market KR
 응답이 아직 없는 첫 단계를 골라 프롬프트를 렌더링하고 클립보드로 복사한다. Claude 웹에 붙여넣고 응답 전문을 `outputs/wk{N}/{시장}/responses/{stage}.md`로 저장한 뒤 다시 실행하면 다음 단계로 넘어간다. 각 단계는 **새 대화**에서 실행해야 한다 — 히스토리를 누적하면 Bear가 Bull에 동조한다.
 
 게이트웨이가 웹 검색 툴을 중계하지 않으면 (`llm.openai_compat.web_search: false`) analyst·bear 프롬프트에 "검색 도구가 없으니 확인 불가는 확인 불가로 표기하라"는 지침이 자동으로 붙는다. 검색이 중요한 주차에는 그 두 단계만 manual로 돌리는 혼합 운용이 가능하다 — 단계별로 모드를 바꿔도 산출물 경로가 같기 때문이다.
+
+## 데스크 UI · 피드백 대시보드
+
+```bash
+.venv/Scripts/python -m uvicorn app.server:app --port 8765
+```
+
+- `http://localhost:8765/desk` — **Day Desk**. 파이프라인 단계를 방으로, 에이전트를 캐릭터로 보여 준다. `screener`·`agents`·`settle`이 `outputs/wk{N}/{시장}/events.jsonl`에 남기는 이벤트를 읽어, 지금 돌고 있는 실행은 실시간(SSE)으로, 지난 주차는 재생으로 보여 준다. auto 모드에서는 analyst·bear의 웹 검색어가 들어오는 대로 뜬다. 방을 누르면 후보 목록·프롬프트·응답 원문이 열린다.
+- `http://localhost:8765/` — **피드백 대시보드**. 수익률·초과수익·예측범위 적중, 후보군 안에서 추천 종목의 위치, 단계별 기여도.
+
+서버는 저장소 파일을 읽기만 한다. LLM도 시세 API도 호출하지 않는다. events.jsonl이 없는 주차(wk3·wk4)는 `run_meta.json`·`pick.json`·`log.csv`에 남은 값만으로 흐름을 복원한다 — 당시 검색어처럼 기록되지 않은 것은 만들어 넣지 않는다.
+
+**후보군 정산** — 단계별 기여도는 추천 1종목뿐 아니라 후보 20종목 전체의 같은 주 수익률이 있어야 나온다.
+
+```bash
+python src/settle.py --week 4          # 추천 종목 → log.csv
+python src/cohort.py --week 4          # 후보 20종목 → outputs/wk4/{시장}/cohort.csv
+```
 
 ## 데이터 소스
 

@@ -23,6 +23,9 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import events  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 LOG = ROOT / "log.csv"
 
@@ -187,6 +190,11 @@ def settle_one(cfg: dict, week: int, market: str,
         "primary_risk": pick.get("primary_risk", ""),
         "rank": "", "notes": "",          # rank는 순위표 확인 후 수동 입력
     }
+    events.bind(week, market)
+    events.emit("settle", "done", f"{row['ret_pct']:+.2f}% (벤치마크 {row['benchmark_ret_pct']}%)",
+                ret_pct=row["ret_pct"], benchmark_ret_pct=row["benchmark_ret_pct"],
+                buy_open=row["buy_open"], sell_close=row["sell_close"],
+                buy_date=row["buy_date"], sell_date=row["sell_date"])
     print(f"  [{market}] {ticker} {name}  {row['buy_date']} 시가 {buy_open:,.2f} → "
           f"{row['sell_date']} 종가 {sell_close:,.2f}   {row['ret_pct']:+.2f}% "
           f"(벤치마크 {row['benchmark_ret_pct']}%, 초과 {row['excess_pct']}%p)")

@@ -31,6 +31,7 @@ import pandas as pd
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import events  # noqa: E402
 import llm as llm_mod  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -208,6 +209,13 @@ def extract_pick(text: str) -> dict | None:
 
 def run_manual(cfg: dict, market: str, week: int, out: Path, resp: Path,
                only: str | None) -> int:
+    # 사람이 붙여넣어 저장한 응답은 여기서 처음 발견된다 — 그때 완료로 기록한다.
+    # 기록이 이미 시작된 실행에만 붙인다. events.jsonl 도입 전 주차에 'done'만 덩그러니
+    # 남으면 데스크 UI가 산출물 기반 복원 대신 그 조각을 보여 주게 된다.
+    for s in DEPS:
+        if (events.active() and (resp / f"{s}.md").exists()
+                and not events.seen(s, "done")):
+            events.emit(s, "done", "응답 저장됨 (manual)")
     stage = only or next((s for s in DEPS if not (resp / f"{s}.md").exists()), None)
     if stage is None:
         print(f"[{market}] 4단계 응답이 모두 저장되어 있다. 최종 결과는 "
@@ -239,6 +247,7 @@ def run_manual(cfg: dict, market: str, week: int, out: Path, resp: Path,
 
     nxt = [s for s in DEPS if not (resp / f"{s}.md").exists() and s != stage]
     print(f"[{market}/{stage}] 렌더링 완료 — {dst.relative_to(ROOT)} ({len(text):,}자)")
+    events.emit(stage, "wait", "프롬프트 렌더링 완료 — 수동 실행 대기", chars=len(text))
     print("클립보드에 복사됨." if to_clipboard(text) else "클립보드 복사 실패. 파일을 직접 열 것.")
     print(f"""
 다음 순서로 진행할 것.
@@ -289,10 +298,18 @@ def run_auto(cfg: dict, market: str, week: int, out: Path, resp: Path,
         print(f"  [{market}/{stage}] 호출 — {model} "
               f"({len(text):,}자{f', 웹 검색 {budget}회' if use_search else ''})")
 
+        events.emit(stage, "start", f"{model} 호출" + (f" · 검색 예산 {budget}" if use_search else ""),
+                    model=model, budget=budget if use_search else 0)
         t0 = datetime.now()
-        reply = provider.complete(model=model, prompt=text, max_tokens=max_tokens,
-                                  temperature=temperature, web_search=use_search,
-                                  max_searches=budget if use_search else None)
+        try:
+            reply = provider.complete(
+                model=model, prompt=text, max_tokens=max_tokens,
+                temperature=temperature, web_search=use_search,
+                max_searches=budget if use_search else None,
+                on_search=lambda q, st=stage: events.emit(st, "search", q))
+        except Exception as e:
+            events.emit(stage, "error", str(e)[:200])
+            raise
 
         # trader는 구조화 JSON이 필수다. 파싱 실패하면 JSON만 다시 요구해 재시도한다.
         pick = None
@@ -330,6 +347,12 @@ def run_auto(cfg: dict, market: str, week: int, out: Path, resp: Path,
             "chars": len(reply.text),
         }
         save_meta(meta_f, meta)
+        st_meta = meta["stages"][stage]
+        events.emit(stage, "done", f"{st_meta['elapsed_sec']}초 · 검색 {reply.web_searches}회",
+                    elapsed_sec=st_meta["elapsed_sec"], searches=reply.web_searches,
+                    input_tokens=(reply.usage or {}).get("input_tokens"),
+                    output_tokens=(reply.usage or {}).get("output_tokens"),
+                    pick=pick.get("ticker") if pick else None)
         print(f"    저장 {f.relative_to(ROOT)} ({len(reply.text):,}자, "
               f"{meta['stages'][stage]['elapsed_sec']}초)")
 
@@ -341,6 +364,7 @@ def run_market(cfg: dict, market: str, week: int, mode: str, only: str | None,
     out = ROOT / "outputs" / f"wk{week}" / market
     resp = out / "responses"
     resp.mkdir(parents=True, exist_ok=True)
+    events.bind(week, market)
     print(f"\n{'=' * 78}\n[{market}] {cfg['markets'][market]['label']} | "
           f"mode={mode} | prompts={cfg['meta']['prompt_version']}\n{'=' * 78}")
     if mode == "manual":

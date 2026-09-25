@@ -95,7 +95,7 @@ class OpenAICompatProvider:
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
                  temperature: float | None, web_search: bool,
-                 max_searches: int | None = None) -> Reply:
+                 max_searches: int | None = None, on_search=None) -> Reply:
         # web_search·max_searches는 여기서 쓰지 않는다. 게이트웨이마다 툴 스펙 형식이 달라 확인 전에는
         # 보낼 수 없고, config의 web_search는 '게이트웨이가 알아서 검색해 주는가'라는
         # 선언으로만 쓰여 프롬프트 문구(search_policy)를 고른다.
@@ -176,7 +176,7 @@ class AnthropicProvider:
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
                  temperature: float | None, web_search: bool,
-                 max_searches: int | None = None) -> Reply:
+                 max_searches: int | None = None, on_search=None) -> Reply:
         kwargs: dict[str, Any] = {
             "model": model,
             "max_tokens": max_tokens,
@@ -197,6 +197,21 @@ class AnthropicProvider:
         messages: list[dict[str, Any]] = [{"role": "user", "content": prompt}]
         texts: list[str] = []
         searches = 0
+        seen: set[str] = set()      # on_search로 이미 알린 server_tool_use id
+
+        def notify(block) -> None:
+            # 데스크 UI용 부수 효과. 어떤 이유로든 실패해도 호출은 계속한다.
+            if on_search is None or getattr(block, "type", "") != "server_tool_use":
+                return
+            bid = getattr(block, "id", None)
+            if bid in seen:
+                return
+            seen.add(bid)
+            try:
+                q = (getattr(block, "input", None) or {}).get("query", "")
+                on_search(q)
+            except Exception:
+                pass
         usage: dict[str, Any] = {}
         last = None
 
@@ -204,6 +219,11 @@ class AnthropicProvider:
             kwargs["messages"] = messages
             try:
                 with self.client.messages.stream(**kwargs) as s:
+                    if on_search is not None:
+                        # 검색 블록이 완성되는 즉시 알린다 (pause_turn까지 기다리지 않도록)
+                        for ev in s:
+                            if getattr(ev, "type", "") == "content_block_stop":
+                                notify(getattr(ev, "content_block", None))
                     msg = s.get_final_message()
             except self._anthropic.APIError as e:
                 raise LLMError(f"Anthropic API 오류: {e}") from e
@@ -213,6 +233,8 @@ class AnthropicProvider:
                     f"모델이 응답을 거부했다: {getattr(msg, 'stop_details', None)}")
 
             texts += [b.text for b in msg.content if b.type == "text"]
+            for b in msg.content:       # 스트림에서 놓친 것 보충
+                notify(b)
             searches += sum(1 for b in msg.content
                             if b.type == "web_search_tool_result")
             for k, v in (msg.usage.model_dump() if msg.usage else {}).items():

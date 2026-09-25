@@ -149,3 +149,8 @@ td.na { color: var(--muted); }
   .top { padding: 10px 16px; } main { padding: 16px; }
   .sub { display: none; }
 }
+
+.grow { flex: 1; }
+.nav { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; margin-left: 12px; }
+.nav a { color: var(--ink-2); text-decoration: none; padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 12.5px; }
+.nav a.on { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--border); }

@@ -28,6 +28,7 @@ import pandas as pd
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import events  # noqa: E402
 import us_universe  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -64,6 +65,7 @@ def force_http_timeout(seconds: float) -> None:
 
 def log(step: str, n: int, note: str = "") -> None:
     print(f"  {step:<34} {n:>5} 종목  {note}")
+    events.emit("screener", "step", step, n=n)
 
 
 def buy_date_of(cfg: dict, market: str) -> str:
@@ -178,6 +180,8 @@ def emit(d: pd.DataFrame, market: str, week: int, ref: pd.Timestamp,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n저장: {dst.relative_to(ROOT)}")
     print(out.to_string(index=False))
+    events.emit("screener", "done", f"후보 {len(out)}종목 확정", n=len(out),
+                tickers=[f"{t} {n}" for t, n in zip(out["ticker"], out["name"])])
     return dst
 
 
@@ -275,6 +279,8 @@ def screen_kr(cfg: dict, week: int, use_cache: bool) -> int:
     ref = ref_friday(buy_date_of(cfg, "KR"))
     n_out = int(cfg["universe"]["quota"]["KR"])
     print(f"\n{'=' * 78}\n[KR] 기준일 {ref:%Y-%m-%d}(금) 종가\n{'=' * 78}")
+    events.bind(week, "KR")
+    events.emit("screener", "start", f"기준일 {ref:%Y-%m-%d} 종가")
 
     df = build_universe(load_listing(ref, use_cache), cfg)
 
@@ -299,6 +305,7 @@ def screen_kr(cfg: dict, week: int, use_cache: bool) -> int:
     d = apply_common_filters(d, f, "KR", n_out)
     if d.empty:
         print("\nKR 후보가 0개다. 필터 파라미터를 확인할 것.", file=sys.stderr)
+        events.emit("screener", "error", "후보 0개")
         return 1
     emit(d, "KR", week, ref, cfg)
     return 0
@@ -395,6 +402,8 @@ def screen_us(cfg: dict, week: int, use_cache: bool) -> int:
     n_out = int(cfg["universe"]["quota"]["US"])
     print(f"\n{'=' * 78}\n[US] 기준일 후보 {cal_ref:%Y-%m-%d}(금) — 실제 기준일은 "
           f"데이터에서 확정한다\n{'=' * 78}")
+    events.bind(week, "US")
+    events.emit("screener", "start", f"기준일 후보 {cal_ref:%Y-%m-%d}")
 
     uni = us_universe.load(ROOT / cfg["universe"]["us"]["universe_csv"])
     print("\n[0] 유니버스 구성")
@@ -442,6 +451,7 @@ def screen_us(cfg: dict, week: int, use_cache: bool) -> int:
     d = apply_common_filters(d, f, "US", n_out)
     if d.empty:
         print("\nUS 후보가 0개다. 필터 파라미터를 확인할 것.", file=sys.stderr)
+        events.emit("screener", "error", "후보 0개")
         return 1
     emit(d, "US", week, ref, cfg)
     return 0

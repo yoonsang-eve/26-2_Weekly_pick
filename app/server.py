@@ -5,13 +5,15 @@
 """
 from __future__ import annotations
 
+import asyncio
 import csv
 import json
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -105,6 +107,7 @@ def _summary(week: int, market: str, d: Path, log: dict) -> dict:
         "responses": [s for s in STAGES if (d / "responses" / f"{s}.md").exists()],
         "settled": {k: row.get(k) for k in row} if row else None,
         "cohort": _cohort_summary(_csv(d / "cohort.csv")),
+        "events_mtime": (d / "events.jsonl").stat().st_mtime if (d / "events.jsonl").exists() else None,
     }
 
 
@@ -147,9 +150,136 @@ def run_text(week: int, market: str, kind: str, stage: str):
     return f.read_text(encoding="utf-8")
 
 
+# ------------------------------------------------------------------ 이벤트 (데스크 UI)
+def _read_events(f: Path) -> list[dict]:
+    out = []
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                try:
+                    out.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass        # 쓰는 도중의 마지막 줄
+    return out
+
+
+def _synth_events(week: int, market: str, d: Path) -> list[dict]:
+    """events.jsonl이 없던 시절(wk3·wk4)의 실행을 저장된 산출물로 복원한다.
+
+    실제로 기록된 값(시각·소요시간·검색 횟수·선택 결과·탈락 사유·정산)만 쓰고,
+    당시 검색어처럼 남아 있지 않은 것은 만들어 넣지 않는다.
+    """
+    ev: list[dict] = []
+
+    def add(ts: datetime, agent: str, kind: str, msg: str = "", **data):
+        ev.append({"ts": ts.isoformat(timespec="seconds"), "agent": agent, "kind": kind,
+                   "msg": msg, "data": {**data, "synth": True}})
+
+    sm = _json(d / "screen_meta.json") or {}
+    meta = _json(d / "run_meta.json") or {}
+    pick = _json(d / "pick.json") or {}
+    cand = _csv(d / "candidates.csv")
+    names = {_ticker(c["ticker"]): c.get("name", "") for c in cand}
+
+    stages = meta.get("stages", {})
+    first = min((datetime.fromisoformat(v["rendered_at"]) for v in stages.values()
+                 if v.get("rendered_at")), default=None)
+    t_scr = datetime.fromisoformat(sm["screened_at"]) if sm.get("screened_at") else \
+        (first - timedelta(minutes=30) if first else datetime(2000, 1, 1))
+    add(t_scr - timedelta(seconds=90), "screener", "start",
+        f"기준일 {sm.get('ref_date', '?')} 종가")
+    add(t_scr, "screener", "done", f"후보 {len(cand)}종목 확정", n=len(cand),
+        tickers=[f"{_ticker(c['ticker'])} {c.get('name', '')}" for c in cand])
+
+    finalists = [_ticker(pick["ticker"])] + [_ticker(r["ticker"]) for r in pick.get("rejected", [])] \
+        if pick.get("ticker") else []
+    order = [s for s in STAGES if stages.get(s, {}).get("rendered_at")]
+    for i, st in enumerate(order):
+        m = stages[st]
+        t0 = datetime.fromisoformat(m["rendered_at"])
+        if m.get("elapsed_sec"):
+            t1 = t0 + timedelta(seconds=m["elapsed_sec"])
+        elif i + 1 < len(order):          # manual 모드: 다음 단계 렌더링 직전에 끝난 것으로 본다
+            t1 = datetime.fromisoformat(stages[order[i + 1]]["rendered_at"]) - timedelta(seconds=5)
+        else:
+            t1 = t0 + timedelta(minutes=3)
+        model = m.get("model") or "manual"
+        add(t0, st, "start", f"{model} 호출" if meta.get("mode") == "auto" else f"{model} (manual)",
+            model=model)
+        extra = {}
+        if st == "analyst" and finalists:
+            for t in finalists:
+                add(t1 - timedelta(seconds=1), st, "note", f"통과 {t} {names.get(t, '')}")
+            extra["finalists"] = finalists
+        if st == "bear":
+            for r in pick.get("rejected", []):
+                t = _ticker(r["ticker"])
+                add(t1 - timedelta(seconds=1), st, "note",
+                    f"{names.get(t, t)} · {r.get('reason', '')[:60]}")
+        if st == "trader" and pick:
+            extra["pick"] = _ticker(pick.get("ticker"))
+        searches = m.get("web_search_calls")
+        msg = " · ".join(x for x in [
+            f"{m['elapsed_sec']:.0f}초" if m.get("elapsed_sec") else "",
+            f"검색 {searches}회" if searches else ""] if x) or "완료"
+        add(t1, st, "done", msg, elapsed_sec=m.get("elapsed_sec"), searches=searches,
+            input_tokens=(m.get("usage") or {}).get("input_tokens"),
+            output_tokens=(m.get("usage") or {}).get("output_tokens"), **extra)
+
+    row = _log().get((str(week), market))
+    if row and row.get("ret_pct"):
+        t = datetime.fromisoformat(row["sell_date"]) + timedelta(hours=16)
+        add(t, "settle", "done", f"{float(row['ret_pct']):+.2f}% (벤치마크 {row['benchmark_ret_pct']}%)",
+            ret_pct=float(row["ret_pct"]), benchmark_ret_pct=_num(row.get("benchmark_ret_pct")),
+            buy_open=_num(row.get("buy_open")), sell_close=_num(row.get("sell_close")),
+            buy_date=row["buy_date"], sell_date=row["sell_date"])
+    return sorted(ev, key=lambda e: e["ts"])
+
+
+def _events(week: int, market: str) -> tuple[list[dict], str]:
+    d = OUT / f"wk{week}" / market
+    if not d.is_dir():
+        raise HTTPException(404, "no such run")
+    real = _read_events(d / "events.jsonl")
+    if real:
+        return real, "recorded"
+    return _synth_events(week, market, d), "reconstructed"
+
+
+@app.get("/api/runs/{week}/{market}/events")
+def run_events(week: int, market: str):
+    ev, source = _events(week, market)
+    return {"source": source, "events": ev}
+
+
+@app.get("/api/runs/{week}/{market}/stream")
+async def run_stream(week: int, market: str, request: Request, since: int = 0):
+    """events.jsonl을 tail해서 Server-Sent Events로 흘린다. since = 이미 받은 줄 수."""
+    f = OUT / f"wk{week}" / market / "events.jsonl"
+
+    async def gen():
+        n = since
+        yield ": connected\n\n"
+        while not await request.is_disconnected():
+            ev = _read_events(f)
+            for e in ev[n:]:
+                yield f"data: {json.dumps(e, ensure_ascii=False)}\n\n"
+            n = max(n, len(ev))
+            yield ": ping\n\n"
+            await asyncio.sleep(1.0)
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/")
 def index():
     return FileResponse(STATIC / "index.html")
+
+
+@app.get("/desk")
+def desk():
+    return FileResponse(STATIC / "desk.html")
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
