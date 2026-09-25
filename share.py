@@ -58,17 +58,23 @@ def tailscale_url(ts: str) -> str | None:
         return None
     host = (st.get("Self") or {}).get("DNSName", "").rstrip(".")
     print("Tailscale Funnel을 켜는 중...")
-    p = subprocess.run([ts, "funnel", "--bg", str(PORT)], capture_output=True, text=True,
-                       encoding="utf-8", errors="replace", timeout=60)
-    out = (p.stdout or "") + (p.stderr or "")
-    if p.returncode != 0 or "login.tailscale.com" in out:
-        # 처음이면 tailnet에서 Funnel을 허용하라는 링크를 준다. 브라우저에서 승인하면 된다.
-        link = re.search(r"https://login\.tailscale\.com/\S+", out)
-        print("\nFunnel이 아직 허용되지 않았습니다." if link else "\nFunnel을 켜지 못했습니다:\n" + out.strip())
-        if link:
-            print("아래 주소를 브라우저에서 열어 [Enable]을 누른 뒤, share.bat을 다시 실행하세요.\n")
-            print(f"    {link.group(0)}\n")
-            os.startfile(link.group(0)) if hasattr(os, "startfile") else None
+    # 처음이면 tailscale이 승인 링크를 출력하고 승인될 때까지 기다린다. 출력을 붙잡아 두면
+    # 링크가 안 보인 채 멈춰 있으므로 한 줄씩 그대로 보여 주고, 링크는 브라우저로 연다.
+    p = subprocess.Popen([ts, "funnel", "--bg", str(PORT)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         text=True, encoding="utf-8", errors="replace")
+    opened = False
+    for line in p.stdout:
+        line = line.rstrip()
+        if line:
+            print("  " + line)
+        link = re.search(r"https://login\.tailscale\.com/\S+", line)
+        if link and not opened:
+            opened = True
+            print("\n브라우저에 Tailscale 승인 페이지를 열었습니다. [Enable]을 누르면 여기서 자동으로 이어집니다.\n")
+            if hasattr(os, "startfile"):
+                os.startfile(link.group(0))
+    if p.wait() != 0:
+        print("\nFunnel을 켜지 못했습니다. 위 메시지를 캡처해 보내 주세요.")
         return None
     return f"https://{host}" if host else None
 
