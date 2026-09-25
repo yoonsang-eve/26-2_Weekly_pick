@@ -206,12 +206,12 @@ def _argv(j: JobIn, week: int) -> tuple[list[str], str]:
         return [PY, "src/final.py", *wk], "최종 선택 정산"
     if j.kind == "deck_final":
         return ([PY, "src/deck/build.py", *wk, "--final"] + (["--full"] if j.full else []),
-                f"최종 선택 발표자료{' (발표용)' if j.full else ''}")
+                f"최종 선택 리포트{' (상세판)' if j.full else ''}")
     if j.kind == "deck":
         if not j.market:
-            raise HTTPException(400, "발표자료는 시장을 골라야 한다.")
+            raise HTTPException(400, "리포트는 시장을 골라야 한다.")
         return ([PY, "src/deck/build.py", *wk, *mk] + (["--full"] if j.full else []),
-                f"발표자료 {m}{' (발표용)' if j.full else ''}")
+                f"리포트 {m}{' (상세판)' if j.full else ''}")
     raise HTTPException(400, f"알 수 없는 작업: {j.kind}")
 
 
@@ -244,7 +244,7 @@ def get_job(jid: str, since: int = 0):
 
 # ------------------------------------------------------------------ manual 모드
 def _run_dir(week: int, market: str) -> Path:
-    if market not in ("KR", "US", "final"):          # final = 직접 지정 종목의 발표자료·차트
+    if market not in ("KR", "US", "final"):          # final = 직접 지정 종목의 리포트·차트
         raise HTTPException(400)
     return OUT / f"wk{week}" / market
 

@@ -133,7 +133,7 @@ const Perf = (() => {
         return `<tr><td>${f.week}주</td><td class="l">${esc(f.name)} <span class="muted mono">${esc(f.ticker)}</span></td><td class="l">${f.choice === "custom" ? `<span class="tag">직접 지정</span>` : `에이전트 ${f.market === "KR" ? "한국" : "미국"}`}</td>
           <td class="${sign(v)}">${s ? pct(v) : `<span class="tag off">정산 대기</span>`}</td><td class="${sign(num(s?.excess_pct))}">${s ? pp(num(s.excess_pct)) : "—"}</td>
           <td class="${sign(k)}">${pct(k)}</td><td class="${sign(u)}">${pct(u)}</td><td class="l" style="font-size:12px;max-width:260px">${esc(f.note || "")}</td></tr>`; }).join("")}</tbody></table>
-      <p class="hint">에이전트 한국/미국은 그 주 에이전트 추천을 그대로 냈다면의 결과다. 직접 지정이 에이전트보다 나았는지 여기서 본다.</p>`;
+      <p class="hint">에이전트 한국/미국은 그 주 에이전트 추천을 그대로 골랐다면의 결과다. 직접 지정이 에이전트보다 나았는지 여기서 본다.</p>`;
   }
 
   function render() { figs(); strip(); range(); contrib(); finals(); weeks(); }

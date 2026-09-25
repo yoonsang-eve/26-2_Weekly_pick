@@ -1,4 +1,4 @@
-// 이번 주 작업 패널 — 주차 설정부터 발표자료까지 순서대로.
+// 이번 주 작업 패널 — 주차 설정부터 리포트까지 순서대로.
 const Tasks = (() => {
   let W = null, M = "KR", ST = null, PICK = null, FIN = null, MODE = "manual", job = null, poll = null;
   let CUSTOM = { market: "KR", ticker: "", name: "" };
@@ -78,7 +78,7 @@ const Tasks = (() => {
     // 4 추천
     items.push({ done: !!PICK, h: "추천 확정", body: PICK ? `<div class="pickbox"><div class="nm">${esc(PICK.name)} <span class="mono muted" style="font-size:12px">${esc(PICK.ticker)}</span></div>
         <dl><dt>예상</dt><dd class="mono">${PICK.expected_return_range?.join("% ~ ")}%</dd><dt>촉매</dt><dd>${esc(PICK.catalyst)}</dd><dt>리스크</dt><dd>${esc(PICK.primary_risk)}</dd></dl></div>
-        <div class="acts"><button class="btn sm" data-a="copy-pick">제출용 문구 복사</button></div>`
+        <div class="acts"><button class="btn sm" data-a="copy-pick">추천 요약 복사</button></div>`
       : `<p>Trader 응답이 저장되면 최종 종목이 여기에 뜬다.</p>` });
 
     // 5 최종 선택 (주차당 1종목 — 시장 토글과 무관)
@@ -87,14 +87,14 @@ const Tasks = (() => {
     // 6 정산
     const fs = FIN.settled, anyPassed = ["KR", "US"].some((m) => today() > c.markets[m].sell_date);
     items.push({ done: !!(fs || settled), h: "정산",
-      tag: fs ? `<span class="tag ${+fs.ret_pct >= 0 ? "done" : "fail"} mono">제출 ${pct(+fs.ret_pct)}</span>` : settled ? `<span class="tag ${+settled.ret_pct >= 0 ? "done" : "fail"} mono">${MK[M]} ${pct(+settled.ret_pct)}</span>` : "",
+      tag: fs ? `<span class="tag ${+fs.ret_pct >= 0 ? "done" : "fail"} mono">최종 선택 ${pct(+fs.ret_pct)}</span>` : settled ? `<span class="tag ${+settled.ret_pct >= 0 ? "done" : "fail"} mono">${MK[M]} ${pct(+settled.ret_pct)}</span>` : "",
       body: `<p>에이전트 추천(한국·미국), 후보 20종목, 최종 선택을 한 번에 정산한다. ${anyPassed ? "" : `${md(c.markets.KR.sell_date)} 장 마감 뒤에 할 수 있다.`}</p>
         <div class="acts"><button class="btn sm ${fs ? "ghost" : "primary"}" data-a="settle" ${dis || (!anyPassed ? "disabled" : "")}>${fs || settled ? "다시 정산" : "정산 실행"}</button></div>` });
 
-    // 7 발표자료
+    // 7 주간 리포트
     const deckRow = (d, mk) => `<div class="acts"><span class="mono" style="font-size:11.5px;flex:1">${esc(d)}</span><button class="btn sm" data-a="open" data-mk="${mk}" data-f="${esc(d)}">PowerPoint로 열기</button><a class="btn sm ghost" href="/api/runs/${c.week_no}/${mk}/file/${encodeURIComponent(d)}?download=true">받기</a></div>`;
-    items.push({ done: ST.decks.length + ST.final_decks.length > 0, h: "발표자료", body: `<p>8장짜리 pptx. 최종 선택이 직접 지정 종목이면 에이전트 과정 대신 '에이전트 추천 vs 내 선택'과 선택 사유를 넣는다.</p>
-      <div class="acts"><label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" id="deck-full"> 발표용</label>
+    items.push({ done: ST.decks.length + ST.final_decks.length > 0, h: "주간 리포트", body: `<p>8장짜리 pptx 리포트. 최종 선택이 직접 지정 종목이면 에이전트 과정 대신 '에이전트 추천 vs 내 선택'과 선택 사유를 넣는다.</p>
+      <div class="acts"><label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" id="deck-full"> 상세판</label>
         <button class="btn sm primary" data-a="deck-final" ${dis || (!FIN.final ? "disabled" : "")}>최종 선택으로 만들기</button>
         <button class="btn sm ghost" data-a="deck" ${dis || (!PICK ? "disabled" : "")}>${MK[M]} 에이전트 추천으로</button></div>
       ${ST.final_decks.map((d) => deckRow(d, "final")).join("")}${ST.decks.map((d) => deckRow(d, M)).join("")}` });
@@ -109,17 +109,17 @@ const Tasks = (() => {
     const kr = o.find((x) => x.id === "KR"), us = o.find((x) => x.id === "US");
     const cur = f?.choice || (kr ? "KR" : us ? "US" : "custom");
     const opt = (id, n, lab, x) => x ? `<option value="${id}" ${cur === id ? "selected" : ""}>${n}) ${lab}: ${esc(x.name)} ${esc(x.ticker)}</option>` : "";
-    const saved = f ? `<div class="pickbox" style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3)">이번 주 제출 종목</div><div class="nm">${esc(f.name)} <span class="mono muted" style="font-size:12px">${esc(f.ticker)}</span></div>
+    const saved = f ? `<div class="pickbox" style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3)">이번 주 최종 선택</div><div class="nm">${esc(f.name)} <span class="mono muted" style="font-size:12px">${esc(f.ticker)}</span></div>
         <dl><dt>경로</dt><dd>${f.choice === "custom" ? `직접 지정 (${MK[f.market]})` : `에이전트 추천 (${MK[f.market]})`}</dd>${f.note ? `<dt>사유</dt><dd>${esc(f.note)}</dd>` : ""}
         ${FIN.settled ? `<dt>결과</dt><dd class="mono ${sign(+FIN.settled.ret_pct)}">${pct(+FIN.settled.ret_pct)}</dd>` : ""}</dl></div>` : "";
-    return `<p>과제에는 한 주에 1종목만 낸다. 에이전트 추천 중에서 고르거나, 추천 과정 없이 직접 지정한다. 직접 지정한 종목도 정산·발표자료·성과에 들어간다.</p>
+    return `<p>한 주에 1종목을 최종 선택한다. 에이전트 추천 중에서 고르거나, 추천 과정 없이 직접 지정한다. 직접 지정한 종목도 정산·리포트·성과에 들어간다.</p>
       <div style="display:grid;gap:8px;margin-top:10px">
         <select class="sel" id="fin-sel" aria-label="최종 선택">${opt("KR", 1, "최종 추천안", kr)}${opt("US", 2, "차선책", us)}<option value="custom" ${cur === "custom" ? "selected" : ""}>3) 그 외 사용자 지정</option></select>
         <div id="fin-custom" style="display:${cur === "custom" ? "grid" : "none"};gap:6px;grid-template-columns:90px 1fr">
           <select class="sel" id="fin-mk">${["KR", "US"].map((m) => `<option value="${m}" ${(f?.choice === "custom" ? f.market : CUSTOM.market) === m ? "selected" : ""}>${MK[m]}</option>`).join("")}</select>
           <input class="in" id="fin-q" placeholder="종목명 또는 코드/티커" value="${esc(f?.choice === "custom" ? `${f.name} ${f.ticker}` : CUSTOM.ticker ? `${CUSTOM.name} ${CUSTOM.ticker}` : "")}" autocomplete="off">
           <div></div><div id="fin-hits" class="hits"></div></div>
-        <textarea class="in" id="fin-note" rows="2" placeholder="선택 사유 (발표자료에 들어간다)" style="font-family:var(--sans)">${esc(f?.note || "")}</textarea>
+        <textarea class="in" id="fin-note" rows="2" placeholder="선택 사유 (리포트에 들어간다)" style="font-family:var(--sans)">${esc(f?.note || "")}</textarea>
         <div class="acts" style="margin:0"><button class="btn sm primary" data-a="final-save" ${dis}>${f ? "최종 선택 바꾸기" : "최종 선택 저장"}</button></div>
       </div>${saved}`;
   }
@@ -275,7 +275,7 @@ const Tasks = (() => {
 // ---------------------------------------------------------------- 산출물 모달
 const Files = (() => {
   let W, M, list = [];
-  const label = { deck: "발표", image: "차트", text: "문서", table: "표", data: "데이터", file: "파일" };
+  const label = { deck: "리포트", image: "차트", text: "문서", table: "표", data: "데이터", file: "파일" };
   async function open(week, market, select) {
     W = week; M = market;
     list = await api(`/api/runs/${week}/${market}/files`).catch(() => []);

@@ -133,13 +133,18 @@ const Plan = (() => {
     });
   }
   // 한글과 고정폭 영문이 섞여 글자 수로는 폭을 알 수 없다. 실제로 재서 자른다.
+  // 웹폰트(Martian Mono)가 늦게 들어오면 대체 글꼴로 잰 폭이 틀려 벽을 넘는다. 원문과 한도를
+  // 기억해 두었다가 폰트 로딩 뒤 다시 잰다.
   function fit(t, s, maxW) {
+    t.dataset.full = s; t.dataset.max = maxW;
+    maxW -= 8;
     t.textContent = s;
     if (!s || t.getComputedTextLength() <= maxW) return;
     let lo = 0, hi = s.length;
     while (lo < hi) { const m = (lo + hi + 1) >> 1; t.textContent = s.slice(0, m) + "…"; if (t.getComputedTextLength() <= maxW) lo = m; else hi = m - 1; }
     t.textContent = s.slice(0, lo) + "…";
   }
+  document.fonts?.ready.then(() => $$("#plan text[data-full]").forEach((t) => fit(t, t.dataset.full, +t.dataset.max)));
   function callout(who, text) {
     const g = $(`#co-${who}`);
     if (!text) { g.classList.remove("on"); return; }

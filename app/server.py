@@ -10,13 +10,15 @@ from __future__ import annotations
 
 import asyncio
 import csv
+import hmac
 import json
+import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,6 +35,38 @@ from app.tasks import router as tasks_router  # noqa: E402
 app.include_router(tasks_router)
 app.include_router(account_router)
 app.include_router(market_router)
+
+
+# ------------------------------------------------------------------ 보기 전용 모드
+# APP_MODE=viewer 로 띄운 서버는 남에게 링크로 보여 주는 용도다 (share.py).
+#  - 읽기(GET)만 허용한다. 스크립트 실행·설정 저장·응답 저장·일정 추가는 전부 막는다.
+#  - 계좌 화면과 계좌 API는 통째로 막는다 (개인 정보).
+#  - VIEWER_TOKEN이 있으면 링크의 ?k=토큰 또는 그 쿠키가 있어야 열린다.
+VIEWER = os.environ.get("APP_MODE", "").lower() == "viewer"
+TOKEN = os.environ.get("VIEWER_TOKEN", "")
+DENIED = HTMLResponse("<meta charset=utf-8><p style='font:16px sans-serif;margin:40px'>링크가 올바르지 않습니다. 받은 링크 전체를 다시 눌러 주세요.</p>", 403)
+
+
+@app.middleware("http")
+async def viewer_guard(request: Request, call_next):
+    if not VIEWER:
+        return await call_next(request)
+    path = request.url.path
+    k = request.query_params.get("k", "")
+    ok = not TOKEN or hmac.compare_digest(request.cookies.get("wp_k", ""), TOKEN) or hmac.compare_digest(k, TOKEN)
+    if not ok:
+        return DENIED
+    if request.method != "GET" or path.startswith("/api/account") or path.startswith("/api/jobs"):
+        return HTMLResponse("보기 전용 링크에서는 할 수 없는 동작입니다.", 403)
+    resp = await call_next(request)
+    if TOKEN and k:
+        resp.set_cookie("wp_k", TOKEN, max_age=60 * 60 * 24 * 90, httponly=True, samesite="lax")
+    return resp
+
+
+@app.get("/api/app")
+def app_info():
+    return {"viewer": VIEWER}
 
 
 @app.middleware("http")

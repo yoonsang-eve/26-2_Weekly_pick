@@ -250,7 +250,7 @@ def _pipeline_dates() -> list[dict]:
     import yaml
     run = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))["run"]
     b = date.fromisoformat(str(run["buy_date"]))
-    ev.append({"date": (b - timedelta(days=1)).isoformat(), "kind": "주차", "title": f"{run['week_no']}주차 제출 마감", "market": ""})
+    ev.append({"date": (b - timedelta(days=1)).isoformat(), "kind": "주차", "title": f"{run['week_no']}주차 추천 마감 (월 개장 전)", "market": ""})
     return ev
 
 

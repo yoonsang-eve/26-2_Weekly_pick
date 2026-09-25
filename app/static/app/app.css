@@ -309,3 +309,28 @@ details.blk > summary::-webkit-details-marker { display: none; }
 .hits:empty { display: none; }
 .hits button { text-align: left; border: 0; border-bottom: 1px solid var(--grid); background: #fff; padding: 5px 8px; cursor: pointer; font-size: 12.5px; }
 .hits button:hover { background: var(--mark); }
+
+/* ---------------------------------------------------------------- 보기 전용 */
+.viewer [data-a], .viewer #p-cta, .viewer .console, .viewer #cal-add, .viewer #pv-open,
+.viewer #fin-sel, .viewer #fin-custom, .viewer #fin-note, .viewer [aria-label="실행 방식"],
+.viewer .task p.act-hint { display: none !important; }
+.viewer .task [data-a="view"], .viewer .task a.btn { display: inline-flex !important; }
+.viewer-note { display: none; }
+.viewer .viewer-note { display: block; }
+
+/* ---------------------------------------------------------------- 안내 */
+.guide { max-width: 860px; }
+.guide h1 { font-size: 30px; font-weight: 850; margin-bottom: 6px; }
+.guide h2 { font-size: 20px; font-weight: 850; margin: 34px 0 10px; padding-top: 14px; border-top: 1.5px solid var(--ink); }
+.guide h3 { font-size: 15px; font-weight: 800; margin: 18px 0 6px; }
+.guide p, .guide li { font-size: 15px; line-height: 1.8; }
+.guide .lead { font-size: 16.5px; color: var(--ink-2); }
+.guide dl { display: grid; grid-template-columns: 150px 1fr; gap: 8px 16px; margin: 10px 0; }
+.guide dt { font-weight: 800; } .guide dd { margin: 0; line-height: 1.7; }
+.guide .box { border: 1.5px solid var(--ink); background: var(--sheet); padding: 14px 18px; margin: 14px 0; }
+.guide .box.mark { background: var(--mark); }
+.guide .flow { display: grid; grid-template-columns: repeat(5, 1fr); border: 1.5px solid var(--ink); margin: 14px 0; background: var(--sheet); }
+.guide .flow div { padding: 10px 12px; border-right: 1px solid var(--ink); font-size: 13.5px; line-height: 1.55; }
+.guide .flow div:last-child { border-right: 0; }
+.guide .flow b { display: block; font: 800 12px var(--mono); margin-bottom: 4px; }
+@media (max-width: 700px) { .guide .flow { grid-template-columns: 1fr; } .guide .flow div { border-right: 0; border-bottom: 1px solid var(--ink); } .guide dl { grid-template-columns: 1fr; } }

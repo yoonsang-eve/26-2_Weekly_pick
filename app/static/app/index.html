@@ -13,6 +13,7 @@
     <a href="#market" data-view="market">시장</a>
     <a href="#perf" data-view="perf">성과</a>
     <a href="#account" data-view="account">계좌</a>
+    <a href="#guide" data-view="guide">안내</a>
   </nav>
   <div class="sp"></div>
   <div class="clock"><span id="deadline"></span><span>KST <strong id="kst" class="num">--:--</strong></span></div>
@@ -87,12 +88,14 @@
     <section class="blk"><header><h2>예측 범위와 실제</h2><p>막대는 Trader가 낸 범위</p></header><div class="bd chart" id="range"></div></section>
     <section class="blk"><header><h2>단계별 기여</h2><p>직전 단계 평균 대비 %p</p></header><div class="bd" id="contrib"></div></section>
   </div>
-  <section class="blk"><header><h2>실제로 낸 종목</h2><p>주차마다 최종 선택한 1종목과, 같은 주 에이전트 추천의 결과</p></header><div class="bd" id="finals"></div></section>
+  <section class="blk"><header><h2>최종 선택한 종목</h2><p>주차마다 최종 선택한 1종목과, 같은 주 에이전트 추천의 결과</p></header><div class="bd" id="finals"></div></section>
   <section class="blk"><header><h2>에이전트 추천 기록</h2><p>행을 누르면 근거와 원문</p></header><div class="bd" id="weeks"></div></section>
 </div></section>
 
 <!-- ============================================================ 계좌 -->
 <section class="view" id="v-account"><div class="page" id="acct"></div></section>
+
+<section class="view" id="v-guide"><div class="page guide" id="guide"></div></section>
 
 <div class="scrim" id="scrim"></div>
 <div class="modal" id="modal" role="dialog" aria-modal="true"><div class="mh"><h2 id="m-title"></h2><button class="x" data-close aria-label="닫기">×</button></div><div class="mb" id="m-body"></div><div class="mf" id="m-foot"></div></div>
@@ -105,5 +108,6 @@
 <script src="/static/app/market.js"></script>
 <script src="/static/app/perf.js"></script>
 <script src="/static/app/account.js"></script>
+<script src="/static/app/guide.js"></script>
 <script src="/static/app/main.js"></script>
 </body></html>
