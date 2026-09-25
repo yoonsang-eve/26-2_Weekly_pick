@@ -343,3 +343,54 @@ details.blk > summary::-webkit-details-marker { display: none; }
 .guide .legend-n li::before { content: counter(n); position: absolute; left: 0; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--mark); border: 2px solid var(--ink); font: 800 12px var(--mono); display: grid; place-items: center; box-sizing: border-box; }
 .guide .shot-side { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
 @media (max-width: 700px) { .guide .shot-side { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- 표·그래프 넘침 방지 */
+.tbw { overflow-x: auto; }
+.mk-g { overflow: hidden; }
+.mk-g .tb td.l:last-child, .mk-g .tb th.l:last-child { width: 22%; min-width: 64px; }
+svg.spark { display: block; width: 100%; height: 26px; }
+.tb th { white-space: nowrap; }
+.tb td:first-child { white-space: nowrap; }
+.mk-g .tb td:first-child { white-space: normal; min-width: 88px; }
+.blk .bd { overflow-x: auto; }
+#mk-cal { overflow-x: auto; }
+
+/* ---------------------------------------------------------------- 모바일 */
+@media (max-width: 760px) {
+  .hd { height: auto; flex-wrap: wrap; position: sticky; }
+  .wm { border-right: 0; padding: 10px 16px; flex: 1 1 auto; }
+  .wm b { font-size: 16px; white-space: nowrap; }
+  .hd .sp { display: none; }
+  .clock { border-left: 0; padding: 0 16px; gap: 10px; font-size: 11.5px; white-space: nowrap; }
+  #deadline { display: none; }
+  .nav { order: 3; width: 100%; border-top: 1px solid var(--ink); }
+  .nav a { flex: 1 1 0; justify-content: center; padding: 11px 4px; border-right: 1px solid var(--rule); white-space: nowrap; font-size: 14px; }
+  .nav a:last-child { border-right: 0; }
+  .page, .page.wide { padding: 16px; }
+  .page-hd { flex-wrap: wrap; gap: 10px; }
+  .page-hd h1, .plan-head h1 { font-size: 24px; }
+  .figs, .figs[style] { grid-template-columns: repeat(2, 1fr) !important; }
+  .fig { border-bottom: 1px solid var(--rule); }
+  .fig .v { font-size: 21px; }
+  .blk > header { flex-wrap: wrap; }
+  .tb { min-width: 520px; }
+  .mk-board { grid-template-columns: 1fr; }
+  .mk-g .tb { min-width: 480px; }
+  .plan-wrap { padding: 16px; }
+  .plan-head { gap: 8px; }
+  .plan-foot { grid-template-columns: 1fr; }
+  .steps { border-right: 0; border-bottom: 1px solid var(--ink); }
+  .log { height: 200px; }
+  .panel-hd .wk b { font-size: 32px; }
+  .cal { min-width: 640px; }
+  .cal-add { grid-template-columns: 1fr; }
+  .modal { max-height: calc(100vh - 24px); box-shadow: 4px 4px 0 var(--ink); }
+  .files { grid-template-columns: 1fr; }
+  .files ul { max-height: 200px; border-right: 0; border-bottom: 1px solid var(--ink); }
+  .acct-fig { border-right: 0; border-bottom: 1px solid var(--ink); }
+  .kv { grid-template-columns: 96px 1fr; }
+  .guide .shot-side { grid-template-columns: 1fr; }
+}
+
+/* 격자 칸은 내용(넓은 표)에 밀려 늘어나지 않게: 표는 칸 안에서 가로 스크롤 */
+.two > *, .mk-board > *, .grid2 > *, .desk > *, .acct-hero > *, .hold > * { min-width: 0; }

@@ -52,7 +52,10 @@ const Perf = (() => {
         svgEl("circle", { cx: x(v), cy: cy + jit, ...a }, g);
         const h = svgEl("circle", { cx: x(v), cy: cy + jit, r: 11, fill: "transparent" }, g);
         hover(h, `<b>${esc(c.name || c.ticker)}</b> ${c.ticker}<br>${{ pick: "추천", finalist: "최종후보", candidate: "후보" }[c.role]}  ${pct(v)}`);
-        if (c.role === "pick") svgEl("text", { x: x(v), y: cy - 13, "text-anchor": "middle", class: "lbl" }, g).textContent = `${c.name} ${pct(v, 1)}`;
+        if (c.role === "pick") {
+          const anchor = x(v) > W - 90 ? "end" : x(v) < L + 90 ? "start" : "middle";
+          svgEl("text", { x: x(v), y: cy - 13, "text-anchor": anchor, class: "lbl" }, g).textContent = `${c.name} ${pct(v, 1)}`;
+        }
       });
     });
   }
@@ -79,7 +82,9 @@ const Perf = (() => {
       const act = num(r.settled?.ret_pct);
       if (act === null) { svgEl("text", { x: x(b) + 8, y: cy + 4 }, g).textContent = "정산 대기"; return; }
       svgEl("rect", { x: x(act) - 5, y: cy - 9, width: 10, height: 18, fill: act >= 0 ? "#d1242f" : "#1e56c8" }, g);
-      const t = svgEl("text", { x: x(act) + (act > b ? 10 : -10), y: cy + 4, "text-anchor": act > b ? "start" : "end", class: "lbl" }, g);
+      // 오른쪽에 붙이되, 차트 끝을 넘으면 점 왼쪽으로 (좁은 화면에서 라벨이 밖으로 나가지 않게)
+      const right = act > b && x(act) + 56 < W;
+      const t = svgEl("text", { x: x(act) + (right ? 10 : -10), y: cy + 4, "text-anchor": right ? "start" : "end", class: "lbl" }, g);
       t.textContent = pct(act, 1);
     });
     const defs = svgEl("defs", {}, g);

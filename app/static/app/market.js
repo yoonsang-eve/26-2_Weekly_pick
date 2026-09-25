@@ -9,7 +9,8 @@ const Market = (() => {
     if (!v?.length) return "";
     const W = 96, H = 26, lo = Math.min(...v), hi = Math.max(...v), r = hi - lo || 1;
     const pts = v.map((x, i) => `${(i / (v.length - 1) * W).toFixed(1)},${(H - 2 - (x - lo) / r * (H - 4)).toFixed(1)}`).join(" ");
-    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><polyline points="${pts}" fill="none" stroke="${up ? "#d1242f" : "#1e56c8"}" stroke-width="1.3"/></svg>`;
+    // 칸 너비에 맞춰 늘고 준다 (고정 폭이면 좁은 칸에서 밖으로 삐져나간다)
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${up ? "#d1242f" : "#1e56c8"}" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>`;
   }
 
   async function summary() {
@@ -28,11 +29,11 @@ const Market = (() => {
     if (B.error) { el.innerHTML = `<p class="warn">${esc(B.error)}</p>`; return; }
     const k = PERIOD === "week" ? "w1" : "m1";
     el.innerHTML = B.groups.map((g) => `<section class="blk mk-g"><header><h2>${g.group}</h2></header>
-      <table class="tb"><thead><tr><th>종목</th><th>현재</th><th>1일</th><th>${PERIOD === "week" ? "1주" : "1개월"}</th><th>연초 대비</th><th class="l">2개월</th></tr></thead><tbody>
+      <div class="tbw"><table class="tb"><thead><tr><th>종목</th><th>현재</th><th>1일</th><th>${PERIOD === "week" ? "1주" : "1개월"}</th><th>연초 대비</th><th class="l">2개월</th></tr></thead><tbody>
       ${g.rows.map((r) => r.last == null ? `<tr><td>${r.label}</td><td colspan="5" class="muted">시세 없음</td></tr>`
         : `<tr><td>${esc(r.label)}<br><span class="muted mono" style="font-size:10.5px">${esc(r.symbol)}  ${md(r.asof)}</span></td><td>${fmtN(r.last, digits(r.symbol))}${r.symbol === "^TNX" ? "%" : ""}</td>
           <td class="${sign(r.d1)}">${pct(r.d1)}</td><td class="${sign(r[k])}">${pct(r[k])}</td><td class="${sign(r.ytd)}">${pct(r.ytd, 1)}</td><td class="l">${spark(r.spark, (r.spark?.at(-1) ?? 0) >= (r.spark?.[0] ?? 0))}</td></tr>`).join("")}
-      </tbody></table></section>`).join("");
+      </tbody></table></div></section>`).join("");
   }
 
   // ---------------------------------------------------------------- 히트맵 (squarified treemap)
@@ -78,7 +79,7 @@ const Market = (() => {
     }
     const H = HEAT[HM];
     if (H.error) { el.innerHTML = `<p class="warn">${esc(H.error)}</p>`; return; }
-    const W = el.clientWidth || 1100, HH = Math.round(W * 0.48), lim = HP === "d1" ? 3 : 8;
+    const W = el.clientWidth || 1100, HH = Math.max(420, Math.round(W * 0.48)), lim = HP === "d1" ? 3 : 8;
     const groups = {};
     H.tiles.forEach((t) => (groups[t.group] = groups[t.group] || []).push(t));
     const gl = Object.entries(groups).map(([g, ts]) => ({ g, ts: ts.sort((a, b) => b.cap - a.cap), v: ts.reduce((s, t) => s + t.cap, 0) })).sort((a, b) => b.v - a.v);
