@@ -80,8 +80,10 @@ h1, h2, h3 { margin: 0; letter-spacing: -.03em; }
 .view { display: none; } .view.on { display: block; }
 
 /* ---------------------------------------------------------------- 데스크 */
+/* 도면도 CSS px 크기를 갖게 한다. 칸 너비에만 맞추면 브라우저 확대 시 패널 글자는 커지는데
+   도면은 칸이 좁아져 오히려 작아진다. 최소 폭 아래로는 줄이지 않고, 공간이 모자라면 패널을 아래로 내린다. */
 .desk { display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: calc(100vh - 56px); }
-@media (max-width: 1100px) { .desk { grid-template-columns: 1fr; } }
+@media (max-width: 1260px) { .desk { grid-template-columns: 1fr; } }
 .plan-wrap { padding: 22px 26px 26px; min-width: 0; }
 .plan-head { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
 .plan-head h1 { font-size: 30px; font-weight: 850; line-height: 1; }
@@ -94,7 +96,8 @@ h1, h2, h3 { margin: 0; letter-spacing: -.03em; }
 }
 .titleblock div { padding: 4px 10px; border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); }
 .titleblock div:nth-child(-n+2) { border-top: 0; } .titleblock div:nth-child(odd) { border-left: 0; color: var(--ink-3); }
-#plan { display: block; width: 100%; height: auto; }
+#plan { display: block; width: 100%; min-width: 780px; max-width: 1180px; height: auto; }
+.sheet { overflow-x: auto; }
 #plan .wall { fill: none; stroke: var(--ink); stroke-width: 4; }
 #plan .wall-o { fill: none; stroke: var(--ink); stroke-width: 7; }
 #plan .door { fill: none; stroke: var(--ink); stroke-width: 1; }
@@ -152,7 +155,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.03em; }
 
 /* ---------------------------------------------------------------- 작업 패널 */
 .panel { background: var(--sheet); border-left: 1.5px solid var(--ink); display: flex; flex-direction: column; min-height: 0; }
-@media (max-width: 1100px) { .panel { border-left: 0; border-top: 1.5px solid var(--ink); } }
+@media (max-width: 1260px) { .panel { border-left: 0; border-top: 1.5px solid var(--ink); } }
 .panel-hd { padding: 18px 20px 14px; border-bottom: 1.5px solid var(--ink); }
 .panel-hd .wk { display: flex; align-items: baseline; gap: 10px; }
 .panel-hd .wk b { font-size: 40px; font-weight: 900; letter-spacing: -.06em; line-height: 1; }
@@ -252,3 +255,22 @@ table.tb { width: 100%; border-collapse: collapse; font-size: 13px; }
 .tip.on { opacity: 1; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--sheet); padding: 10px 16px; font-size: 13px; z-index: 70; display: none; }
 .toast.on { display: block; }
+
+/* ---------------------------------------------------------------- 계좌: 포트폴리오 */
+.acct-hero { display: grid; grid-template-columns: 340px minmax(0, 1fr); }
+@media (max-width: 900px) { .acct-hero { grid-template-columns: 1fr; } }
+.acct-fig { padding: 18px 20px; border-right: 1px solid var(--ink); }
+.acct-fig .l { font-size: 12.5px; color: var(--ink-2); font-weight: 650; }
+.acct-fig .big { font-size: 34px; font-weight: 800; letter-spacing: -.05em; line-height: 1.15; margin-top: 4px; }
+.acct-fig .big small { font: 700 15px var(--sans); margin-left: 4px; }
+.acct-curve { padding: 14px 16px 8px; min-width: 0; }
+.blk > header .seg button { height: 26px; font-size: 12px; }
+details.blk > summary::-webkit-details-marker { display: none; }
+.hold { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr); gap: 24px; }
+@media (max-width: 900px) { .hold { grid-template-columns: 1fr; } }
+.tl { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); max-height: 420px; overflow: auto; }
+.tl li { display: grid; grid-template-columns: 44px 40px 1fr; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--grid); font-size: 12.5px; }
+.tl .d { font: 11px var(--mono); color: var(--ink-3); padding-top: 2px; }
+.tl .k { font-size: 11px; font-weight: 800; border: 1px solid var(--ink); text-align: center; height: 20px; line-height: 18px; }
+.tl .k-추천 { background: var(--mark); } .tl .k-매매 { background: var(--ink); color: var(--sheet); }
+.tl p { margin: 2px 0 0; color: var(--ink-2); }

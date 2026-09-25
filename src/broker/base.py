@@ -25,6 +25,7 @@ class Position:
     pnl: float              # 평가손익 (현지 통화)
     pnl_pct: float
     currency: str
+    day_pct: float | None = None    # 전일 대비 등락률 (국내만 제공)
 
     def to_dict(self) -> dict:
         return asdict(self)

@@ -1,6 +1,7 @@
 // 도면 — 파이프라인 단계를 방으로 그린 평면도. events(기록 또는 복원)로 상태를 바꾼다.
 const Plan = (() => {
-  const TOP = 40, MID = 300, COR = 340, BOT = 590;
+  // 복도(MID~COR)는 문 두 짝이 마주 열려도 가운데에 동선과 봉투가 지나갈 폭을 둔다.
+  const TOP = 40, MID = 290, COR = 380, BOT = 620, HALL = (MID + COR) / 2;
   const ROOMS = {
     scr: { n: "01", name: "스크리닝실", sub: "기계적 필터, LLM 없음", x: 20, y: TOP, w: 300, h: MID - TOP, door: 250 },
     ana: { n: "02", name: "리서치실", sub: "Analyst: 20종목 중 3개만 남긴다", x: 320, y: TOP, w: 300, h: MID - TOP, door: 560 },
@@ -43,8 +44,8 @@ const Plan = (() => {
     }
   }
   function door(r, top) {
-    const d = r.door, y = top ? MID : COR, dir = top ? -1 : 1;
-    return `<rect class="gap" x="${d}" y="${y - 4}" width="36" height="8"/><path class="door" d="M${d} ${y} L${d} ${y + dir * 36} M${d + 36} ${y} A36 36 0 0 ${top ? 0 : 1} ${d} ${y + dir * 36}"/>`;
+    const d = r.door, y = top ? MID : COR, dir = top ? 1 : -1;      // 복도 쪽으로 열린다
+    return `<rect class="gap" x="${d}" y="${y - 4}" width="36" height="8"/><path class="door" d="M${d} ${y} L${d} ${y + dir * 32} M${d + 36} ${y} A36 36 0 0 ${top ? 1 : 0} ${d} ${y + dir * 36}"/>`;
   }
   function build(bars) {
     const rooms = Object.entries(ROOMS).map(([id, r]) => {
@@ -66,9 +67,10 @@ const Plan = (() => {
       <g id="dims"><path class="dim" d="M20 22 V14 M940 22 V14 M20 18 H940"/><text class="dimt" id="dim-t" x="480" y="12" text-anchor="middle"></text></g>
       ${rooms}
       <rect class="wall-o" x="20" y="${TOP}" width="920" height="${BOT - TOP}"/>
-      <path class="path" marker-end="url(#ar)" d="M${ROOMS.scr.door + 18} ${MID + 20} H${ROOMS.deb.door + 18} M${ROOMS.trd.door + 18} ${MID + 20} H${ROOMS.set.door + 30}"/>
-      <text class="dimt" x="36" y="${MID + 24}">복도</text>
-      <g id="env" transform="translate(${ROOMS.scr.door + 6} ${MID - 70})"><path d="M0 0h16l6 6v22h-22z" fill="#f8f9f7" stroke="#121416" stroke-width="1.4"/><path d="M16 0v6h6" fill="none" stroke="#121416"/><path d="M4 12h12M4 17h12M4 22h8" stroke="#121416" stroke-width=".8"/>
+      <path class="path" marker-end="url(#ar)" d="M${ROOMS.scr.door + 18} ${HALL} H${ROOMS.deb.door + 18}"/>
+      <path class="path" marker-end="url(#ar)" d="M${ROOMS.deb.door + 90} ${HALL} H${ROOMS.set.door + 70}" opacity=".45"/>
+      <text class="dimt" x="36" y="${HALL + 4}">복도</text>
+      <g id="env"><path d="M0 0h16l6 6v22h-22z" fill="#f8f9f7" stroke="#121416" stroke-width="1.4"/><path d="M16 0v6h6" fill="none" stroke="#121416"/><path d="M4 12h12M4 17h12M4 22h8" stroke="#121416" stroke-width=".8"/>
         <g class="cnt"><rect x="12" y="-10" width="22" height="14"/><text id="env-n" x="23" y="0" text-anchor="middle">—</text></g></g>`;
     // 방의 경계선: 방마다 사각형 + 문 위치의 벽을 비운다
     Object.entries(ROOMS).forEach(([id, r]) => {
@@ -94,7 +96,7 @@ const Plan = (() => {
   }
 
   // ---------------------------------------------------------------- 봉투 이동 (문 → 복도 → 문)
-  const hall = (id) => [ROOMS[id].door + 44, MID + 6];
+  const hall = (id) => [ROOMS[id].door + 46, HALL - 14];
   function moveEnv(id, n) {
     if (n !== undefined && n !== null) { S.envN = n; $("#env-n").textContent = n; }
     if (S.envRoom === id) return;

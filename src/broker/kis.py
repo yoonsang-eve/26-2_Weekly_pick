@@ -8,6 +8,7 @@
   - 국내 잔고  GET  /uapi/domestic-stock/v1/trading/inquire-balance   TTTC8434R
   - 국내 주문  POST /uapi/domestic-stock/v1/trading/order-cash        매수 TTTC0012U / 매도 TTTC0011U
   - 해외 잔고  GET  /uapi/overseas-stock/v1/trading/inquire-balance   TTTS3012R
+  - 국내 체결  GET  /uapi/domestic-stock/v1/trading/inquire-daily-ccld TTTC0081R (3개월 이내, 모의 15건/회)
   - 호출 간격  실전 0.05초, 모의 0.5초
 
 설정은 전부 .env에서 읽는다 (.gitignore 대상). 값을 코드나 config.yaml에 적지 말 것.
@@ -181,7 +182,8 @@ class KISBroker(Broker):
             params["CTX_AREA_NK100"] = d.get("ctx_area_nk100", "")
         pos = [Position("KR", r.get("pdno", ""), r.get("prdt_name", ""), _f(r.get("hldg_qty")),
                         _f(r.get("pchs_avg_pric")), _f(r.get("prpr")), _f(r.get("evlu_amt")),
-                        _f(r.get("evlu_pfls_amt")), _f(r.get("evlu_pfls_rt")), "KRW")
+                        _f(r.get("evlu_pfls_amt")), _f(r.get("evlu_pfls_rt")), "KRW",
+                        _f(r.get("fltt_rt")) if r.get("fltt_rt") not in (None, "") else None)
                for r in rows if _f(r.get("hldg_qty")) > 0]
         return pos, summary
 
@@ -214,6 +216,34 @@ class KISBroker(Broker):
             pnl_krw=_f(s.get("evlu_pfls_smtl_amt")) if s.get("evlu_pfls_smtl_amt") is not None else None,
             positions=pos, raw_summary=s,
             fetched_at=datetime.now().isoformat(timespec="seconds"), env=self.env)
+
+    def executions(self, start: str, end: str) -> list[dict]:
+        """국내 체결 내역 (3개월 이내). start/end는 YYYYMMDD."""
+        params = {"CANO": self.s.cano, "ACNT_PRDT_CD": self.s.prdt, "INQR_STRT_DT": start, "INQR_END_DT": end,
+                  "SLL_BUY_DVSN_CD": "00", "INQR_DVSN": "01", "PDNO": "", "CCLD_DVSN": "01",
+                  "ORD_GNO_BRNO": "", "ODNO": "", "INQR_DVSN_3": "00", "INQR_DVSN_1": "",
+                  "EXCG_ID_DVSN_CD": "KRX", "CTX_AREA_FK100": "", "CTX_AREA_NK100": ""}
+        rows, cont = [], ""
+        for _ in range(30):                              # 모의투자는 15건 단위
+            d, nxt = self._call("GET", "/uapi/domestic-stock/v1/trading/inquire-daily-ccld",
+                                "TTTC0081R", params=params, tr_cont=cont)
+            rows += d.get("output1") or []
+            if nxt not in ("F", "M"):
+                break
+            cont = "N"
+            params["CTX_AREA_FK100"] = d.get("ctx_area_fk100", "")
+            params["CTX_AREA_NK100"] = d.get("ctx_area_nk100", "")
+        out = []
+        for r in rows:
+            q = _f(r.get("tot_ccld_qty"))
+            if q <= 0:
+                continue
+            dt = r.get("ord_dt", "")
+            out.append({"date": f"{dt[:4]}-{dt[4:6]}-{dt[6:8]}", "time": r.get("ord_tmd", ""),
+                        "side": "sell" if r.get("sll_buy_dvsn_cd") == "01" else "buy",
+                        "market": "KR", "ticker": r.get("pdno", ""), "name": r.get("prdt_name", ""),
+                        "qty": q, "price": _f(r.get("avg_prvs")), "amount": _f(r.get("tot_ccld_amt"))})
+        return sorted(out, key=lambda t: (t["date"], t["time"]))
 
     # ------------------------------------------------------------ 주문
     def place_order(self, plan: OrderPlan, *, confirm: str) -> dict:
