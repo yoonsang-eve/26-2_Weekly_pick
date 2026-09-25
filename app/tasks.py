@@ -30,14 +30,7 @@ import events  # noqa: E402
 
 router = APIRouter()
 
-# 2026년 하반기 휴장일. 매수·매도일 제안에만 쓰고, 화면에서 확인·수정한다.
-# 출처가 확정되지 않은 것은 note에 '확인 필요'를 단다.
-HOLIDAYS = {
-    "KR": {"2026-08-17": "광복절 대체공휴일", "2026-09-24": "추석 연휴", "2026-09-25": "추석",
-           "2026-10-05": "개천절 대체공휴일 (확인 필요)", "2026-10-09": "한글날",
-           "2026-12-25": "성탄절", "2026-12-31": "연말 휴장"},
-    "US": {"2026-09-07": "Labor Day", "2026-11-26": "Thanksgiving", "2026-12-25": "Christmas"},
-}
+from app.calendar_data import HOLIDAYS  # noqa: E402  (휴장일 표는 시장 패널 캘린더와 공유)
 
 
 # ------------------------------------------------------------------ 주차 설정
@@ -209,6 +202,11 @@ def _argv(j: JobIn, week: int) -> tuple[list[str], str]:
         return [PY, "src/settle.py", *wk, *mk], f"정산 {m}"
     if j.kind == "cohort":
         return [PY, "src/cohort.py", *wk, *mk], f"후보군 정산 {m}"
+    if j.kind == "final_settle":
+        return [PY, "src/final.py", *wk], "최종 선택 정산"
+    if j.kind == "deck_final":
+        return ([PY, "src/deck/build.py", *wk, "--final"] + (["--full"] if j.full else []),
+                f"최종 선택 발표자료{' (발표용)' if j.full else ''}")
     if j.kind == "deck":
         if not j.market:
             raise HTTPException(400, "발표자료는 시장을 골라야 한다.")
@@ -246,7 +244,7 @@ def get_job(jid: str, since: int = 0):
 
 # ------------------------------------------------------------------ manual 모드
 def _run_dir(week: int, market: str) -> Path:
-    if market not in ("KR", "US"):
+    if market not in ("KR", "US", "final"):          # final = 직접 지정 종목의 발표자료·차트
         raise HTTPException(400)
     return OUT / f"wk{week}" / market
 
@@ -266,7 +264,8 @@ def run_status(week: int, market: str):
     return {"week": week, "market": market, "exists": d.exists(), "n_candidates": n_cand,
             "screened": (d / "candidates.csv").exists(), "stages": stages, "next_stage": nxt,
             "picked": (d / "pick.json").exists(), "cohort": (d / "cohort.csv").exists(),
-            "decks": decks}
+            "decks": decks,
+            "final_decks": sorted(p.name for p in (OUT / f"wk{week}" / "final").glob("deck_*.pptx"))}
 
 
 class ResponseIn(BaseModel):
@@ -337,3 +336,107 @@ def open_file(week: int, market: str, rel: str):
         raise HTTPException(501, "Windows에서만 지원한다.")
     os.startfile(p)  # noqa: S606 — outputs/ 아래 파일로 제한됨
     return {"opened": p.name}
+
+
+# ------------------------------------------------------------------ 최종 선택 (주차당 1종목)
+def _read_json(f: Path) -> dict | None:
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
+
+
+def _final_log() -> dict:
+    f = ROOT / "final_log.csv"
+    if not f.exists():
+        return {}
+    import csv
+    with f.open(encoding="utf-8-sig") as fh:
+        return {int(r["week"]): r for r in csv.DictReader(fh)}
+
+
+@router.get("/api/week/{week}/final")
+def get_final(week: int):
+    opts = []
+    for m in ("KR", "US"):
+        p = _read_json(OUT / f"wk{week}" / m / "pick.json")
+        if p:
+            opts.append({"id": m, "market": m, "ticker": str(p["ticker"]), "name": p.get("name", ""),
+                         "range": p.get("expected_return_range"), "catalyst": p.get("catalyst", "")})
+    return {"week": week, "options": opts, "final": _read_json(OUT / f"wk{week}" / "final.json"),
+            "settled": _final_log().get(week)}
+
+
+@router.get("/api/finals")
+def finals():
+    log = _final_log()
+    out = []
+    for wk in sorted(OUT.glob("wk*"), key=lambda p: int(p.name[2:]) if p.name[2:].isdigit() else 0):
+        f = _read_json(wk / "final.json")
+        if f:
+            out.append({**f, "settled": log.get(int(wk.name[2:]))})
+    return out
+
+
+_listing: dict = {}
+
+
+def _kr_names() -> dict:
+    if "kr" not in _listing:
+        import FinanceDataReader as fdr
+        df = fdr.StockListing("KRX")
+        _listing["kr"] = dict(zip(df["Code"].astype(str), df["Name"]))
+    return _listing["kr"]
+
+
+def _us_names() -> dict:
+    if "us" not in _listing:
+        import csv
+        with (ROOT / "data" / "us_universe.csv").open(encoding="utf-8") as f:
+            _listing["us"] = {r["symbol"]: r["name"] for r in csv.DictReader(f)}
+    return _listing["us"]
+
+
+@router.get("/api/lookup")
+def lookup(market: str, q: str):
+    """직접 지정 종목 검색. KR은 KRX 전종목, US는 유니버스(S&P500+NDX) + 입력한 티커 그대로."""
+    q = q.strip()
+    if not q:
+        return []
+    names = _kr_names() if market == "KR" else _us_names()
+    ql = q.lower()
+    hits = [{"ticker": t, "name": n} for t, n in names.items() if ql in t.lower() or ql in str(n).lower()]
+    hits.sort(key=lambda h: (h["ticker"].lower() != ql, len(h["name"])))
+    if market == "US" and q.upper() not in names and q.replace("-", "").isalnum():
+        hits.append({"ticker": q.upper(), "name": "(유니버스 밖 — 티커 그대로 사용)"})
+    return hits[:12]
+
+
+class FinalIn(BaseModel):
+    choice: str                 # KR | US | custom
+    market: str | None = None
+    ticker: str | None = None
+    name: str | None = None
+    note: str = ""
+
+
+@router.post("/api/week/{week}/final")
+def set_final(week: int, f: FinalIn):
+    if f.choice in ("KR", "US"):
+        p = _read_json(OUT / f"wk{week}" / f.choice / "pick.json")
+        if not p:
+            raise HTTPException(400, "그 시장의 에이전트 추천이 아직 없다.")
+        rec = {"choice": f.choice, "market": f.choice, "ticker": str(p["ticker"]), "name": p.get("name", ""),
+               "source": "agent"}
+    elif f.choice == "custom":
+        if f.market not in ("KR", "US") or not f.ticker:
+            raise HTTPException(400, "시장과 종목을 지정해야 한다.")
+        t = f.ticker.strip().upper() if f.market == "US" else f.ticker.strip().zfill(6)
+        name = f.name or (_kr_names().get(t) if f.market == "KR" else _us_names().get(t)) or t
+        if f.market == "KR" and t not in _kr_names():
+            raise HTTPException(400, f"KRX에 없는 종목코드다: {t}")
+        rec = {"choice": "custom", "market": f.market, "ticker": t, "name": name, "source": "user"}
+    else:
+        raise HTTPException(400)
+    rec.update(week=week, note=f.note.strip(), chosen_at=datetime.now().isoformat(timespec="seconds"))
+    d = OUT / f"wk{week}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "final.json").write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+    return get_final(week)

@@ -121,7 +121,22 @@ const Perf = (() => {
     $("#d-plan").onclick = () => { Modal.close(); location.hash = "#desk"; Plan.userPicked = true; Plan.load(r); };
   }
 
-  function render() { figs(); strip(); range(); contrib(); weeks(); }
+  async function finals() {
+    const F = await api("/api/finals").catch(() => []);
+    const el = $("#finals");
+    if (!F.length) { el.innerHTML = `<p class="muted" style="margin:0">아직 최종 선택 기록이 없다. 데스크 작업 패널의 '최종 선택'에서 고른다.</p>`; return; }
+    const agent = (w, m) => { const r = App.runs.find((x) => x.week === w && x.market === m); return r?.settled ? num(r.settled.ret_pct) : null; };
+    const done = F.filter((f) => f.settled).map((f) => num(f.settled.ret_pct));
+    el.innerHTML = `<div class="kv" style="margin-bottom:10px;grid-template-columns:auto 1fr auto 1fr;gap:4px 14px"><dt>정산된 주</dt><dd>${done.length}/${F.length}</dd><dt>평균 수익률</dt><dd class="${sign(avg(done))}">${pct(avg(done))}</dd></div>
+      <table class="tb"><thead><tr><th>주차</th><th class="l">최종 선택</th><th class="l">경로</th><th>수익률</th><th>벤치마크 대비</th><th>에이전트 한국</th><th>에이전트 미국</th><th class="l">사유</th></tr></thead><tbody>
+      ${F.map((f) => { const s = f.settled, v = num(s?.ret_pct), k = agent(f.week, "KR"), u = agent(f.week, "US");
+        return `<tr><td>${f.week}주</td><td class="l">${esc(f.name)} <span class="muted mono">${esc(f.ticker)}</span></td><td class="l">${f.choice === "custom" ? `<span class="tag">직접 지정</span>` : `에이전트 ${f.market === "KR" ? "한국" : "미국"}`}</td>
+          <td class="${sign(v)}">${s ? pct(v) : `<span class="tag off">정산 대기</span>`}</td><td class="${sign(num(s?.excess_pct))}">${s ? pp(num(s.excess_pct)) : "—"}</td>
+          <td class="${sign(k)}">${pct(k)}</td><td class="${sign(u)}">${pct(u)}</td><td class="l" style="font-size:12px;max-width:260px">${esc(f.note || "")}</td></tr>`; }).join("")}</tbody></table>
+      <p class="hint">에이전트 한국/미국은 그 주 에이전트 추천을 그대로 냈다면의 결과다. 직접 지정이 에이전트보다 나았는지 여기서 본다.</p>`;
+  }
+
+  function render() { figs(); strip(); range(); contrib(); finals(); weeks(); }
   $$("#perf-mkt button").forEach((b) => b.addEventListener("click", () => { MKT = b.dataset.m; $$("#perf-mkt button").forEach((x) => x.setAttribute("aria-pressed", x === b)); render(); }));
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if ($("#v-perf").classList.contains("on")) { strip(); range(); } }, 150); });
   return { render };

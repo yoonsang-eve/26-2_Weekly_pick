@@ -1,12 +1,13 @@
 // 라우팅, 시계, 초기화
 (() => {
-  const views = { desk: "#v-desk", perf: "#v-perf", account: "#v-account" };
+  const views = { desk: "#v-desk", market: "#v-market", perf: "#v-perf", account: "#v-account" };
   function route() {
     const v = (location.hash || "#desk").slice(1);
     const id = views[v] ? v : "desk";
     $$(".view").forEach((el) => el.classList.toggle("on", `#${el.id}` === views[id]));
     $$(".nav a").forEach((a) => (a.dataset.view === id ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
     if (id === "perf") Perf.render();
+    if (id === "market") Market.render();
     if (id === "account") Account.render();
   }
   addEventListener("hashchange", route);

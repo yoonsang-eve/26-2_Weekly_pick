@@ -27,10 +27,12 @@ STAGES = ["analyst", "bull", "bear", "trader"]
 app = FastAPI(title="weekly_pick dashboard")
 
 from app.account import router as account_router  # noqa: E402
+from app.market import router as market_router  # noqa: E402
 from app.tasks import router as tasks_router  # noqa: E402
 
 app.include_router(tasks_router)
 app.include_router(account_router)
+app.include_router(market_router)
 
 
 @app.middleware("http")

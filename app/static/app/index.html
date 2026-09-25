@@ -10,6 +10,7 @@
   <div class="wm"><svg viewBox="0 0 22 22" aria-hidden="true"><rect x="1.5" y="1.5" width="19" height="19" fill="none" stroke="#121416" stroke-width="2.4"/><path d="M1.5 11h9v9.5M10.5 1.5v5" stroke="#121416" stroke-width="1.6" fill="none"/><rect x="12" y="12" width="7" height="7" fill="#ffe14d"/></svg><b>주간픽 데스크</b></div>
   <nav class="nav">
     <a href="#desk" data-view="desk">데스크</a>
+    <a href="#market" data-view="market">시장</a>
     <a href="#perf" data-view="perf">성과</a>
     <a href="#account" data-view="account">계좌</a>
   </nav>
@@ -45,6 +46,7 @@
       <div class="panel-hd">
         <div class="wk"><b id="p-wk">—</b><span>이번 주 작업</span></div>
         <div class="dates" id="p-dates"></div>
+        <div class="cta" id="p-cta"></div>
         <div class="row">
           <div class="seg" id="p-mkt" role="group" aria-label="시장"><button data-m="KR" aria-pressed="true">한국</button><button data-m="US" aria-pressed="false">미국</button></div>
           <button class="btn sm ghost" id="p-files">산출물 보기</button>
@@ -55,6 +57,19 @@
     </aside>
   </div>
 </section>
+
+<!-- ============================================================ 시장 -->
+<section class="view" id="v-market"><div class="page wide">
+  <div class="page-hd"><h1>시장</h1>
+    <div class="seg" id="mk-period" role="group" aria-label="기간"><button data-p="week" aria-pressed="true">이번 주</button><button data-p="month" aria-pressed="false">이번 달</button></div></div>
+  <section class="blk" style="margin-top:0"><header><h2>요약</h2><p>지수·환율·변동성·금리·크립토 변화와 다가오는 일정</p></header><div class="bd" id="mk-sum"></div></section>
+  <div class="mk-board" id="mk-board"></div>
+  <section class="blk"><header><h2>시장 지도</h2><div style="display:flex;gap:8px">
+      <div class="seg" id="hm-mkt" role="group" aria-label="시장"><button data-m="US" aria-pressed="true">미국</button><button data-m="KR" aria-pressed="false">한국</button></div>
+      <div class="seg" id="hm-per" role="group" aria-label="기간"><button data-p="d1" aria-pressed="true">1일</button><button data-p="w1" aria-pressed="false">1주</button></div></div></header>
+    <div class="bd" id="mk-heat"></div></section>
+  <section class="blk"><header><h2>캘린더</h2><p>휴장, FOMC, 실적, 주차 일정</p></header><div class="bd" id="mk-cal"></div></section>
+</div></section>
 
 <!-- ============================================================ 성과 -->
 <section class="view" id="v-perf"><div class="page">
@@ -72,7 +87,8 @@
     <section class="blk"><header><h2>예측 범위와 실제</h2><p>막대는 Trader가 낸 범위</p></header><div class="bd chart" id="range"></div></section>
     <section class="blk"><header><h2>단계별 기여</h2><p>직전 단계 평균 대비 %p</p></header><div class="bd" id="contrib"></div></section>
   </div>
-  <section class="blk"><header><h2>주차별 기록</h2><p>행을 누르면 근거와 원문</p></header><div class="bd" id="weeks"></div></section>
+  <section class="blk"><header><h2>실제로 낸 종목</h2><p>주차마다 최종 선택한 1종목과, 같은 주 에이전트 추천의 결과</p></header><div class="bd" id="finals"></div></section>
+  <section class="blk"><header><h2>에이전트 추천 기록</h2><p>행을 누르면 근거와 원문</p></header><div class="bd" id="weeks"></div></section>
 </div></section>
 
 <!-- ============================================================ 계좌 -->
@@ -86,6 +102,7 @@
 <script src="/static/app/core.js"></script>
 <script src="/static/app/plan.js"></script>
 <script src="/static/app/tasks.js"></script>
+<script src="/static/app/market.js"></script>
 <script src="/static/app/perf.js"></script>
 <script src="/static/app/account.js"></script>
 <script src="/static/app/main.js"></script>

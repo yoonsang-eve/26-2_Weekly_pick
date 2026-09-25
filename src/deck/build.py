@@ -9,6 +9,7 @@ log.csv, config.yaml만 읽고, screener·agents·llm을 import하지 않는다.
 
     python src/deck/build.py --week 3 --market KR
     python src/deck/build.py --week 3 --market KR --full   # 발표하는 주차
+    python src/deck/build.py --week 4 --final              # 사용자 최종 선택 종목
 """
 from __future__ import annotations
 
@@ -398,14 +399,89 @@ def build(week: int, market: str, full: bool = False,
     return dst
 
 
+def final_row(week: int) -> dict:
+    f = ROOT / "final_log.csv"
+    if not f.exists():
+        return {}
+    with f.open(encoding="utf-8-sig", newline="") as fh:
+        return next((r for r in csv.DictReader(fh) if str(r.get("week")) == str(week)), {})
+
+
+def build_final(week: int, full: bool = False, no_chart: bool = False) -> Path:
+    """사용자 최종 선택의 발표 자료. 에이전트 추천을 골랐으면 그 시장 자료를 그대로 만든다.
+
+    직접 지정한 종목은 에이전트 과정(Analyst/Bull/Bear)이 없으므로 없는 슬라이드를 지어내지 않고,
+    '에이전트 추천 vs 내 선택' 비교와 사용자가 적은 선택 사유로 대신한다.
+    """
+    wdir = ROOT / "outputs" / f"wk{week}"
+    fin = read_json(wdir / "final.json")
+    if not fin:
+        raise SystemExit(f"wk{week}의 최종 선택(final.json)이 없다.")
+    if fin.get("choice") in ("KR", "US"):
+        return build(week, fin["choice"], full, no_chart)
+
+    out = wdir / "final"
+    out.mkdir(parents=True, exist_ok=True)
+    m, ticker, name = fin["market"], str(fin["ticker"]), fin.get("name", "")
+    row = final_row(week)
+    smeta = read_json(wdir / m / "screen_meta.json")
+    buy = row.get("buy_date") or smeta.get("buy_date", "")
+    sell = row.get("sell_date") or smeta.get("sell_date", "")
+    ret, bret, excess = row.get("ret_pct", ""), row.get("benchmark_ret_pct", ""), row.get("excess_pct", "")
+    label = {"KR": "한국", "US": "미국"}[m]
+    deck = Deck(f"wk{week} · 최종 선택 · {name}({ticker})")
+
+    deck.title_slide(f"{name} ({ticker})", [
+        f"{week}주차 · {label} · 사용자 직접 선택", f"{buy} 시가 매수 → {sell} 종가 매도", "",
+        f"주간 수익률   {ret + '%' if ret != '' else '(정산 전)'}"
+        + (f"      벤치마크({row.get('benchmark', '')}) {bret}%" if bret != "" else ""),
+        f"초과수익      {excess}%p" if excess != "" else ""])
+    deck.bullets("파이프라인 구조", PIPELINE,
+                 "이번 주 최종 제출 종목은 에이전트 추천이 아니라 사용자가 직접 골랐다. 다음 장에서 비교한다.")
+
+    rows = []
+    for mk in ("KR", "US"):
+        pk = read_json(wdir / mk / "pick.json")
+        if pk:
+            lr = log_row(week, mk)
+            rows.append([f"에이전트 추천 ({'한국' if mk == 'KR' else '미국'})", f"{pk.get('name', '')} {pk.get('ticker', '')}",
+                         "{}~{}%".format(*(pk.get("expected_return_range") or ["", ""])),
+                         f"{lr['ret_pct']}%" if lr.get("ret_pct") else "(정산 전)"])
+    rows.append(["최종 선택 (사용자)", f"{name} {ticker}", "-", f"{ret}%" if ret != "" else "(정산 전)"])
+    deck.table("에이전트 추천 vs 최종 선택", ["구분", "종목", "예상 범위", "주간 수익률"], rows,
+               "에이전트 추천은 log.csv, 최종 선택은 final_log.csv에서 정산한다.")
+
+    note = fin.get("note") or "(선택 사유 미기재 — 데스크 작업 패널의 최종 선택에서 적는다)"
+    deck.bullets(f"{name} — 선택 사유", [note], "사용자가 최종 선택 단계에서 직접 적은 내용")
+
+    png = out / f"chart_{ticker}.png"
+    if not no_chart and not png.exists():
+        chart_mod.render(ticker, name, m, sell or smeta.get("ref_date", ""), png, buy, sell)
+    deck.image("6개월 일봉 · 기술적 지표", png if png.exists() else None, "음영 = 평가 구간")
+
+    verdict = ([f"실제 {ret}%   벤치마크 {row.get('benchmark', '')} {bret}%  →  초과수익 {excess}%p"]
+               if ret != "" else ["(아직 정산 전 — 작업 패널의 정산 실행)"])
+    verdict += ["", "에이전트 추천을 따르지 않은 판단이 맞았는지 한 줄로 :", "  (직접 작성)"]
+    deck.bullets("사후 검증", verdict, "")
+
+    dst = out / f"deck_wk{week}_final_{ticker}.pptx"
+    deck.save(dst)
+    print(f"\n저장: {chart_mod.rel(dst)}  ({deck.n}슬라이드)")
+    return dst
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--week", type=int, required=True)
     p.add_argument("--market", default="KR", choices=["KR", "US"])
+    p.add_argument("--final", action="store_true", help="사용자 최종 선택 종목으로 만든다 (final.json)")
     p.add_argument("--full", action="store_true", help="발표하는 주차 — 내용을 더 담는다")
     p.add_argument("--no-chart", action="store_true", help="차트 생성을 건너뛴다")
     a = p.parse_args()
-    build(a.week, a.market, a.full, a.no_chart)
+    if a.final:
+        build_final(a.week, a.full, a.no_chart)
+    else:
+        build(a.week, a.market, a.full, a.no_chart)
     return 0
 
 
