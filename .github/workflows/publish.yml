@@ -32,16 +32,32 @@ jobs:
         env:
           SITE_KEY: ${{ secrets.SITE_KEY }}
           TZ: Asia/Seoul
+      # 붙여넣은 값에 공백·줄바꿈·"Bearer "·curl 명령 조각이 섞여 들어오는 일이 잦다.
+      # 토큰(영숫자·-·_ 30자 이상)과 계정 ID(16진 32자)만 뽑아 쓰고, 뽑은 값도 로그에서 가린다.
+      - name: Cloudflare 값 정리
+        env:
+          RAW_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RAW_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          T=$(printf '%s' "$RAW_TOKEN" | sed 's/Bearer//g' | grep -oE '[A-Za-z0-9_-]{30,}' | head -1)
+          A=$(printf '%s' "$RAW_ACCOUNT" | grep -oiE '[0-9a-f]{32}' | head -1)
+          [ -n "$T" ] || { echo "CLOUDFLARE_API_TOKEN에서 토큰을 찾지 못했다"; exit 1; }
+          [ -n "$A" ] || { echo "CLOUDFLARE_ACCOUNT_ID에서 32자리 계정 ID를 찾지 못했다"; exit 1; }
+          echo "::add-mask::$T"; echo "::add-mask::$A"
+          echo "CF_TOKEN=$T" >> "$GITHUB_ENV"; echo "CF_ACCOUNT=$A" >> "$GITHUB_ENV"
+          echo "토큰 ${#T}자, 계정 ID ${#A}자"
       - name: Pages 프로젝트 만들기 (처음 한 번, 이미 있으면 넘어감)
         continue-on-error: true
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ env.CF_TOKEN }}
+          accountId: ${{ env.CF_ACCOUNT }}
+          wranglerVersion: "4"
           command: pages project create weekly-pick-desk --production-branch=main
       - name: 게시
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ env.CF_TOKEN }}
+          accountId: ${{ env.CF_ACCOUNT }}
+          wranglerVersion: "4"
           command: pages deploy site --project-name=weekly-pick-desk --branch=main --commit-dirty=true
