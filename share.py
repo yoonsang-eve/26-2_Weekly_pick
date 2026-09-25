@@ -1,14 +1,17 @@
 """보기 전용 링크 만들기 — 더블클릭은 share.bat.
 
 1. 보기 전용 서버를 8766 포트에 띄운다 (APP_MODE=viewer: 읽기만 허용, 계좌 화면 없음).
-2. Cloudflare 빠른 터널로 인터넷 주소를 받는다 (계정·도메인 불필요, 무료).
+2. 인터넷 주소를 붙인다.
+   - Tailscale이 설치돼 있으면 Funnel로 **고정 주소**를 쓴다: https://<PC이름>.<tailnet>.ts.net
+     (외부 443 → 이 PC의 8766. 설정은 --bg로 남아 있어 다음 실행에도 주소가 같다)
+   - 없으면 Cloudflare 빠른 터널로 임시 주소를 쓴다 (실행할 때마다 바뀐다).
 3. 비밀 키가 붙은 링크를 출력하고 클립보드에 복사한다. 이 링크를 받은 사람만 열 수 있다.
 
-창을 닫으면 링크도 끊긴다. 다시 켜면 주소가 바뀌므로 새 링크를 보내야 한다.
-필요한 것: cloudflared (한 번만 설치 — winget install --id Cloudflare.cloudflared)
+이 창을 닫으면 서버가 꺼져 링크가 열리지 않는다. PC가 켜져 있고 이 창이 열려 있을 때만 보인다.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import secrets
@@ -36,57 +39,98 @@ def token() -> str:
     return t
 
 
-def find_cloudflared() -> str | None:
-    c = shutil.which("cloudflared")
+def find(name: str, *candidates: Path) -> str | None:
+    c = shutil.which(name)
     if c:
         return c
-    for p in (Path(os.environ.get("ProgramFiles(x86)", "")) / "cloudflared" / "cloudflared.exe",
-              Path(os.environ.get("ProgramFiles", "")) / "cloudflared" / "cloudflared.exe",
-              Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Links" / "cloudflared.exe"):
-        if p.exists():
-            return str(p)
-    return None
+    return next((str(p) for p in candidates if p.exists()), None)
+
+
+def tailscale_url(ts: str) -> str | None:
+    """Funnel로 8766을 공개하고 고정 주소를 돌려준다. 처음 한 번은 승인 링크가 뜬다."""
+    try:
+        st = json.loads(subprocess.run([ts, "status", "--json"], capture_output=True, text=True,
+                                       encoding="utf-8", timeout=15).stdout or "{}")
+    except Exception:
+        st = {}
+    if st.get("BackendState") != "Running":
+        print("Tailscale이 로그인되어 있지 않습니다. 작업 표시줄의 Tailscale 아이콘을 눌러 로그인한 뒤 다시 실행하세요.")
+        return None
+    host = (st.get("Self") or {}).get("DNSName", "").rstrip(".")
+    print("Tailscale Funnel을 켜는 중...")
+    p = subprocess.run([ts, "funnel", "--bg", str(PORT)], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", timeout=60)
+    out = (p.stdout or "") + (p.stderr or "")
+    if p.returncode != 0 or "login.tailscale.com" in out:
+        # 처음이면 tailnet에서 Funnel을 허용하라는 링크를 준다. 브라우저에서 승인하면 된다.
+        link = re.search(r"https://login\.tailscale\.com/\S+", out)
+        print("\nFunnel이 아직 허용되지 않았습니다." if link else "\nFunnel을 켜지 못했습니다:\n" + out.strip())
+        if link:
+            print("아래 주소를 브라우저에서 열어 [Enable]을 누른 뒤, share.bat을 다시 실행하세요.\n")
+            print(f"    {link.group(0)}\n")
+            os.startfile(link.group(0)) if hasattr(os, "startfile") else None
+        return None
+    return f"https://{host}" if host else None
+
+
+def cloudflare_url(cf: str) -> tuple[str | None, subprocess.Popen]:
+    tunnel = subprocess.Popen([cf, "tunnel", "--url", f"http://localhost:{PORT}"], stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+    start = time.time()
+    for line in tunnel.stdout:
+        m = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", line)
+        if m:
+            return m.group(0), tunnel
+        if time.time() - start > 60:
+            break
+    return None, tunnel
 
 
 def main() -> int:
-    cf = find_cloudflared()
-    if not cf:
-        print("cloudflared가 없습니다. 아래 한 줄을 PowerShell에 붙여넣어 한 번만 설치한 뒤 다시 실행하세요.\n")
-        print("    winget install --id Cloudflare.cloudflared\n")
+    ts = find("tailscale", Path(os.environ.get("ProgramFiles", "")) / "Tailscale" / "tailscale.exe")
+    cf = find("cloudflared", Path(os.environ.get("ProgramFiles(x86)", "")) / "cloudflared" / "cloudflared.exe",
+              Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Links" / "cloudflared.exe")
+    if not ts and not cf:
+        print("공유 도구가 없습니다. https://tailscale.com/download 에서 Windows용을 설치하고 로그인한 뒤 다시 실행하세요.")
         input("엔터를 누르면 닫힙니다.")
         return 1
+
     t = token()
     env = {**os.environ, "APP_MODE": "viewer", "VIEWER_TOKEN": t, "PYTHONUTF8": "1"}
     py = str(PY if PY.exists() else sys.executable)
     server = subprocess.Popen([py, "-m", "uvicorn", "app.server:app", "--port", str(PORT)], cwd=ROOT, env=env,
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    tunnel = subprocess.Popen([cf, "tunnel", "--url", f"http://localhost:{PORT}"], stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
-    url = None
+    tunnel = None
     try:
-        start = time.time()
-        for line in tunnel.stdout:                      # 주소는 로그에 한 번 찍힌다
-            m = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", line)
-            if m:
-                url = m.group(0)
-                break
-            if time.time() - start > 60:
-                break
-        if not url:
-            print("터널 주소를 받지 못했습니다. 인터넷 연결을 확인하고 다시 실행하세요.")
-            return 1
+        if ts:
+            url, fixed = tailscale_url(ts), True
+            if not url:
+                input("엔터를 누르면 닫힙니다.")
+                return 1
+        else:
+            (url, tunnel), fixed = cloudflare_url(cf), False
+            if not url:
+                print("터널 주소를 받지 못했습니다. 인터넷 연결을 확인하고 다시 실행하세요.")
+                return 1
         link = f"{url}/?k={t}#desk"
         subprocess.run("clip", input=link, text=True, encoding="utf-16", shell=True)
         print("\n보기 전용 링크 (클립보드에 복사됨):\n")
         print(f"    {link}\n")
-        print("카카오톡 등으로 이 링크를 보내면 됩니다. 이 창을 닫으면 링크가 끊깁니다.")
-        print("(처음 열 때 몇 초 걸릴 수 있습니다. 링크 주소는 실행할 때마다 바뀝니다.)")
-        for _ in tunnel.stdout:                         # 터널이 살아 있는 동안 대기
-            pass
+        if fixed:
+            print("고정 주소입니다. 한 번 보내 두면 다음에도 같은 링크로 들어옵니다.")
+        else:
+            print("임시 주소입니다. 다시 실행하면 주소가 바뀌니 새 링크를 보내야 합니다.")
+        print("이 창을 닫으면 링크가 열리지 않습니다. (Ctrl+C 또는 창 닫기로 종료)")
+        if tunnel:
+            for _ in tunnel.stdout:
+                pass
+        else:
+            server.wait()
     except KeyboardInterrupt:
         pass
     finally:
-        tunnel.terminate()
+        if tunnel:
+            tunnel.terminate()
         server.terminate()
     return 0
 
