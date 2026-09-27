@@ -32,7 +32,7 @@ def static_path(path: str) -> str:
     p = p.lstrip("/")
     if p.startswith("static/") or "/file/" in p:
         return p
-    qs = "_".join(x.replace("=", "-", 1) for x in q.split("&") if x and not x.startswith(("download=", "since=")))
+    qs = "_".join(x.replace("=", "-", 1) for x in q.split("&") if x and not x.startswith(("download=", "since=", "fresh=")))
     return p + (f"__{qs}" if qs else "") + (".txt" if "/text/" in p else ".json")
 
 
@@ -127,6 +127,7 @@ def main() -> int:
             b.get(f"/api/market/summary?period={p}")
         for m in ("US", "KR"):
             b.get(f"/api/market/heatmap?mkt={m}")
+        b.get("/api/live")                      # 성과 화면의 잠정 수익률 (구운 시점 기준)
         today = date.today()
         b.get("/api/market/calendar")
         for k in range(-3, 4):

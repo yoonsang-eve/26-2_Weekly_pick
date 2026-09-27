@@ -108,6 +108,39 @@ def window(h: pd.DataFrame, buy: str, sell: str) -> tuple[pd.Timestamp, pd.Times
     return b[0], s[-1]
 
 
+TZ = {"KR": "Asia/Seoul", "US": "America/New_York"}
+
+
+CLOSE_AT = {"KR": 16, "US": 17}   # 현지 시각. 장 마감(15:30 / 16:00) 뒤 여유를 둔다
+
+
+def market_now(market: str) -> pd.Timestamp:
+    return pd.Timestamp.now(tz=TZ[market]).tz_localize(None)
+
+
+def close_final(market: str, sell: str) -> bool:
+    """매도일 종가가 확정됐나. 미국 금요일 종가는 KST 토요일 새벽에 나오므로 KST 날짜로 보면 틀린다.
+
+    시각만 지났다고 제공처에 값이 들어와 있는 것은 아니다 — 그건 prices()가 따로 잡는다.
+    """
+    return market_now(market) >= pd.Timestamp(sell) + pd.Timedelta(hours=CLOSE_AT[market])
+
+
+def prices(h: pd.DataFrame, buy: str, sell: str) -> tuple[pd.Timestamp, pd.Timestamp, float, float]:
+    """매수일 시가·매도일 종가. 값이 비어 있으면 예외를 낸다.
+
+    yfinance는 장이 끝나고 몇 시간 동안 그날 행을 만들어 두고 종가를 NaN으로 비워 두는 일이 있다
+    (wk4 US: 토요일 오전 10시 KST에 금요일 종가가 비어 전 종목 nan으로 기록됐다). 그 행을 지우고
+    직전 거래일로 스냅하면 조용히 틀린 값이 남으므로, 지우지 않고 '아직 미확정'으로 실패시킨다.
+    """
+    bd, sd = window(h, buy, sell)
+    bo, sc = float(h.loc[bd, "Open"]), float(h.loc[sd, "Close"])
+    if bo != bo or sc != sc:
+        raise ValueError(f"{bd:%Y-%m-%d} 시가 또는 {sd:%Y-%m-%d} 종가가 데이터 제공처에 아직 비어 있다 — "
+                         f"잠시 후 다시 정산할 것")
+    return bd, sd, bo, sc
+
+
 def resolve_dates(cfg: dict, week: int, market: str, out: Path,
                   cli_buy: str | None, cli_sell: str | None) -> tuple[str, str]:
     """그 주차의 매수·매도일. config는 '이번 주차'의 값이라 과거 주차엔 쓸 수 없다.
@@ -144,7 +177,7 @@ def settle_one(cfg: dict, week: int, market: str,
     ticker, name = str(pick["ticker"]), pick.get("name", "")
 
     buy, sell = resolve_dates(cfg, week, market, out, cli_buy, cli_sell)
-    if pd.Timestamp(sell) >= pd.Timestamp.now().normalize():
+    if not close_final(market, sell):
         # 매도일 종가가 아직 없으면 window()가 직전 거래일로 스냅해 틀린 값이 기록된다
         print(f"  [{market}] 매도일 {sell}의 종가가 아직 확정되지 않았다 — 건너뛴다",
               file=sys.stderr)
@@ -157,9 +190,11 @@ def settle_one(cfg: dict, week: int, market: str,
     if h.empty:
         print(f"  [{market}] {ticker} 시세를 못 받았다", file=sys.stderr)
         return None
-    bd, sd = window(h, buy, sell)
-    buy_open = float(h.loc[bd, "Open"])
-    sell_close = float(h.loc[sd, "Close"])
+    try:
+        bd, sd, buy_open, sell_close = prices(h, buy, sell)
+    except ValueError as e:
+        print(f"  [{market}] {ticker} {e}", file=sys.stderr)
+        return None
     ret = sell_close / buy_open - 1
 
     bench = fetch_benchmark(market, cfg, start, end)

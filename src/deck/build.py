@@ -103,6 +103,21 @@ def clean(s: str) -> str:
     return re.sub(r"\n{2,}", "\n", s).strip()
 
 
+def outcome(v, lo, hi) -> str:
+    """예측 범위 대비 판정. 화면(core.js outcome)과 같은 기준이다."""
+    try:
+        v, lo, hi = float(v), float(lo), float(hi)
+    except (TypeError, ValueError):
+        return "판정 불가"
+    if v > hi:
+        return f"크게 성공 (상단 {hi:g}% 대비 {v - hi:+.1f}%p)"
+    if v >= 0:
+        return "성공 (0 이상, 상단 이하)"
+    if v >= lo:
+        return "범위 내 실패 (0 미만, 하단 이상)"
+    return f"크게 실패 (하단 {lo:g}% 대비 {v - lo:+.1f}%p)"
+
+
 def clip(s: str, n: int) -> str:
     s = " ".join(str(s).split())
     return s if len(s) <= n else s[: n - 1].rstrip() + "…"
@@ -384,7 +399,7 @@ def build(week: int, market: str, full: bool = False,
     verdict = []
     if ret != "":
         verdict.append(f"실제 {ret}%  vs  예측 {lo}~{hi}%   "
-                       f"→ 예측 범위 {'적중' if row.get('hit_range') == 'Y' else '이탈'}")
+                       f"→ {outcome(ret, lo, hi)}")
         verdict.append(f"벤치마크 {row.get('benchmark', '')} {bret}%  →  초과수익 {excess}%p")
     else:
         verdict.append("(아직 정산 전 — python src/settle.py 실행)")

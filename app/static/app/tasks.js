@@ -24,6 +24,7 @@ const Tasks = (() => {
       : !ST.screened
         ? `<button class="btn primary" data-a="start" ${busy ? "disabled" : ""}>${c.week_no}주차 추천 시작</button><span class="hint" style="margin:0">스크리닝(한국·미국) → ${MODE === "manual" ? "Analyst 프롬프트 생성" : "에이전트 auto"}</span>`
         : "";
+    $("#p-advice").innerHTML = adviceBox(FIN?.advice);
     $("#p-dates").innerHTML = `<span>매수 <b class="num">${md(mk.buy_date)}</b> ${dow(mk.buy_date)} 시가</span><span>매도 <b class="num">${md(mk.sell_date)}</b> ${dow(mk.sell_date)} 종가</span><span>${mk.holding_days ?? "?"}영업일</span>`;
   }
 
@@ -107,14 +108,17 @@ const Tasks = (() => {
   function finalBody(dis) {
     const o = FIN.options, f = FIN.final;
     const kr = o.find((x) => x.id === "KR"), us = o.find((x) => x.id === "US");
-    const cur = f?.choice || (kr ? "KR" : us ? "US" : "custom");
+    // 아직 고르지 않았으면 비교에서 권한 쪽을 기본값으로 둔다 (저장은 사용자가 누른다)
+    const cur = f?.choice || FIN.advice?.recommend || (kr ? "KR" : us ? "US" : "custom");
+    const rec = FIN.advice?.recommend;
     const opt = (id, n, lab, x) => x ? `<option value="${id}" ${cur === id ? "selected" : ""}>${n}) ${lab}: ${esc(x.name)} ${esc(x.ticker)}</option>` : "";
     const saved = f ? `<div class="pickbox" style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3)">이번 주 최종 선택</div><div class="nm">${esc(f.name)} <span class="mono muted" style="font-size:12px">${esc(f.ticker)}</span></div>
         <dl><dt>경로</dt><dd>${f.choice === "custom" ? `직접 지정 (${MK[f.market]})` : `에이전트 추천 (${MK[f.market]})`}</dd>${f.note ? `<dt>사유</dt><dd>${esc(f.note)}</dd>` : ""}
         ${FIN.settled ? `<dt>결과</dt><dd class="mono ${sign(+FIN.settled.ret_pct)}">${pct(+FIN.settled.ret_pct)}</dd>` : ""}</dl></div>` : "";
     return `<p>한 주에 1종목을 최종 선택한다. 에이전트 추천 중에서 고르거나, 추천 과정 없이 직접 지정한다. 직접 지정한 종목도 정산·리포트·성과에 들어간다.</p>
+      ${FIN.advice?.ready ? `<p class="hint" style="margin-top:6px">${FIN.advice.recommend ? `규칙 비교 권장: <b>${esc(FIN.advice.summary)}</b> — 근거는 패널 맨 위` : "규칙 비교는 판단 보류 — 패널 맨 위 참고"}</p>` : ""}
       <div style="display:grid;gap:8px;margin-top:10px">
-        <select class="sel" id="fin-sel" aria-label="최종 선택">${opt("KR", 1, "최종 추천안", kr)}${opt("US", 2, "차선책", us)}<option value="custom" ${cur === "custom" ? "selected" : ""}>3) 그 외 사용자 지정</option></select>
+        <select class="sel" id="fin-sel" aria-label="최종 선택">${opt("KR", 1, `한국 에이전트 추천${rec === "KR" ? " (권장)" : ""}`, kr)}${opt("US", 2, `미국 에이전트 추천${rec === "US" ? " (권장)" : ""}`, us)}<option value="custom" ${cur === "custom" ? "selected" : ""}>3) 그 외 사용자 지정</option></select>
         <div id="fin-custom" style="display:${cur === "custom" ? "grid" : "none"};gap:6px;grid-template-columns:90px 1fr">
           <select class="sel" id="fin-mk">${["KR", "US"].map((m) => `<option value="${m}" ${(f?.choice === "custom" ? f.market : CUSTOM.market) === m ? "selected" : ""}>${MK[m]}</option>`).join("")}</select>
           <input class="in" id="fin-q" placeholder="종목명 또는 코드/티커" value="${esc(f?.choice === "custom" ? `${f.name} ${f.ticker}` : CUSTOM.ticker ? `${CUSTOM.name} ${CUSTOM.ticker}` : "")}" autocomplete="off">
@@ -122,6 +126,22 @@ const Tasks = (() => {
         <textarea class="in" id="fin-note" rows="2" placeholder="선택 사유 (리포트에 들어간다)" style="font-family:var(--sans)">${esc(f?.note || "")}</textarea>
         <div class="acts" style="margin:0"><button class="btn sm primary" data-a="final-save" ${dis}>${f ? "최종 선택 바꾸기" : "최종 선택 저장"}</button></div>
       </div>${saved}`;
+  }
+  // 한국/미국 추천 비교 (app/advice.py — 규칙 기반, LLM 없음). 고르는 건 사용자다.
+  // 패널 맨 위에 둔다: 최종 선택은 주차 공통이라 시장 토글과 무관하게 늘 보여야 한다.
+  function adviceBox(a) {
+    if (!a) return "";
+    if (!a.ready) return `<div class="adv adv-wait"><span class="tag off">추천 비교</span> ${esc(a.summary)}</div>`;
+    const val = (c, m, cls = "") => `<span class="v ${cls} ${c.win === m ? "adv-win" : ""}">${c[m] === null || c[m] === undefined ? "—" : esc(String(c[m]))}</span>`;
+    const [k, u] = a.sides;
+    return `<details class="adv" open><summary>
+        ${a.recommend ? `<span class="tag mark">${a.recommend === "KR" ? "한국" : "미국"} 권장</span>` : `<span class="tag off">판단 보류</span>`}
+        <b>${esc(a.summary)}</b></summary>
+      <p class="adv-x">${esc(a.explain || "")}</p>
+      <div class="adv-g"><span class="h l">규칙 기반 비교 · LLM 없음</span><span class="h">한국 ${esc(k.name)}</span><span class="h">미국 ${esc(u.name)}</span>
+        ${a.criteria.map((c) => `<span class="k">${c.label}</span>${val(c, "KR")}${val(c, "US")}<span class="why">${esc(c.why)}</span>`).join("")}
+        ${(a.info || []).map((c) => `<span class="k ref">${c.label}</span>${val(c, "KR", "ref")}${val(c, "US", "ref")}`).join("")}</div>
+      <p class="hint" style="margin-top:6px">노란 칸이 앞선 쪽. ${esc(a.note)} 최종 선택은 아래 05에서 저장한다.</p></details>`;
   }
   async function saveFinal() {
     const choice = $("#fin-sel").value, body = { choice, note: $("#fin-note").value };
@@ -210,11 +230,16 @@ const Tasks = (() => {
 
   function openPaste(stage) {
     Modal.open(`${STAGE_KO[stage]} 응답 붙여넣기`, `<p style="margin:0 0 8px;font-size:13px">Claude 웹 응답의 <b>전문</b>을 붙여넣는다. 앞 단계와 같은 대화에서 받은 응답이면 안 된다.</p>
-      <textarea class="in" id="resp" rows="16" placeholder="응답 전문"></textarea>${stage === "trader" ? `<p class="hint">JSON 블록이 들어 있어야 최종 종목이 확정된다.</p>` : ""}`,
+      <label style="display:flex;gap:8px;align-items:center;margin:0 0 8px;font-size:13px">사용 모델 <input class="in" id="resp-model" style="flex:1" placeholder="예: Claude Opus (claude.ai 웹, 검색 켬)"></label>
+      <textarea class="in" id="resp" rows="16" placeholder="응답 전문"></textarea>${stage === "trader" ? `<p class="hint">JSON 블록이 들어 있어야 최종 종목이 확정된다.</p>` : ""}
+      <p class="hint">사용 모델은 발표 자료의 '사용 모델' 칸에 그대로 들어간다. 한 번 적으면 다음 단계에도 채워 둔다.</p>`,
       `<button class="btn ghost" data-close>취소</button><button class="btn primary" id="resp-save">저장</button>`, true);
+    try { $("#resp-model").value = localStorage.getItem("wp_manual_model") || ""; } catch {}
     $("#resp-save").onclick = async () => {
+      const model = $("#resp-model").value.trim();
+      try { if (model) localStorage.setItem("wp_manual_model", model); } catch {}
       try {
-        const r = await api(`/api/runs/${W.current.week_no}/${M}/response/${stage}`, { method: "POST", body: { text: $("#resp").value } });
+        const r = await api(`/api/runs/${W.current.week_no}/${M}/response/${stage}`, { method: "POST", body: { text: $("#resp").value, model } });
         Modal.close(); toast(r.warning || "저장했다"); await refresh(); await loadRuns();
       } catch (e) { toast(e.message); }
     };

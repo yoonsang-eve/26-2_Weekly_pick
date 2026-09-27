@@ -72,7 +72,7 @@ select.sel { height: 32px; border: 1px solid var(--ink); background: var(--sheet
   background-repeat: no-repeat; background-position: right 10px center; }
 input.in, textarea.in { border: 1px solid var(--ink); background: #fff; padding: 6px 8px; border-radius: 0; width: 100%; }
 textarea.in { font-family: var(--mono); font-size: 12px; line-height: 1.55; resize: vertical; }
-.tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 1px 7px; border: 1px solid currentColor; }
+.tag { display: inline-block; white-space: nowrap; font-size: 11.5px; font-weight: 700; padding: 1px 7px; border: 1px solid currentColor; }
 .tag.mark { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
 .tag.done { color: var(--ok); } .tag.fail { color: var(--up); } .tag.off { color: var(--ink-3); }
 h1, h2, h3 { margin: 0; letter-spacing: -.03em; }
@@ -394,3 +394,29 @@ svg.spark { display: block; width: 100%; height: 26px; }
 
 /* 격자 칸은 내용(넓은 표)에 밀려 늘어나지 않게: 표는 칸 안에서 가로 스크롤 */
 .two > *, .mk-board > *, .grid2 > *, .desk > *, .acct-hero > *, .hold > * { min-width: 0; }
+
+/* 도면의 시장 표시 — 한국/미국이 한눈에 갈리게. 수익률 색(빨강/파랑)과 겹치지 않는 색을 쓴다 */
+.mkt { display: inline-block; font-size: .62em; font-weight: 800; padding: 2px 8px; vertical-align: middle; border: 2px solid var(--ink); margin-left: 4px; }
+.mkt-KR { background: #0f6e56; color: #fff; border-color: #0f6e56; }
+.mkt-US { background: #5b3fb8; color: #fff; border-color: #5b3fb8; }
+#v-desk[data-market="KR"] #plan { outline: 4px solid #0f6e5633; outline-offset: -4px; }
+#v-desk[data-market="US"] #plan { outline: 4px solid #5b3fb833; outline-offset: -4px; }
+/* 결과 판정 태그 — 수익률 색(빨강 상승 / 파랑 하락)을 따른다 */
+.tag.o-bigwin { background: var(--up); color: #fff; border-color: var(--up); }
+.tag.o-win { color: var(--up); }
+.tag.o-miss { color: var(--down); }
+.tag.o-bigmiss { background: var(--down); color: #fff; border-color: var(--down); }
+/* 최종 선택 — 한국/미국 추천 비교 (패널 맨 위) */
+.adv { margin-top: 10px; border: 1.5px solid var(--ink); background: var(--sheet); padding: 10px 12px; font-size: 12.5px; }
+.adv-wait { color: var(--ink-2); }
+.adv > summary { cursor: pointer; list-style: none; display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; }
+.adv > summary::-webkit-details-marker { display: none; }
+.adv-x { margin: 8px 0 10px; line-height: 1.55; color: var(--ink); }
+.adv-g { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px; gap: 2px 10px; align-items: baseline; }
+.adv-g .h { font-size: 11.5px; color: var(--ink-3); text-align: right; border-bottom: 1px solid var(--ink); padding-bottom: 3px; word-break: keep-all; align-self: end; line-height: 1.3; }
+.adv-g .h.l { text-align: left; }
+.adv-g .k { font-weight: 650; padding-top: 6px; border-top: 1px solid var(--grid); }
+.adv-g .v { font-family: var(--mono); text-align: right; padding: 6px 4px 0; border-top: 1px solid var(--grid); white-space: nowrap; }
+.adv-g .v.adv-win { font-weight: 800; background: var(--mark); color: var(--mark-ink); }
+.adv-g .why { grid-column: 1 / -1; font-size: 11px; color: var(--ink-3); padding-bottom: 4px; }
+.adv-g .k.ref, .adv-g .v.ref { color: var(--ink-3); font-weight: 500; font-size: 12px; }

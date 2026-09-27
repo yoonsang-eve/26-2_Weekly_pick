@@ -19,7 +19,7 @@ import pandas as pd
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from settle import ROOT, fetch, fetch_benchmark, resolve_dates, window  # noqa: E402
+from settle import ROOT, close_final, fetch, fetch_benchmark, prices, resolve_dates, window  # noqa: E402
 
 FLOG = ROOT / "final_log.csv"
 FIELDS = ["week", "choice", "market", "ticker", "name", "buy_date", "sell_date", "buy_open", "sell_close",
@@ -38,7 +38,7 @@ def settle_final(cfg: dict, week: int, cli_buy: str | None = None, cli_sell: str
     m, t = fin["market"], str(fin["ticker"])
     out = ROOT / "outputs" / f"wk{week}" / m          # 시장별 날짜(휴장 반영)는 그 시장 폴더에 있다
     buy, sell = resolve_dates(cfg, week, m, out, cli_buy, cli_sell)
-    if pd.Timestamp(sell) >= pd.Timestamp.now().normalize():
+    if not close_final(m, sell):
         print(f"  매도일 {sell}의 종가가 아직 확정되지 않았다 — 건너뛴다", file=sys.stderr)
         return None
     start = (pd.Timestamp(buy) - timedelta(days=10)).date()
@@ -47,8 +47,11 @@ def settle_final(cfg: dict, week: int, cli_buy: str | None = None, cli_sell: str
     if h.empty:
         print(f"  {t} 시세를 못 받았다", file=sys.stderr)
         return None
-    bd, sd = window(h, buy, sell)
-    bo, sc = float(h.loc[bd, "Open"]), float(h.loc[sd, "Close"])
+    try:
+        bd, sd, bo, sc = prices(h, buy, sell)
+    except ValueError as e:
+        print(f"  {t} {e}", file=sys.stderr)
+        return None
     ret = sc / bo - 1
     bench = fetch_benchmark(m, cfg, start, end)
     try:

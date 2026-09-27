@@ -270,6 +270,7 @@ def run_status(week: int, market: str):
 
 class ResponseIn(BaseModel):
     text: str
+    model: str = ""         # manual 모드에서 사람이 적는 사용 모델 (발표 자료 3번 슬라이드)
 
 
 @router.post("/api/runs/{week}/{market}/response/{stage}")
@@ -281,6 +282,12 @@ def save_response(week: int, market: str, stage: str, r: ResponseIn):
     d = _run_dir(week, market)
     (d / "responses").mkdir(parents=True, exist_ok=True)
     (d / "responses" / f"{stage}.md").write_text(r.text, encoding="utf-8")
+    if r.model.strip():
+        meta_f = d / "run_meta.json"
+        meta = json.loads(meta_f.read_text(encoding="utf-8")) if meta_f.exists() else {}
+        st = meta.setdefault("stages", {}).setdefault(stage, {})
+        st["model"] = r.model.strip()
+        meta_f.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     pick = None
     if stage == "trader":
         import agents                                   # extract_pick 재사용 (LLM 호출 없음)
@@ -360,8 +367,9 @@ def get_final(week: int):
         if p:
             opts.append({"id": m, "market": m, "ticker": str(p["ticker"]), "name": p.get("name", ""),
                          "range": p.get("expected_return_range"), "catalyst": p.get("catalyst", "")})
+    from app.advice import advise
     return {"week": week, "options": opts, "final": _read_json(OUT / f"wk{week}" / "final.json"),
-            "settled": _final_log().get(week)}
+            "settled": _final_log().get(week), "advice": advise(OUT / f"wk{week}")}
 
 
 @router.get("/api/finals")
@@ -439,4 +447,31 @@ def set_final(week: int, f: FinalIn):
     d = OUT / f"wk{week}"
     d.mkdir(parents=True, exist_ok=True)
     (d / "final.json").write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+    _resettle_final(week)
     return get_final(week)
+
+
+def _resettle_final(week: int) -> None:
+    """최종 선택을 바꾸면 final_log.csv의 그 주 행을 새 선택 기준으로 맞춘다.
+
+    정산을 먼저 돌리고 최종 선택을 나중에 하면(wk4) final_settle이 영영 안 돌아 '정산 대기'로 남는다.
+    매도일 종가가 확정됐으면 바로 정산(시세 조회만, LLM 없음)하고, 아니면 옛 선택의 행을 지운다.
+    """
+    import final as fin_mod
+    cfg = _load_cfg()
+    try:
+        row = fin_mod.settle_final(cfg, week)
+    except Exception as e:
+        print(f"최종 선택 정산 실패: {e}", file=sys.stderr)
+        row = None
+    if row:
+        fin_mod.append(row)
+        return
+    log = _final_log()
+    if week in log:
+        import csv
+        rows = [r for w, r in sorted(log.items()) if w != week]
+        with (ROOT / "final_log.csv").open("w", encoding="utf-8-sig", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=fin_mod.FIELDS)
+            w.writeheader()
+            w.writerows(rows)

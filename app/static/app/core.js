@@ -20,7 +20,7 @@ function U(path) {
   let [p, q] = path.split("?");
   p = p.slice(1);
   if (p.startsWith("static/") || p.includes("/file/")) return p;
-  const qs = (q || "").split("&").filter((x) => x && !/^(download|since)=/.test(x)).map((x) => x.replace("=", "-")).join("_");
+  const qs = (q || "").split("&").filter((x) => x && !/^(download|since|fresh)=/.test(x)).map((x) => x.replace("=", "-")).join("_");
   return p + (qs ? "__" + qs : "") + (p.includes("/text/") ? ".txt" : ".json");
 }
 
@@ -88,3 +88,16 @@ async function loadRuns() {
   App.onRuns.forEach((f) => f());
   return App.runs;
 }
+
+// ---- 결과 판정: 예측 범위 [lo, hi] 대비 실제 수익률 v
+//  크게 성공 = 상단 초과 / 성공 = 0 이상 상단 이하 / 범위 내 실패 = 하단 이상 0 미만 / 크게 실패 = 하단 미만
+function outcome(v, lo, hi) {
+  v = num(v); lo = num(lo); hi = num(hi);
+  if (v === null || lo === null || hi === null) return null;
+  const d = (x) => `${x > 0 ? "+" : ""}${x.toFixed(1)}%p`;
+  if (v > hi) return { key: "big-win", label: "크게 성공", cls: "o-bigwin", note: `상단 ${hi}% 대비 ${d(v - hi)}` };
+  if (v >= 0) return { key: "win", label: "성공", cls: "o-win", note: `상단까지 ${d(v - hi)}` };
+  if (v >= lo) return { key: "miss", label: "범위 내 실패", cls: "o-miss", note: `하단 ${lo}%까지 여유 ${d(v - lo)}` };
+  return { key: "big-miss", label: "크게 실패", cls: "o-bigmiss", note: `하단 ${lo}% 대비 ${d(v - lo)}` };
+}
+const outcomeTag = (o) => (o ? `<span class="tag ${o.cls}">${o.label}</span> <span class="muted" style="font-size:11.5px">${o.note}</span>` : "—");

@@ -35,7 +35,8 @@ def emit(agent: str, kind: str, msg: str = "", **data) -> None:
     rec = {"ts": datetime.now().isoformat(timespec="milliseconds"),
            "agent": agent, "kind": kind, "msg": msg}
     if data:
-        rec["data"] = data
+        # NaN은 JSON 표준이 아니다. 그대로 쓰면 서버가 이 파일을 응답으로 못 내보내 도면이 통째로 안 뜬다
+        rec["data"] = {k: (None if isinstance(v, float) and v != v else v) for k, v in data.items()}
     try:
         _target.parent.mkdir(parents=True, exist_ok=True)
         with _target.open("a", encoding="utf-8") as f:

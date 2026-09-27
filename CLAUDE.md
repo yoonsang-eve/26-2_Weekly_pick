@@ -292,6 +292,10 @@ python src/deck/build.py --week 3 --market KR
   몇 주 뒤에 wk3을 정산하면 wk3이 아닌 날짜가 들어간다. `screen_meta.json`에 기록해 둔
   매수·매도일을 먼저 보고, 없으면 `--buy-date/--sell-date`로 받는다
 - 벤치마크(KOSPI/S&P500)는 yfinance로 받는다. FDR의 KS11은 며칠 늦게 채워진다
+- **yfinance는 장 마감 후 몇 시간 동안 그날 행의 종가를 NaN으로 비워 둘 수 있다** (wk4 US: KST 토 10시에
+  금요일 종가가 비어 전 종목 nan). NaN 행을 지우면 직전 거래일로 조용히 스냅되므로 지우지 말고
+  `settle.prices()`에서 실패시킨다. 확정 여부는 KST 날짜가 아니라 시장 현지 시각으로 본다 (`close_final`)
+- 정산 전 주차의 잠정 수익률은 `cohort.live()` → `/api/live` (성과 화면 '새로고침'). 파일에 기록하지 않는다
 - `log.csv`에 append하며 같은 (week, market)은 덮어쓰되 `rank`·`notes` 수동 입력분은 보존한다
 - 누적되면 학기 말에 "LLM 에이전트 기반 종목 선정의 hit rate 분석"이 공짜로 나온다. 발표 차별화 포인트이므로 초기부터 빠짐없이 기록할 것
 

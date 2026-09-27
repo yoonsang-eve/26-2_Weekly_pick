@@ -290,6 +290,14 @@ def screen_kr(cfg: dict, week: int, use_cache: bool) -> int:
     hist = fetch_history(codes, ref, cfg, use_cache)
     log("조회 성공", len(hist))
 
+    # 금요일이 휴장이면(wk5: 추석 9/24~25) 달력상 금요일 종가는 없다. 미국과 같은 방식으로
+    # 실제 마지막 거래일을 기준일로 삼는다. 안 그러면 전 종목이 '기준일 종가 없음'으로 탈락한다.
+    actual = resolve_last_session(hist, ref)
+    if actual != ref.normalize():
+        print(f"  기준일 조정: {ref:%Y-%m-%d}은 휴장 -> 실제 마지막 거래일 {actual:%Y-%m-%d} 종가")
+        events.emit("screener", "step", f"기준일 조정 {actual:%Y-%m-%d} (금요일 휴장)")
+        ref = actual
+
     rows = []
     for code, h in hist.items():
         ind = indicators(h, ref, int(cfg["data"]["lookback_days"]),
@@ -297,6 +305,11 @@ def screen_kr(cfg: dict, week: int, use_cache: bool) -> int:
                          int(f["reversal_days"]))
         if ind:
             rows.append({"Code": code, **ind})
+    if not rows:
+        print(f"\nKR: 기준일 {ref:%Y-%m-%d} 종가를 가진 종목이 하나도 없다 (휴장일 또는 데이터 지연).",
+              file=sys.stderr)
+        events.emit("screener", "error", f"기준일 {ref:%Y-%m-%d} 종가 없음")
+        return 1
     d = df.merge(pd.DataFrame(rows), on="Code")
     log("기준일 종가 보유 (거래정지 제외)", len(d))
 
@@ -368,6 +381,9 @@ def resolve_us_ref(hist: dict, ref: pd.Timestamp) -> pd.Timestamp:
     last = Counter(h.index[-1].normalize() for h in hist.values())
     resolved = max(d for d, _ in last.most_common(3))
     return min(resolved, ref.normalize())
+
+
+resolve_last_session = resolve_us_ref   # KR도 같은 규칙 (금요일 휴장 대비)
 
 
 def fetch_us_marketcap(symbols: list[str], ref: pd.Timestamp, cfg: dict,

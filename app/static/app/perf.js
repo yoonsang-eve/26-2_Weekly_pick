@@ -9,27 +9,26 @@ const Perf = (() => {
     const s = vis().filter((r) => r.settled);
     const rets = s.map((r) => num(r.settled.ret_pct)).filter((v) => v !== null);
     const exc = s.map((r) => num(r.settled.excess_pct)).filter((v) => v !== null);
-    const hit = s.filter((r) => r.settled.hit_range === "Y").length;
+    const oc = s.map((r) => outcome(r.settled.ret_pct, r.settled.predicted_low, r.settled.predicted_high)).filter(Boolean);
+    const wins = oc.filter((o) => o.key === "win" || o.key === "big-win").length, big = oc.filter((o) => o.key === "big-win").length;
     const ranks = s.map((r) => r.cohort?.pick_rank).filter(Boolean);
     const F = [
       ["정산", `${s.length}`, `대기 ${vis().length - s.length}`, ""],
       ["평균 수익률", pct(avg(rets)), rets.length ? `최고 ${pct(Math.max(...rets))}` : "", sign(avg(rets))],
       ["평균 초과", pp(avg(exc)), "벤치마크 대비", sign(avg(exc))],
       ["벤치마크 이김", exc.length ? `${exc.filter((v) => v > 0).length}/${exc.length}` : "—", "초과수익이 0보다 큼", ""],
-      ["범위 적중", s.length ? `${hit}/${s.length}` : "—", "실제가 예측 범위 안", ""],
+      ["성공 이상", oc.length ? `${wins}/${oc.length}` : "—", `크게 성공(예측 상단 초과) ${big}`, ""],
       ["후보 내 순위", ranks.length ? `${avg(ranks).toFixed(1)}` : "—", "20종목 중 평균 등수", ""],
     ];
     $("#figs").innerHTML = F.map(([l, v, sub, c]) => `<div class="fig"><div class="l">${l}</div><div class="v ${c}">${v}</div><div class="s">${sub}</div></div>`).join("");
   }
 
-  async function strip() {
-    const host = $("#strip"), runs = vis().filter((r) => r.cohort);
-    if (!runs.length) { host.innerHTML = `<p class="muted">후보군 정산이 아직 없다. 작업 패널의 정산을 실행하면 생긴다.</p>`; return; }
-    const ds = await Promise.all(runs.map((r) => api(`/api/runs/${r.week}/${r.market}`)));
-    const vals = ds.flatMap((d) => d.cohort_rows.map((c) => num(c.ret_pct))).filter((v) => v !== null)
-      .concat(runs.map((r) => num(r.settled?.benchmark_ret_pct)).filter((v) => v !== null));
+  // 후보 점 그래프. items: [{label, sub, rows: [{role, ret_pct, name, ticker}], bench, benchName}]
+  function dots(host, items) {
+    const vals = items.flatMap((it) => it.rows.map((c) => num(c.ret_pct))).filter((v) => v !== null)
+      .concat(items.map((it) => it.bench).filter((v) => v !== null));
     const [lo, hi, st] = nice(Math.min(0, ...vals), Math.max(0, ...vals));
-    const W = host.clientWidth || 900, L = 110, R = 12, RH = 58, T = 10, H = T + RH * runs.length + 24;
+    const W = host.clientWidth || 900, L = 110, R = 12, RH = 58, T = 10, H = T + RH * items.length + 24;
     const x = (v) => L + ((v - lo) / (hi - lo)) * (W - L - R);
     host.innerHTML = "";
     const g = svgEl("svg", { viewBox: `0 0 ${W} ${H}` }, host);
@@ -37,28 +36,89 @@ const Perf = (() => {
       svgEl("line", { x1: x(v), x2: x(v), y1: T, y2: H - 20, class: v === 0 ? "zero" : "gl" }, g);
       svgEl("text", { x: x(v), y: H - 5, "text-anchor": "middle" }, g).textContent = `${v > 0 ? "+" : ""}${v}%`;
     }
-    ds.forEach((d, i) => {
-      const r = runs[i], cy = T + RH * i + RH / 2;
-      svgEl("text", { x: 0, y: cy - 2, class: "lbl" }, g).textContent = lab(r);
-      svgEl("text", { x: 0, y: cy + 13 }, g).textContent = `후보 평균 ${pct(r.cohort.candidates_avg, 1)}`;
+    const ROLE = { pick: "추천", finalist: "최종후보", candidate: "후보", extra: "최종 선택(후보 밖)" };
+    const ord = { candidate: 0, extra: 1, finalist: 1, pick: 2 };
+    items.forEach((it, i) => {
+      const cy = T + RH * i + RH / 2;
+      svgEl("text", { x: 0, y: cy - 2, class: "lbl" }, g).textContent = it.label;
+      svgEl("text", { x: 0, y: cy + 13 }, g).textContent = it.sub;
       svgEl("line", { x1: 0, x2: W - R, y1: T + RH * (i + 1), y2: T + RH * (i + 1), class: "gl" }, g);
-      const b = num(r.settled?.benchmark_ret_pct);
-      if (b !== null) { const l = svgEl("line", { x1: x(b), x2: x(b), y1: cy - 20, y2: cy + 20, stroke: "#121416", "stroke-dasharray": "2 2" }, g); hover(l, `${r.settled.benchmark} ${pct(b)}`); }
-      const ord = { candidate: 0, finalist: 1, pick: 2 };
-      d.cohort_rows.filter((c) => num(c.ret_pct) !== null).sort((a, z) => ord[a.role] - ord[z.role]).forEach((c, j) => {
+      if (it.bench !== null && it.bench !== undefined) {
+        const l = svgEl("line", { x1: x(it.bench), x2: x(it.bench), y1: cy - 20, y2: cy + 20, stroke: "#121416", "stroke-dasharray": "2 2" }, g);
+        hover(l, `${it.benchName} ${pct(it.bench)}`);
+      }
+      it.rows.filter((c) => num(c.ret_pct) !== null).sort((a, z) => ord[a.role] - ord[z.role]).forEach((c, j) => {
         const v = num(c.ret_pct), jit = c.role === "candidate" ? ((j * 7) % 5 - 2) * 3 : 0;
         const a = c.role === "pick" ? { r: 7, fill: "#121416", stroke: "#ffe14d", "stroke-width": 2.5 }
-          : c.role === "finalist" ? { r: 5.5, fill: "#f8f9f7", stroke: "#121416", "stroke-width": 1.8 } : { r: 4.5, fill: "none", stroke: "#8a9095", "stroke-width": 1.3 };
+          : c.role === "finalist" ? { r: 5.5, fill: "#f8f9f7", stroke: "#121416", "stroke-width": 1.8 }
+          : c.role === "extra" ? { r: 6, fill: "#ffe14d", stroke: "#121416", "stroke-width": 1.8 }
+          : { r: 4.5, fill: "none", stroke: "#8a9095", "stroke-width": 1.3 };
         svgEl("circle", { cx: x(v), cy: cy + jit, ...a }, g);
         const h = svgEl("circle", { cx: x(v), cy: cy + jit, r: 11, fill: "transparent" }, g);
-        hover(h, `<b>${esc(c.name || c.ticker)}</b> ${c.ticker}<br>${{ pick: "추천", finalist: "최종후보", candidate: "후보" }[c.role]}  ${pct(v)}`);
-        if (c.role === "pick") {
+        hover(h, `<b>${esc(c.name || c.ticker)}</b> ${c.ticker}<br>${ROLE[c.role]}  ${pct(v)}${c.last_date ? `<br>${c.last_date} 기준` : ""}`);
+        if (c.role === "pick" || c.role === "extra") {
           const anchor = x(v) > W - 90 ? "end" : x(v) < L + 90 ? "start" : "middle";
-          svgEl("text", { x: x(v), y: cy - 13, "text-anchor": anchor, class: "lbl" }, g).textContent = `${c.name} ${pct(v, 1)}`;
+          svgEl("text", { x: x(v), y: c.role === "pick" ? cy - 13 : cy + 21, "text-anchor": anchor, class: "lbl" }, g).textContent = `${c.name || c.ticker} ${pct(v, 1)}`;
         }
       });
     });
   }
+
+  async function strip() {
+    const host = $("#strip"), runs = vis().filter((r) => r.cohort);
+    if (!runs.length) { host.innerHTML = `<p class="muted">후보군 정산이 아직 없다. 작업 패널의 정산을 실행하면 생긴다.</p>`; return; }
+    const ds = await Promise.all(runs.map((r) => api(`/api/runs/${r.week}/${r.market}`)));
+    dots(host, ds.map((d, i) => ({ label: lab(runs[i]), sub: `후보 평균 ${pct(runs[i].cohort.candidates_avg, 1)}`, rows: d.cohort_rows,
+      bench: num(runs[i].settled?.benchmark_ret_pct), benchName: runs[i].settled?.benchmark })));
+  }
+
+  // ---- 실시간(잠정) — /api/live. 확정 정산(log.csv·cohort.csv)과 섞지 않는다
+  let LIVE = null, liveBusy = false;
+  async function live(fresh = false) {
+    const host = $("#live"), btn = $("#live-refresh");
+    if (STATIC) btn.hidden = true;                 // 구운 사이트는 구운 시점 값만 있다
+    if (liveBusy) return;
+    if (!LIVE || fresh) {
+      liveBusy = true; btn.disabled = true; btn.textContent = "받는 중…";
+      if (!LIVE) host.innerHTML = `<p class="muted" style="margin:0">시세를 받는 중이다 (40종목 안팎, 몇 초 걸린다)…</p>`;
+      try { LIVE = await api(`/api/live${fresh ? "?fresh=1" : ""}`); }
+      catch (e) {
+        host.innerHTML = `<p class="muted" style="margin:0">${STATIC ? "이 사이트에는 실시간 값이 구워져 있지 않다." : `시세 조회 실패: ${esc(e.message)}`}</p>`;
+        return;
+      } finally { liveBusy = false; btn.disabled = false; btn.textContent = "새로고침"; }
+    }
+    const L = LIVE, ms = L.markets.filter((m) => MKT === "ALL" || m.market === MKT);
+    const when = (L.markets[0]?.fetched_at || "").replace("T", " ").slice(5, 16);
+    $("#live-sub").textContent = `${L.week}주 · 월 시가 → 지금까지의 마지막 가격 · ${STATIC ? "사이트를 구운" : "받은"} 시각 ${when} KST · 확정 정산 전 참고값`;
+    if (!ms.length) { host.innerHTML = `<p class="muted" style="margin:0">이 시장의 후보가 없다.</p>`; return; }
+    const ST = { before: `<span class="tag off">매수일 전</span>`, live: `<span class="tag mark">장 진행 중</span>`, closed: `<span class="tag done">매도일 종가 반영</span>` };
+    const avgOf = (rs) => avg(rs.map((r) => num(r.ret_pct)).filter((x) => x !== null));
+    const tr = ms.map((m) => {
+      const R = m.rows.filter((r) => r.role !== "extra");
+      const pk = R.find((r) => r.role === "pick"), pv = num(pk?.ret_pct), b = num(m.benchmark?.ret_pct);
+      const ok = R.filter((r) => num(r.ret_pct) !== null);
+      return { m, mk: m.market === "KR" ? "한국" : "미국", pk, pv, b, cand: avgOf(R), finl: avgOf(R.filter((r) => r.role !== "candidate")),
+        rank: pv === null ? null : 1 + ok.filter((r) => num(r.ret_pct) > pv).length, n: ok.length, fail: R.length - ok.length };
+    });
+    const fin = L.final;
+    const finRow = fin && L.markets.find((m) => m.market === fin.market)?.rows.find((r) => r.ticker === String(fin.ticker));
+    const fv = num(finRow?.ret_pct);
+    const ex = (t) => (t.pv === null || t.b === null ? null : t.pv - t.b);
+    host.innerHTML = `
+      ${fin ? `<div class="kv" style="margin-bottom:12px;grid-template-columns:auto 1fr"><dt>최종 선택</dt><dd style="font-family:var(--sans)"><b>${esc(fin.name)}</b> <span class="muted mono">${esc(fin.ticker)}</span>
+        <span class="mono ${sign(fv)}" style="font-weight:700;margin-left:6px">${finRow ? pct(fv) : "—"}</span>${finRow?.last_date ? ` <span class="muted">(${md(finRow.last_date)} 기준)</span>` : ""}</dd></div>` : ""}
+      <table class="tb"><thead><tr><th>시장</th><th>상태</th><th class="l">추천</th><th>추천</th><th>최종후보 3</th><th>후보 평균</th><th>벤치마크</th><th>추천−벤치</th><th>후보 내 순위</th><th>기준일</th></tr></thead><tbody>
+      ${tr.map((t) => `<tr><td>${t.mk}</td><td>${ST[t.m.status] || ""}</td><td class="l">${esc(t.pk?.name || "—")} <span class="muted mono">${esc(t.pk?.ticker || "")}</span></td>
+        <td class="${sign(t.pv)}"><b>${pct(t.pv)}</b></td><td class="${sign(t.finl)}">${pct(t.finl)}</td><td class="${sign(t.cand)}">${pct(t.cand)}</td>
+        <td class="${sign(t.b)}">${pct(t.b)}</td><td class="${sign(ex(t))}">${pp(ex(t))}</td>
+        <td>${t.rank ? `${t.rank}/${t.n}` : "—"}${t.fail ? ` <span class="muted">(실패 ${t.fail})</span>` : ""}</td><td>${t.m.asof ? `${md(t.m.asof)}(${dow(t.m.asof)})` : "—"}</td></tr>`).join("")}</tbody></table>
+      <div class="chart" id="live-dots" style="margin-top:12px"></div>
+      <p class="hint">장중에는 그 시점 가격이다(미국은 약 15분 지연). 확정 기록은 매도일 장 마감 뒤 작업 패널의 '정산'으로 남긴다.</p>`;
+    const items = tr.filter((t) => t.m.rows.length).map((t) => ({ label: `${L.week}주 ${t.mk}`, sub: `후보 평균 ${pct(t.cand, 1)}`, rows: t.m.rows,
+      bench: t.b, benchName: t.m.benchmark?.name }));
+    if (items.length) dots($("#live-dots"), items); else $("#live-dots").remove();
+  }
+  $("#live-refresh").addEventListener("click", () => live(true));
 
   function range() {
     const host = $("#range"), runs = vis().filter((r) => r.pick?.expected_return_range);
@@ -105,11 +165,11 @@ const Perf = (() => {
 
   function weeks() {
     const rs = [...vis()].reverse();
-    $("#weeks").innerHTML = `<table class="tb"><thead><tr><th>주차</th><th class="l">종목</th><th>예측</th><th>수익률</th><th>벤치마크</th><th>초과</th><th class="l">범위</th></tr></thead><tbody>${rs.map((r) => {
+    $("#weeks").innerHTML = `<table class="tb"><thead><tr><th>주차</th><th class="l">종목</th><th>예측</th><th>수익률</th><th>벤치마크</th><th>초과</th><th class="l">예측 대비</th></tr></thead><tbody>${rs.map((r) => {
       const s = r.settled, p = r.pick || {}, v = num(s?.ret_pct);
       return `<tr class="click" data-k="${r.week}-${r.market}"><td>${lab(r)}</td><td class="l">${esc(p.name || "—")} <span class="muted mono">${esc(p.ticker || "")}</span></td>
         <td>${p.expected_return_range ? p.expected_return_range.join(" ~ ") : "—"}</td><td class="${sign(v)}">${pct(v)}</td><td>${s ? pct(num(s.benchmark_ret_pct)) : "—"}</td>
-        <td class="${sign(num(s?.excess_pct))}">${s ? pp(num(s.excess_pct)) : "—"}</td><td class="l">${s ? (s.hit_range === "Y" ? "적중" : "이탈") : `<span class="tag off">정산 대기</span>`}</td></tr>`;
+        <td class="${sign(num(s?.excess_pct))}">${s ? pp(num(s.excess_pct)) : "—"}</td><td class="l">${s ? outcomeTag(outcome(s.ret_pct, p.expected_return_range?.[0] ?? s.predicted_low, p.expected_return_range?.[1] ?? s.predicted_high)) : `<span class="tag off">정산 대기</span>`}</td></tr>`;
     }).join("")}</tbody></table>`;
     $$("#weeks tr.click").forEach((tr) => tr.addEventListener("click", () => detail(App.runs.find((r) => `${r.week}-${r.market}` === tr.dataset.k))));
   }
@@ -141,8 +201,8 @@ const Perf = (() => {
       <p class="hint">에이전트 한국/미국은 그 주 에이전트 추천을 그대로 골랐다면의 결과다. 직접 지정이 에이전트보다 나았는지 여기서 본다.</p>`;
   }
 
-  function render() { figs(); strip(); range(); contrib(); finals(); weeks(); }
+  function render() { live(); figs(); strip(); range(); contrib(); finals(); weeks(); }
   $$("#perf-mkt button").forEach((b) => b.addEventListener("click", () => { MKT = b.dataset.m; $$("#perf-mkt button").forEach((x) => x.setAttribute("aria-pressed", x === b)); render(); }));
-  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if ($("#v-perf").classList.contains("on")) { strip(); range(); } }, 150); });
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if ($("#v-perf").classList.contains("on")) { strip(); range(); live(); } }, 150); });
   return { render };
 })();

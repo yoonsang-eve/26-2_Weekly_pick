@@ -15,7 +15,8 @@ const Plan = (() => {
   const AGENTS = [["screener", "Screener"], ["analyst", "Analyst"], ["bull", "Bull"], ["bear", "Bear"], ["trader", "Trader"], ["settle", "정산"]];
   const PAUSE = { start: 900, done: 900, step: 350, search: 550, note: 700, wait: 900, error: 900 };
   const svg = $("#plan");
-  let S, EV = [], timer = null, es = null, speed = 1, cur = null, detail = null, source = "";
+  let S, EV = [], timer = null, es = null, speed = 1, cur = null, detail = null, source = "", seq = 0;
+  const MK = { KR: "한국", US: "미국" };
 
   // ---------------------------------------------------------------- 그리기
   // 위치(transform 속성)와 애니메이션(CSS transform)을 다른 g에 둔다. 같은 g에 두면 CSS가 위치를 덮어쓴다.
@@ -239,13 +240,30 @@ const Plan = (() => {
     tick();
   }
   async function load(run) {
-    cur = run;
-    const [ev, d] = await Promise.all([api(`/api/runs/${run.week}/${run.market}/events`), api(`/api/runs/${run.week}/${run.market}`)]);
-    EV = ev.events; source = ev.source; detail = d;
+    // 시작할 때 도면(KR)을 불러오는 중에 사용자가 미국을 고르면, 늦게 끝난 KR 응답이 제목·방 내용을
+    // 덮어써서 시장이 섞였다. 마지막 요청만 반영한다.
+    const my = ++seq;
+    stop();
+    $("#run").value = key(run);
+    let ev, d;
+    try {
+      [ev, d] = await Promise.all([api(`/api/runs/${run.week}/${run.market}/events`), api(`/api/runs/${run.week}/${run.market}`)]);
+    } catch (e) {
+      // 실패하면 이전 시장의 도면이 새 제목 아래 남아 섞여 보인다. 실패를 그대로 드러낸다
+      if (my !== seq) return;
+      cur = null; detail = null;
+      $("#plan-title").innerHTML = `${run.week}주차 <span class="mkt mkt-${run.market}">${run.market} ${MK[run.market]}</span>`;
+      $("#plan-src").innerHTML = `<span class="tag fail">불러오기 실패</span> ${esc(e.message)}`;
+      svg.innerHTML = ""; $("#log").innerHTML = "";
+      return;
+    }
+    if (my !== seq) return;
+    cur = run; EV = ev.events; source = ev.source; detail = d;
     const live = source === "recorded" && isLive(run);
-    $("#plan-title").textContent = `${run.week}주차 ${run.market === "KR" ? "한국" : "미국"}`;
+    $("#plan-title").innerHTML = `${run.week}주차 <span class="mkt mkt-${run.market}">${run.market} ${MK[run.market]}</span>`;
+    $("#v-desk").dataset.market = run.market;
     $("#plan-src").innerHTML = live ? `<span class="tag mark">실시간</span>` : source === "recorded" ? "기록된 실행을 재생" : "기록 도입 전 주차라 산출물로 복원해 재생";
-    $("#tb-run").textContent = `wk${run.week} ${run.market}  ${d.prompt_version || ""} ${d.mode || ""}`;
+    $("#tb-run").textContent = `wk${run.week} ${MK[run.market]}(${run.market})  ${d.prompt_version || ""} ${d.mode || ""}`;
     $("#tb-src").textContent = live ? "실시간" : source === "recorded" ? "events.jsonl" : "복원";
     $("#run").value = key(run);
     reset();
@@ -259,6 +277,7 @@ const Plan = (() => {
 
   // ---------------------------------------------------------------- 방 상세
   async function openRoom(id) {
+    if (!cur || !detail || detail.week !== cur.week || detail.market !== cur.market) return;
     const w = cur.week, m = cur.market;
     if (id === "scr") {
       const rows = detail.candidates.map((c) => {
@@ -268,14 +287,14 @@ const Plan = (() => {
         const r = num(co?.ret_pct);
         return `<tr><td>${esc(c.name)} <span class="muted mono">${c.ticker}</span></td><td class="l">${mark}</td><td>${f(c.ret_mom)}</td><td>${f(c.ret5)}</td><td>${f(c.atr20_pct)}</td><td class="${sign(r)}">${pct(r)}</td></tr>`;
       }).join("");
-      Modal.open(`스크리닝 결과  wk${w} ${m}`, `<table class="tb"><thead><tr><th>종목</th><th class="l">단계</th><th>모멘텀</th><th>5일</th><th>ATR%</th><th>그 주 실제</th></tr></thead><tbody>${rows}</tbody></table>
+      Modal.open(`스크리닝 결과  ${w}주차 ${MK[m]}`, `<table class="tb"><thead><tr><th>종목</th><th class="l">단계</th><th>모멘텀</th><th>5일</th><th>ATR%</th><th>그 주 실제</th></tr></thead><tbody>${rows}</tbody></table>
         <p class="hint">모멘텀은 최근 20영업일을 뺀 120영업일, 5일은 반전 조건(≤0). 실제 수익률은 cohort.py로 정산한 값이다.</p>`, "", true);
       return;
     }
     if (id === "set") {
       const s = detail.settled;
-      Modal.open(`정산  wk${w} ${m}`, s ? `<dl class="kv"><dt>종목</dt><dd>${esc(s.name)} ${s.ticker}</dd><dt>매수</dt><dd>${s.buy_date} 시가 ${(+s.buy_open).toLocaleString()}</dd><dt>매도</dt><dd>${s.sell_date} 종가 ${(+s.sell_close).toLocaleString()}</dd>
-        <dt>수익률</dt><dd class="${sign(+s.ret_pct)}">${pct(+s.ret_pct)}</dd><dt>${s.benchmark}</dt><dd>${pct(num(s.benchmark_ret_pct))}</dd><dt>초과</dt><dd>${pp(num(s.excess_pct))}</dd><dt>예측범위</dt><dd>${s.predicted_low}% ~ ${s.predicted_high}% (${s.hit_range === "Y" ? "적중" : "이탈"})</dd></dl>`
+      Modal.open(`정산  ${w}주차 ${MK[m]}`, s ? `<dl class="kv"><dt>종목</dt><dd>${esc(s.name)} ${s.ticker}</dd><dt>매수</dt><dd>${s.buy_date} 시가 ${(+s.buy_open).toLocaleString()}</dd><dt>매도</dt><dd>${s.sell_date} 종가 ${(+s.sell_close).toLocaleString()}</dd>
+        <dt>수익률</dt><dd class="${sign(+s.ret_pct)}">${pct(+s.ret_pct)}</dd><dt>${s.benchmark}</dt><dd>${pct(num(s.benchmark_ret_pct))}</dd><dt>초과</dt><dd>${pp(num(s.excess_pct))}</dd><dt>예측범위</dt><dd>${s.predicted_low}% ~ ${s.predicted_high}%</dd><dt>예측 대비</dt><dd style="font-family:var(--sans)">${outcomeTag(outcome(s.ret_pct, s.predicted_low, s.predicted_high))}</dd></dl>`
         : `<p>아직 정산 전이다. 매도일 종가가 확정되면 오른쪽 작업 패널의 5번에서 정산한다.</p>`);
       return;
     }
@@ -283,7 +302,7 @@ const Plan = (() => {
     const btns = stages.flatMap((s) => [detail.responses.includes(s) ? `<button class="btn sm" data-k="response" data-s="${s}">${s} 응답</button>` : "", `<button class="btn sm ghost" data-k="prompt" data-s="${s}">${s} 프롬프트</button>`]).join("");
     const st = stages.map((s) => detail.stages[s]).filter((x) => x?.model);
     const meta = st.map((x, i) => `${stages[i]} ${x.model}${x.elapsed_sec ? `, ${Math.round(x.elapsed_sec)}초` : ""}${x.web_search_calls ? `, 검색 ${x.web_search_calls}회` : ""}`).join(" / ");
-    Modal.open(`${ROOMS[id].name}  wk${w} ${m}`, `<p class="hint" style="margin:0 0 10px">${esc(meta)}</p><div style="display:flex;gap:6px;flex-wrap:wrap">${btns}</div><div class="doc" id="doc" style="margin-top:14px"></div>`, "", true);
+    Modal.open(`${ROOMS[id].name}  ${w}주차 ${MK[m]}`, `<p class="hint" style="margin:0 0 10px">${esc(meta)}</p><div style="display:flex;gap:6px;flex-wrap:wrap">${btns}</div><div class="doc" id="doc" style="margin-top:14px"></div>`, "", true);
     $$("#m-body [data-k]").forEach((b) => b.addEventListener("click", async () => {
       $$("#m-body [data-k]").forEach((x) => x.classList.toggle("primary", x === b));
       const t = await api(`/api/runs/${w}/${m}/text/${b.dataset.k}/${b.dataset.s}`).catch(() => "(파일 없음)");

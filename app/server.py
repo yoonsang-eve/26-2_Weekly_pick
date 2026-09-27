@@ -212,7 +212,8 @@ def _read_events(f: Path) -> list[dict]:
         for line in f.read_text(encoding="utf-8").splitlines():
             if line.strip():
                 try:
-                    out.append(json.loads(line))
+                    # 예전 기록에 NaN이 섞여 있어도 응답이 깨지지 않게 null로 바꾼다 (wk4 US 정산 실패분)
+                    out.append(json.loads(line, parse_constant=lambda _c: None))
                 except json.JSONDecodeError:
                     pass        # 쓰는 도중의 마지막 줄
     return out
@@ -297,6 +298,12 @@ def _events(week: int, market: str) -> tuple[list[dict], str]:
         raise HTTPException(404, "no such run")
     real = _read_events(d / "events.jsonl")
     if real:
+        # 파이프라인은 기록 도입 전에 돌고 정산만 기록된 주차(wk4)는 앞 단계가 비어 방이 전부 '대기'로 남는다.
+        # 기록에 없는 단계만 산출물로 복원해 앞에 붙인다.
+        have = {e.get("agent") for e in real}
+        if not have & {"screener", "analyst", "bull", "bear", "trader"}:
+            synth = [e for e in _synth_events(week, market, d) if e.get("agent") not in have]
+            return sorted(synth + real, key=lambda e: e.get("ts", "")), "recorded"
         return real, "recorded"
     return _synth_events(week, market, d), "reconstructed"
 
@@ -325,6 +332,53 @@ async def run_stream(week: int, market: str, request: Request, since: int = 0):
 
     return StreamingResponse(gen(), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache"})
+
+
+# ------------------------------------------------------------------ 실시간(잠정) 정산
+_live_cache: dict = {}
+
+
+def _live(week: int) -> dict:
+    import sys
+    import time
+
+    import yaml
+    sys.path.insert(0, str(ROOT / "src"))
+    import cohort
+
+    hit = _live_cache.get(week)
+    if hit and time.time() - hit[0] < 60:
+        return hit[1]
+    cfg = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
+    fin = _json(OUT / f"wk{week}" / "final.json")
+    markets = []
+    for m in ("KR", "US"):
+        extra = [str(fin["ticker"])] if fin and fin.get("market") == m else []
+        r = cohort.live(cfg, week, m, extra)
+        if r:
+            markets.append(r)
+    res = {"week": week, "markets": markets, "final": fin}
+    _live_cache[week] = (time.time(), res)
+    return res
+
+
+@app.get("/api/live")
+def live(week: int | None = None, fresh: int = 0):
+    """정산 전 주차의 잠정 수익률 (후보 전체 + 벤치마크 + 최종 선택). 시세만 쓴다, LLM 호출 없음.
+
+    week를 안 주면 후보가 있는 가장 최근 주차. 60초 캐시, fresh=1이면 새로 받는다.
+    """
+    if week is None:
+        wks = [w for w, _, d in _runs() if (d / "candidates.csv").exists()]
+        if not wks:
+            raise HTTPException(404, "후보가 있는 주차가 없다.")
+        week = max(wks)
+    if fresh:
+        _live_cache.pop(week, None)
+    try:
+        return _live(week)
+    except Exception as e:
+        raise HTTPException(502, f"시세 조회 실패: {e}")
 
 
 @app.get("/")
