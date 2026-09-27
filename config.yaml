@@ -15,15 +15,15 @@ meta:
   config_version: 3
 
 run:
-  week_no: 4
+  week_no: 5
   # 시장 공통 기본값. 휴장이 끼면 markets.{시장}.sell_date로 시장별로 덮어쓴다.
-  buy_date: "2026-09-21"
-  sell_date: "2026-09-25"
+  buy_date: "2026-09-28"
+  sell_date: "2026-10-02"
   # 운용 시장. 각 시장에서 독립적으로 1종목씩 추천한다 (KR 1 + US 1).
   markets: [KR, US]
   agent_mode: auto          # manual | auto
   # 실행 전 수동 확인. 평가 기간(buy_date~sell_date)에 걸리는 일정만 적는다.
-  macro_calendar: "KRX 추석 휴장 9/24(목)~9/25(금) — 한국 평가주간의 마지막 거래일은 9/23(수)다. 미국은 휴장 없음. (미국 지표 일정은 미확인)"
+  macro_calendar: ""
 
 universe:
   quota: {KR: 20, US: 20}   # 시장별 최종 후보 수. 시장마다 독립 파이프라인을 돌린다
@@ -50,8 +50,7 @@ markets:
     # 2026 추석: 9/25(금)이 추석, 연휴 9/24(목)~9/26(토), 대체공휴일 없음.
     # KRX는 9/24·9/25 휴장이므로 평가주간의 마지막 거래일이 9/23(수)이다.
     # 휴장이 없는 주에는 이 두 줄을 지우면 run.sell_date(금요일)를 그대로 쓴다.
-    sell_date: "2026-09-23"
-    holding_days: 3
+    holding_days: 5
     currency: KRW
     price_unit: "원"
     cap_unit: "억원"

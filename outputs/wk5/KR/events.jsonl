@@ -1,0 +1,39 @@
+{"ts": "2026-09-27T13:33:15.956", "agent": "screener", "kind": "start", "msg": "기준일 2026-09-25 종가"}
+{"ts": "2026-09-27T13:33:17.104", "agent": "screener", "kind": "step", "msg": "KRX 전체 상장", "data": {"n": 2870}}
+{"ts": "2026-09-27T13:33:17.113", "agent": "screener", "kind": "step", "msg": "KONEX 제외", "data": {"n": 2763}}
+{"ts": "2026-09-27T13:33:17.129", "agent": "screener", "kind": "step", "msg": "우선주 제외", "data": {"n": 2646}}
+{"ts": "2026-09-27T13:33:17.141", "agent": "screener", "kind": "step", "msg": "스팩 제외", "data": {"n": 2575}}
+{"ts": "2026-09-27T13:33:17.150", "agent": "screener", "kind": "step", "msg": "리츠 제외", "data": {"n": 2553}}
+{"ts": "2026-09-27T13:33:17.159", "agent": "screener", "kind": "step", "msg": "관리종목·투자주의환기 제외", "data": {"n": 2390}}
+{"ts": "2026-09-27T13:33:39.756", "agent": "screener", "kind": "step", "msg": "조회 성공", "data": {"n": 500}}
+{"ts": "2026-09-27T13:35:07.624", "agent": "screener", "kind": "start", "msg": "기준일 2026-09-25 종가"}
+{"ts": "2026-09-27T13:35:08.353", "agent": "screener", "kind": "step", "msg": "KRX 전체 상장", "data": {"n": 2870}}
+{"ts": "2026-09-27T13:35:08.357", "agent": "screener", "kind": "step", "msg": "KONEX 제외", "data": {"n": 2763}}
+{"ts": "2026-09-27T13:35:08.366", "agent": "screener", "kind": "step", "msg": "우선주 제외", "data": {"n": 2646}}
+{"ts": "2026-09-27T13:35:08.371", "agent": "screener", "kind": "step", "msg": "스팩 제외", "data": {"n": 2575}}
+{"ts": "2026-09-27T13:35:08.378", "agent": "screener", "kind": "step", "msg": "리츠 제외", "data": {"n": 2553}}
+{"ts": "2026-09-27T13:35:08.381", "agent": "screener", "kind": "step", "msg": "관리종목·투자주의환기 제외", "data": {"n": 2390}}
+{"ts": "2026-09-27T13:35:11.274", "agent": "screener", "kind": "step", "msg": "조회 성공", "data": {"n": 500}}
+{"ts": "2026-09-27T13:35:56.859", "agent": "screener", "kind": "start", "msg": "기준일 2026-09-25 종가"}
+{"ts": "2026-09-27T13:35:56.959", "agent": "screener", "kind": "step", "msg": "KRX 전체 상장", "data": {"n": 2870}}
+{"ts": "2026-09-27T13:35:56.967", "agent": "screener", "kind": "step", "msg": "KONEX 제외", "data": {"n": 2763}}
+{"ts": "2026-09-27T13:35:56.978", "agent": "screener", "kind": "step", "msg": "우선주 제외", "data": {"n": 2646}}
+{"ts": "2026-09-27T13:35:56.988", "agent": "screener", "kind": "step", "msg": "스팩 제외", "data": {"n": 2575}}
+{"ts": "2026-09-27T13:35:56.997", "agent": "screener", "kind": "step", "msg": "리츠 제외", "data": {"n": 2553}}
+{"ts": "2026-09-27T13:35:57.006", "agent": "screener", "kind": "step", "msg": "관리종목·투자주의환기 제외", "data": {"n": 2390}}
+{"ts": "2026-09-27T13:35:59.257", "agent": "screener", "kind": "step", "msg": "조회 성공", "data": {"n": 500}}
+{"ts": "2026-09-27T13:35:59.282", "agent": "screener", "kind": "step", "msg": "기준일 조정 2026-09-23 (금요일 휴장)"}
+{"ts": "2026-09-27T13:36:02.332", "agent": "screener", "kind": "step", "msg": "기준일 종가 보유 (거래정지 제외)", "data": {"n": 484}}
+{"ts": "2026-09-27T13:36:02.346", "agent": "screener", "kind": "step", "msg": "1. adv20 상위 300위", "data": {"n": 300}}
+{"ts": "2026-09-27T13:36:02.350", "agent": "screener", "kind": "step", "msg": "2. 시총 >= 2,000억", "data": {"n": 274}}
+{"ts": "2026-09-27T13:36:02.359", "agent": "screener", "kind": "step", "msg": "3. 120일 모멘텀(최근 20일 제외) 상위 40% & 5일 수익률 <= +0%", "data": {"n": 40}}
+{"ts": "2026-09-27T13:36:02.363", "agent": "screener", "kind": "step", "msg": "4. atr20_pct 정렬 후 상위", "data": {"n": 20}}
+{"ts": "2026-09-27T13:36:02.418", "agent": "screener", "kind": "done", "msg": "후보 20종목 확정", "data": {"n": 20, "tickers": ["002990 금호건설", "017900 광전자", "069540 빛과전자", "006110 삼아알미늄", "322000 HD현대에너지솔루션", "336260 두산퓨얼셀", "317400 자이에스앤디", "031980 피에스케이홀딩스", "047040 대우건설", "452280 한선엔지니어링", "093370 후성", "066970 엘앤에프", "053690 한미글로벌", "006360 GS건설", "004170 신세계", "009420 한올바이오파마", "241710 코스메카코리아", "257720 실리콘투", "073240 금호타이어", "214450 파마리서치"]}}
+{"ts": "2026-09-27T13:42:10.113", "agent": "analyst", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 4888}}
+{"ts": "2026-09-27T14:02:10.594", "agent": "analyst", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-09-27T14:02:14.614", "agent": "bull", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 7084}}
+{"ts": "2026-09-27T14:05:48.758", "agent": "bull", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-09-27T14:05:52.419", "agent": "bear", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 14443}}
+{"ts": "2026-09-27T14:11:16.064", "agent": "bear", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-09-27T14:11:18.825", "agent": "trader", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 24316}}
+{"ts": "2026-09-27T14:13:03.636", "agent": "trader", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": "031980"}}

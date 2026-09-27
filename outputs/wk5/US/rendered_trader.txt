@@ -1,0 +1,499 @@
+너는 최종 의사결정자다. 아래 매수 측과 매도 측 논거를 비교해 1개 종목을 선택한다.
+보유 기간은 2026-09-28 시가 매수 → 2026-10-02 종가 매도, 5영업일이다.
+대상 시장은 미국 (S&P 500 + Nasdaq 100)이며, 이 시장의 후보 중에서만 고른다. 다른 시장의 종목을
+가져오거나 두 시장을 비교하지 않는다.
+
+[시장 특성 — 판단에 반드시 반영할 것]
+- 가격·시가총액 단위는 USD다. 시총은 10억 달러($B) 단위로 표기했다.
+- 실적 발표는 ET 기준 날짜와 **장전(pre-market) / 장마감 후(after-hours)** 구분까지
+  확인하라. 이 정도로 짧은 평가 구간에서는 이 구분이 수익률 부호를 바꾼다.
+- 공시는 SEC EDGAR(8-K, S-1, 424B5, 13D/G) 원문으로 확인한다. 정규장은
+  09:30~16:00 ET.
+- 가격제한폭이 없다. 갭 상승·갭 하락이 KR보다 크므로 하방 시나리오를 더 크게 잡아라.
+- 섹터 로테이션과 금리(10Y), 달러인덱스 민감도를 반드시 확인하라.
+- 미국 공휴일(휴장)에 매수일이 걸리면 다음 영업일 시가가 매수가다.
+- 한국시간 금요일 기준으로는 미국 현지 금요일장이 아직 열리지 않았다. 스크리너가
+  출력한 '기준일'이 곧 확정된 마지막 종가일이며, 그 이후 가격은 모른다는 전제로 쓴다.
+
+[후보 정보]
+30회 검색 한도 안에서 20개 종목 전체를 먼저 한 번씩 훑고, 이번 주 매크로 일정과 실적 일정을 따로 확인한 뒤 테이블, 체크리스트, 3종목 압축 순서로 정리하겠습니다.검색은 30회 중 28회를 썼습니다. 20개 종목을 모두 한 번 이상 확인했고, 매크로·Micron·FDS 일정은 따로 확인했습니다. 가격은 스크리너 기준일인 9/25 종가를 기준으로 합니다. "5일 하방 기준치"는 검색으로 얻은 값이 아니라 스크리너의 ATR20/종가 × √5로 계산한 값이고, 실적이나 이벤트로 생기는 갭은 여기에 포함하지 않았습니다.
+
+---
+
+## 0. 평가 구간 매크로 배경 (확인된 것만)
+
+- **금리**: Fed가 9월 중순 hiking cycle을 시작했다. 10Y는 9/25에 5.17%로 소폭 내렸지만, 앞선 3거래일 동안 23bp 올라 5.20% 부근까지 갔었다. 10월 25bp 인상 확률은 약 66%다. 9/25 장중 고점은 2007년 6월 이후 최고치였다.
+- **유가**: 유가는 9/10에 $100를 넘었다. 9/25에는 미국과 이란 협상단이 단계적 합의를 모색한다는 신호에 하락했다.
+- **셧다운 리스크 없음**: 9/2 서명된 CR로 12/11까지 연방정부 예산이 확보됐다.
+- **이벤트**: 9/30에는 ADP, Q2 GDP 확정치, personal income/spending이 나온다. 금요일 NFP 컨센서스는 +100k(8월 162k), 실업률은 4.2%다. 같은 주에 JOLTS, ISM PMI, PCE도 발표된다.
+- **Peer 이벤트**: Micron은 9/30 ET 장마감 후 실적을 발표하고 16:30에 콜을 연다.
+- **DXY**: 수준 확인 불가.
+
+---
+
+## 1단계. 종목별 테이블
+
+| 종목 | 최근 상승(주가) 원인 | 9/28~10/2 예정 catalyst | 가격 반영 정도 | 5영업일 하방 리스크 |
+|:--|:--|:--|:--|:--|
+| **COHR** | 9/22 PhotonLink를 공개했고 Stifel이 Buy/$420을 유지했지만, 당일 -3.5%로 $310.39에 마감했다. | 자체 catalyst 없음. 다음 실적은 11/11. Micron 간접 영향 | 신제품 뉴스에도 하락. 9/25 $295.83까지 밀려 호재 소진 | ATR 기준 약 16.5% (후보 중 최대) |
+| **SNDK** | 9/4 investor day 이후 11.8% 급등. 9/21자로 S&P 100에 편입됐다. 9/22 Rosenblatt 신규 Buy($2,400)로 +6.82%, $1,887.04 | **Micron 9/30 AMC 실적·가이던스** (read-across) | 지수 편입과 initiation은 이미 반영. 9/22 고점 대비 약 -5.8%. MU도 9/22 print 전에 약 5% 올라 일부는 선반영 | 약 15.0%. 9/24 memory 3사가 장전 2% 넘게 하락한 전례 |
+| **DELL** | 9/1 AMC Q2 FY27 발표. 매출 $47.0B(+58%), EPS $7.04 FY27 매출 가이던스를 $192B로 상향. 9/18 52주 고점 $595.51, 9/22 -4.59% | 자체 catalyst 없음. Micron 간접 영향 (메모리는 원가 항목이라 방향 모호) | 실적·지수 편입 반영 완료. 고점 대비 -5.5% | 약 12.5%. CFO가 $585.02에 $13.98M 매도, Silver Lake도 매도 |
+| **GEN** | (하락) 9/24 GoDaddy 인수 추진 보도로 -12.05%, $23.07 | GoDaddy 건의 확인·부인 (**일정 없음**). 초기 단계이고 양사 모두 논평을 거부했다. | 이틀 동안 약 -30% 반영. Street 평균 목표가는 $33 유지 | 약 12.3%. StoneX는 GEN 순부채 $8B를 근거로 대규모 equity 조달 가능성을 지적했다. |
+| **HOOD** | 9/3 MS Overweight 상향($150)과 BTC $77k 돌파로 +15% 9/17 SEC tokenized stock innovation exemption | 확인된 것 없음. 실적은 11/3(추정) | 호재가 9월 초중순에 집중됐고 그 뒤 박스권 | 약 11.6%. 금리와 crypto에 민감. 9/15 직원 2명 사기 혐의 기소로 -4% |
+| **CVNA** | (보합) $1.66B TLB로 9% notes를 상환할 예정. 연간 이자 약 $45M 절감 | 확인 불가 | 호재에도 20일 -12.2% | 약 11.2%. 금리 민감. 12개월 insider 순매도 $332.9M |
+| **HPQ** | (하락) 9/21 8-K로 FY27 가이던스를 보류하고 CY27 PC 물량의 mid-single-digit 감소를 전제로 제시. 당일 -3.72% | 없음 | 악재 반영이 진행 중 (9/24 $31.18 → 9/25 $31.30) | 약 11.0%. 원가 상승이 계속된다고 언급 |
+| **EXPE** | (하락) 9/23 Meta Muse AI agent가 aggregator를 우회할 수 있다는 우려로 EXPE -7%. 회사 자체 공시는 없었다. | 없음 | 테마형 매도가 진행 중 | 약 10.7%. 유가와 금리에 민감 |
+| **CDW** | (하락) 9/24 -4.58%, $139.46. Barclays 목표가 $148. Lovelytics를 $525M에 인수(Q3 종결 예정) | 없음 | 확인 불가 | 약 10.3%. 인수 관련 senior notes 발행 |
+| **WDAY** | 8/27 Q2 FY27 매출 $2.649B(+12.8%), $1.3B 자사주 매입. 최근 3주 뉴스는 확인 불가 | 없음. 다음 실적은 11/24(추정) | 확인 불가 | 약 9.8%. 금리와 AI 대체 우려 |
+| **FDS** | (하락) 9/10 OpenAI ChatGPT for Financial Services 파트너 포함, 9/11 DB 목표가 $299로 상향, 9/14 Anthropic이 Claude for Financial Advisors 발표 | **자체 실적 9/30 장전(BMO)** EPS 컨센서스 $4.35, 매출 $629.7M | 20일 -10%로 AI 경쟁 우려가 반영된 상태에서 print를 맞음 | 약 9.6%에 실적 갭이 더해짐. Q1 FY26 발표 뒤 장중 -7.7% 전례 |
+| **CRM** | (하락) Dreamforce 기간 5거래일 -8.29%, 9/18 $237.92 9/16 글로벌 장애 | 없음 (Dreamforce 종료) | 이벤트 소진 | 약 8.7% |
+| **ARES** | 최근 3주 뉴스 확인 불가. 4월에 private credit fund 환매를 5%로 제한 | 확인 불가 | 확인 불가 | 약 8.5%. 금리와 private credit 심리 |
+| **VLO** | diesel crack이 사상 최고 $102.20. NYMEX 3:2:1 9월물 $69.92, 2027년 8월물 $44.38 | 확인된 일정 없음 (지정학 헤드라인) | 평균 목표가가 주가보다 31% 낮음. 선물 곡선이 정상화를 가격에 반영 중 | 약 8.5%. 이란 협상이나 공급 회복 뉴스 시 crack 급락 위험 |
+| **CNC** | DB 컨퍼런스에서 2026 EPS >$4.80 재확인. Q3 첫 두 달은 예상 부합 | 없음. 실적은 10/27 | 9/25까지 6일 연속 하락 | 약 8.3%. 연말까지 Medicaid 가입자 약 9% 감소 경고 |
+| **JBHT** | (하락) intra-quarter 경고 후 9/16 -13.3%, $236.73 Q3 EPS가 전분기 대비 5~10% 감소하고 연료비가 최소 $10M 부담 | 없음. 실적 10/15 추정 (10/20이라는 출처도 있음) | 경고는 반영됨 | 약 8.3%. diesel 민감 |
+| **MGM** | (하락) 9/23 장후 People Inc.가 $48.30 인수 제안을 철회. 지분 약 27%는 계속 보유 9/24 -10.99%, $33.69 | Macau National Day Golden Week 10/1~10/5. 9월 GGR 발표일은 확인 불가 | 인수 프리미엄 소멸분은 대부분 반영 | 약 8.0%. Citi는 9월 GGR을 MOP 18bn(-2% YoY)으로 전망 |
+| **APA** | 9/23 Stifel 신규 Buy($62)로 +4.16%. Eni가 Uruguay OFF-6 광구 40% 인수 | 없음 (유가) | 호재 반영 | 약 8.0%. 유가 하락 시 직격 |
+| **MPC** | VLO와 같은 crack spread 동인. 두 종목 모두 목표가($370, $355) 위에서 거래 | 확인된 일정 없음 | VLO와 동일 | 약 7.8% |
+| **ABNB** | (하락) Meta Muse 영향으로 9/23 -6%. 독점 listing 덕분에 상대적으로 방어적일 수 있다는 평가 | 없음 | 테마형 매도 | 약 7.8%. 유가와 금리 |
+
+---
+
+## 2단계. 개별 체크
+
+**평가 기간 중 실적 발표**
+- **FDS 9/30(수) 장전**: 프레젠테이션 8:30 ET, 콜 9:00 ET. 9/28 시가에 매수하면 발표 갭을 그대로 떠안습니다.
+- Peer 이벤트: **Micron 9/30 장후**. SNDK, DELL, COHR의 반응은 10/1 시가에 나타납니다.
+- 다음 실적일이 확인됐고 평가 구간 밖인 종목: COHR 11/11, GEN 11/5(추정), HOOD 11/3(추정), WDAY 11/24(추정), CNC 10/27, JBHT 10/15 또는 10/20.
+- 나머지(CVNA, EXPE, CDW, ARES, VLO, MPC, MGM, APA, ABNB, SNDK, HPQ, CRM, DELL)의 다음 일정은 확인 불가입니다. 다만 DELL과 CRM은 최근에 이미 발표를 마쳤습니다.
+
+**물량 출회**
+- SNDK: WDC는 7/3 기준 Sandisk 주식을 전혀 보유하지 않는다. 따라서 WDC발 overhang은 없습니다.
+- DELL: insider 매도가 이어지고 있습니다(Silver Lake, CFO). 9/15 $5B senior notes 발행을 완료했다. 이는 부채이고 희석은 아닙니다.
+- MGM: People Inc.의 27% 지분이 overhang으로 남아 있습니다.
+- GEN: 딜이 진행되면 equity 조달 가능성이 있습니다(StoneX 의견).
+- CDW, CVNA: 부채 조달이라 희석은 아닙니다.
+- **한계**: 나머지 종목은 EDGAR의 S-1, 424B5, 13D/G 원문을 개별로 조회하지 못했습니다(확인 불가).
+
+**배당락·분할·지수**
+- DELL 배당 $0.63, ex-date 10/20, APA $0.25, 기준일 10/22. 둘 다 평가 구간 밖입니다. COHR는 무배당이다.
+- DELL과 SNDK의 S&P 100 편입은 9/21에 이미 발효됐습니다.
+- 그 외 종목의 배당락, 액면분할, 편출입은 확인 불가입니다.
+
+**매크로 노출**
+- **금리↑에 불리**: WDAY, CRM, FDS, CDW(duration이 긴 software/data), HOOD, CVNA, ARES(credit). 10월 인상 확률이 약 66%라 NFP(10/2)가 가장 큰 공통 리스크입니다.
+- **유가↑에 유리**: VLO, MPC, APA. 미·이란 협상 진전은 이들에게 하방 리스크입니다.
+- **유가↑에 불리**: JBHT, EXPE, ABNB, MGM.
+- **환율(DXY)**: 수준을 확인하지 못해 판단에서 제외했습니다.
+
+---
+
+## 3단계. 3종목 압축
+
+**1. FDS: 자체 실적(9/30 BMO)**
+- 기간 안에 반드시 실현되는 유일한 자체 catalyst입니다.
+- 20일 -10% 상태에서 print를 맞기 때문에 AI 경쟁 우려가 얼마나 반영됐는지가 곧 잔여 여력입니다.
+- 하방 시나리오: 가이던스가 실망스러우면 ATR 기준치(약 9.6%)를 넘는 갭 하락이 가능합니다. 금리에도 민감합니다.
+
+**2. SNDK: Micron 9/30 AMC read-across**
+- 과거에도 peer memory 종목들은 자체 공시보다 Micron 코멘트에 따라 움직였다.
+- 지수 편입과 initiation 효과는 이미 소진됐고 9/22 고점 대비 약 -6%라서, 남은 동인은 Micron의 FQ1 가이던스입니다.
+- 하방 시나리오: 후보 중 변동성이 두 번째로 크고(약 15%), 가이던스가 실망스러우면 memory 섹터 전체가 동반 갭 하락할 수 있습니다.
+
+**3. MGM: Golden Week(10/1~5)** (가장 약한 픽)
+- 기간 안에 확정된 이벤트이고, Macau 역풍이 언급될 만큼 MGM은 Macau 노출이 있다.
+- 약점:
+  - 9월 GGR 발표일을 확인하지 못했습니다.
+  - Citi의 9월 GGR 전망이 YoY 마이너스입니다.
+  - 주가를 움직인 주된 요인은 Macau가 아니라 딜 철회였습니다.
+- 하방 시나리오: 약 8%. People Inc. 지분 overhang과 유가 부담이 있습니다.
+
+**탈락 사유 (각 한 줄)**
+- COHR: 기간 내 자체 catalyst가 없고 Micron 연결고리가 간접적입니다. 변동성은 최대입니다.
+- DELL: Micron 영향의 방향이 모호하고(메모리는 원가) insider 매도가 이어지고 있습니다.
+- GEN: GoDaddy 건은 일정이 없는 이진 이벤트라 5일 안에 해소된다는 근거가 없습니다. 차순위 후보입니다.
+- HOOD: 기간 내 catalyst를 확인하지 못했습니다.
+- CVNA: 기간 내 catalyst를 확인하지 못했습니다.
+- HPQ: 악재(8-K)는 이미 나왔고 기간 내 반전 catalyst가 없습니다.
+- EXPE: AI agent 테마 매도 외에 기간 내 이벤트가 없습니다.
+- CDW: 기간 내 catalyst가 없습니다.
+- WDAY: 실적은 11월이고 최근 뉴스도 확인 불가입니다.
+- CRM: Dreamforce가 끝나 이벤트가 소진됐습니다.
+- ARES: 최근 3주 뉴스와 기간 내 일정 모두 확인 불가입니다.
+- VLO: 예정된 catalyst가 없고 지정학 헤드라인에만 의존합니다.
+- MPC: VLO와 같은 사유입니다.
+- CNC: 실적(10/27)이 평가 구간 밖입니다.
+- JBHT: 실적(10/15 또는 10/20)이 평가 구간 밖입니다.
+- APA: 유가 외에 예정된 catalyst가 없습니다.
+- ABNB: EXPE와 같은 사유입니다.
+
+참고로 이 결과는 정해진 규칙에 따른 스크리닝 결과이고, 투자 권유가 아닙니다(저는 financial advisor가 아닙니다). 가장 큰 공백은 EDGAR 원문을 전수 확인하지 못한 점과 DXY 수준이므로, 실제로 사용하기 전에 이 두 가지는 따로 확인하시는 게 좋습니다.
+
+Sources:
+- [Trading Economics – Week Ahead Sep 28](https://tradingeconomics.com/calendar?article=29372&g=top&importance=2&startdate=2026-09-25)
+- [Trading Economics – US 10Y](https://tradingeconomics.com/united-states/government-bond-yield) · [CNBC – Sep 25 market](https://www.cnbc.com/amp/2026/09/24/stock-market-today-live-updates.html) · [CNBC US10Y](https://www.cnbc.com/quotes/US10Y)
+- [govtschemes – shutdown averted](https://govtschemes.org/government-shutdown-october-2026/)
+- [FactSet IR](https://investor.factset.com/news-releases/news-release-details/factset-schedules-fourth-quarter-2026-earnings-call) · [Alphastreet FDS preview](https://news.alphastreet.com/factset-research-systems-fds-q4-2026-preview-eps-est-4-35-reports-september-30/amp/) · [CNN FDS](https://www.cnn.com/markets/stocks/FDS)
+- [Vantage – Micron Sep 30](https://www.vantagemarkets.com/market-news/micron-fiscal-q4-earnings-30-september-2026-september-23-2026/) · [TradingKey MU](https://www.tradingkey.com/analysis/stocks/us-stocks/262188101-mu-dram-hbm-skhynix-samsung-tradingkey)
+- [FinanceFeeds SNDK](https://financefeeds.com/sandisk-sndk-stock-prediction-2650-bull-780-bear/) · [AD HOC SNDK](https://www.ad-hoc-news.de/boerse/news/corporate-news/sandisk-stock-rises-6-82-percent-ahead-of-the-open/70163312) · [WDC 10-K](https://www.sec.gov/Archives/edgar/data/0000106040/000162828026057139/wdc-20260703.htm)
+- [AD HOC DELL](https://www.ad-hoc-news.de/boerse/news/corporate-news/dell-technologies-stock-falls-4-59-percent-after-record-high/70165472) · [Tickeron DELL](https://tickeron.com/ticker/DELL/) · [Yahoo DELL](https://finance.yahoo.com/quote/DELL/)
+- [AD HOC COHR](https://www.ad-hoc-news.de/boerse/news/nebenwerte/coherent-stock-falls-after-a-3-5-percent-decline/70164748) · [TradingView COHR](https://www.tradingview.com/symbols/NYSE-COHR/)
+- [AD HOC GEN](https://www.ad-hoc-news.de/boerse/news/vorboerse/gen-digital-stock-fell-12-05-percent-ahead-of-the-open/70180562) · [GuruFocus GDDY](https://www.gurufocus.com/news/9095671/godaddy-stock-rises-after-norton-owner-makes-takeover-approach) · [Yahoo/TIKR GEN](https://finance.yahoo.com/markets/stocks/articles/gen-digital-stock-sank-12-054408704.html)
+- [StocksToTrade HOOD](https://stockstotrade.com/news/robinhood-markets-inc-hood-news-2026_09_03-2/) · [CNN HOOD](https://www.cnn.com/markets/stocks/HOOD)
+- [StockTitan CVNA](https://www.stocktitan.net/news/CVNA/) · [Benzinga HPQ](https://www.benzinga.com/trading-ideas/movers/26/09/61903671/why-is-hp-stock-falling-on-monday) · [AD HOC HPQ](https://www.ad-hoc-news.de/boerse/news/corporate-news/hp-inc-stock-falls-3-72-percent-ahead-of-the-open/70150032)
+- [Yahoo – travel/Muse](https://finance.yahoo.com/markets/stocks/articles/travel-booking-stocks-tumble-muse-180858515.html) · [AD HOC CDW](https://www.ad-hoc-news.de/boerse/news/corporate-news/cdw-corporation-stock-falls-4-58-percent-after-target-cut/70183731)
+- [WDAY 8-K](https://www.sec.gov/Archives/edgar/data/0001327811/000132781126000042/wday-07312026x991.htm) · [AD HOC CRM](https://www.ad-hoc-news.de/boerse/news/corporate-news/salesforce-stock-falls-during-dreamforce-as-jefferies-sticks-to-buy-rating/70143949)
+- [Option Beast refiners](https://wp.optionbeast.com/2026/09/15/the-refinery-truce-changes-the-trade-on-marathon-valero-and-phillips-66/) · [Benzinga refiners](https://www.benzinga.com/markets/commodities/26/09/61881898/diesel-squeeze-oil-refiners-stocks-four-top-performing-six-weeks-of-gains)
+- [AD HOC CNC](https://www.ad-hoc-news.de/boerse/news/corporate-news/centene-stock-gains-on-a-higher-2026-eps-outlook/70139362) · [Talk Business JBHT](https://talkbusiness.net/2026/09/j-b-hunt-expects-higher-costs-to-reduce-q3-earnings/)
+- [Investing.com MGM](https://www.investing.com/news/stock-market-news/why-is-mgm-resorts-stock-sliding-today-93CH-4914624) · [Futu – Citi Macau](https://news.futunn.com/en/post/79593265/citi-maintains-forecast-of-mop-18-billion-for-macau-s) · [Golden Week dates](https://casinonodeposits.org/macau-tourism-forecast-mid-autumn-golden-week-2026/)
+- [GlobeNewswire APA](https://www.globenewswire.com/news-release/2026/09/16/3363542/0/en/apa-corporation-declares-cash-dividend-on-common-shares-and-increases-share-repurchase-authorization.html) · [StocksToTrade APA](https://stockstotrade.com/news/apa-corporation-apa-news-2026_09_23/)
+
+[매수 측]
+9/28~10/2 구간의 bull case를 FDS, SNDK, MGM 순서로 정리하겠습니다. 수급 데이터(short interest, 거래량, options)와 9/25 이후 뉴스를 먼저 확인합니다.9/28 시가 매수 → 10/2 종가 매도 기준으로 FDS, SNDK, MGM의 상승 논거를 정리했습니다. 검색은 15회 사용했습니다.
+
+미리 알려드릴 점이 두 가지 있습니다.
+- **MGM에 스크리닝 단계에서 누락된 catalyst가 있습니다.** 9/24 장후 WSJ가 MGM이 People Inc. 인수를 검토 중이라고 보도했습니다. 아래 MGM 트리거에 반영했습니다.
+- **미국에는 KR식 "기관·외국인 일별 순매수" 데이터가 없습니다.** 13F는 분기 지연 공시라 5영업일 판단에는 쓸 수 없습니다. 그래서 수급 항목은 short interest, options positioning, 거래량으로 대체했습니다.
+
+시각 표기는 ET 기준이고, KST는 ET에 13시간을 더하면 됩니다(EDT 기간).
+
+---
+
+## FDS (FactSet)
+
+**1. +10% 시나리오**
+- Q4 FY26 실적이 컨센서스를 넘고, FY27 가이던스가 sell-side 기대 상단을 넘는 경우입니다.
+- 그러면 "AI disintermediation" 우려가 되돌려지고, 높은 short 포지션의 covering이 겹쳐 9/30 하루에 대부분의 상승이 나옵니다.
+- ATR 기준 5일 변동폭이 약 9.6%라서, +10%는 1σ를 넘는 이벤트 갭이 있어야 가능합니다.
+
+**2. 트리거**
+- **9/30(수) BMO 실적** [확인됨]. Q4 FY26(8/31 마감) 결과를 9/30에 발표하고, 같은 날 9:00 ET에 콜과 live Q&A를 진행합니다. 프레젠테이션은 8:30 ET(KST 21:30)에 IR 사이트에 올라옵니다.
+- 보도자료 배포 시각은 7:00 ET 전후로 추정합니다. 가격 반영은 9/30 프리마켓과 시가에서 일어납니다.
+- 체크할 기준치 [확인됨]:
+  - EPS 컨센서스 $4.35(전년 $4.05)
+  - 매출 추정 $629.7M(+5.5% YoY)
+- **FY27 가이던스 기준선** [확인됨, RBC 전망치]: RBC는 FY27 가이던스를 organic ASV 성장 4.5~6.5%, adjusted EPS 성장 약 7~10%로 예상합니다. 이 범위의 상단을 넘는 것이 시나리오의 핵심 조건입니다.
+
+**3. 아직 가격에 반영되지 않았다고 보는 근거**
+- **AI가 역풍이 아니라 매출원이라는 증거가 쌓이는 중입니다** [확인됨].
+  - Q3 organic ASV는 전분기 대비 $35.4M 늘어 컨센서스 $30M를 넘었고, 성장률은 6.7%에서 7.1%로 가속했습니다.
+  - Q3 ASV 증가분의 약 10%가 별도 AI SKU에서 나왔습니다. 전년에는 거의 없던 항목입니다.
+  - 그런데도 주가는 20일 -10%로 AI 경쟁 우려 쪽으로 움직였습니다.
+- **Q4 마진 회복을 회사가 예고했습니다** [확인됨]. RBC에 따르면 경영진은 Q4에 "의미 있는" 마진 회복을 제시했습니다. 이게 숫자로 확인되면 Q3의 약점(마진 미스)이 해소됩니다.
+- **직전 분기 패턴** [확인됨]. Q3 발표일(7/1)에 장중 급반전이 있었고, 이는 short가 높은 상태에서 실적을 맞은 것과 일치한다는 분석이 있습니다. 같은 포지셔닝 구조가 이번에도 반복되고 있습니다(아래 4번).
+- [추정] 20일 조정으로 AI 우려는 이미 가격에 들어갔고, 가이던스의 "안도"는 아직 들어가지 않았다고 봅니다.
+
+**4. 수급 근거**
+- **Short interest가 높고 늘고 있습니다** [확인됨, 9월 중순 기준].
+  - 4.5M주, float의 12.6%로 직전 대비 +24.4%입니다. 2025년 9월 이후로는 108.8% 늘었습니다.
+  - Days to cover는 5.3일입니다.
+  - 세 종목 중 squeeze 연료가 가장 구조적인 형태입니다. 이것은 FDS 단독 서술이고 비교 판단은 아닙니다.
+- **Sell-side 목표가 상향이 실적 전에 이어졌습니다** [확인됨]. Jefferies가 $253에서 $285로 올렸고(Hold 유지), Deutsche Bank, Morgan Stanley, RBC도 9/30 콜을 앞두고 목표가를 높였습니다.
+- 자사주 매입 [확인됨, 단 시점이 오래됨]. Q2 FY26 말 기준 $1B 한도 중 $697M가 남아 있었습니다. 실적 전후 blackout 여부는 확인 불가라서 평가 구간 수급으로는 추정 단계입니다.
+
+**이 논거를 깨는 것**: Zacks는 negative Earnings ESP를 제시했습니다. [확인됨] 11/10 Investor Day는 평가 구간 밖이라 가중치 0입니다.
+
+---
+
+## SNDK (Sandisk)
+
+**1. +10% 시나리오**
+- 기준가 참고: 9/25 종가 $1,777.80 [확인됨]. 매수가는 9/28 시가입니다.
+- Micron FQ4 결과보다 **FQ1 FY27 가이던스와 NAND 가격·수요 코멘트**가 기대를 넘는 경우입니다.
+- 그러면 10/1 시가에 memory 섹터 전체가 갭 상승하고, SNDK는 NAND 순수 노출(pure-play)이라 beta가 더 크게 나옵니다.
+- +10%는 대략 $1,955 부근이고, 9/22 종가 $1,887를 넘는 수준입니다.
+
+**2. 트리거**
+- **Micron 9/30(수) AMC 실적** [확인됨]. 장마감 후 발표하고 16:30 ET(KST 10/1 05:30)에 콜을 엽니다. SNDK 반응은 9/30 after-hours와 10/1 시가에 나타납니다.
+- 기준치 [확인됨]:
+  - EPS $31.56, 매출 $51.20B 컨센서스(33명). 추정 범위가 EPS $28.04~37.44로 넓습니다.
+  - 회사 FQ4 가이던스는 매출 $49~51B, EPS $30~32, GM 약 86%이고, 시장의 초점은 FQ1 FY27 가이던스입니다.
+- **SNDK에 직접 연결되는 변수** [확인됨]: Citi는 Micron의 가이던스 상회를 예상하며, Micron FQ3에 DRAM 가격이 60% 넘게, NAND 가격이 80% 넘게 올랐다고 짚었습니다. NAND 가격 코멘트가 SNDK 매출에 그대로 read-across됩니다.
+
+**3. 아직 가격에 반영되지 않았다고 보는 근거**
+- **고점 대비 할인 상태로 이벤트를 맞습니다** [확인됨]. Zacks 기준으로 9/24에 52주 고점 대비 23% 낮았습니다. S&P 100 편입과 Rosenblatt initiation 효과는 9/22 이후 되돌려졌습니다.
+- **직전 Micron 실적 때의 선례** [확인됨/추정].
+  - [확인됨] Micron FQ3 발표 뒤 Motley Fool은 Sandisk를 가장 큰 수혜주 중 하나로 다뤘습니다.
+  - [추정] 당시 일간 상승폭은 약 +10% 수준으로 보이지만, 정확한 일자별 수익률은 따로 확인해야 합니다.
+- **Micron의 선행 모멘텀이 아직 약합니다** [확인됨]. $1,095 저항선을 실적 전에 돌파하지 못하면 "sell the news" 신호일 수 있다는 분석이 있습니다. 9/23 MU 종가는 $1,071.88로 아직 저항선 아래입니다. [추정] 선반영이 완전하지 않다는 뜻으로도 읽을 수 있습니다.
+- [추정] 9/25 프리마켓에서 memory주가 반등했지만, 주간으로는 여전히 하락이라 기대치가 과열된 상태는 아니라고 봅니다.
+
+**4. 수급 근거**
+- **거래대금 급증 뒤 반등** [확인됨].
+  - 9/24에 -3.47%로 $1,753.62에 마감했고 거래량은 21.9M주였습니다. 평균 9.68M주의 약 2.3배입니다.
+  - 다음 날(9/25) 종가는 $1,777.80으로 올랐습니다.
+  - [추정] 대량 매도가 하루에 소화되고 가격이 지지된 패턴으로 봅니다.
+- **Short interest는 낮습니다. 이 부분은 약점입니다** [확인됨].
+  - 최근 short interest는 6.00M주로 발행주식의 4.10%입니다. 기준일은 확인 불가입니다.
+  - 7/15 기준 days to cover는 1.0일이었습니다.
+  - squeeze로 상승폭이 커질 여지는 제한적이고, 상승은 fundamental read-across에 의존합니다.
+- **지수 편입 관련 수급은 이미 끝났습니다**(9/21 발효). 평가 구간 안의 추가 passive 매수는 없다고 봅니다 [추정].
+- **자체 실적은 구간 밖입니다** [확인됨]. 다음 실적 추정일은 11/5 AMC입니다.
+
+**이 논거를 깨는 것**: 실적이 좋아도 HBM 가격이나 수요 지속성에 대한 표현이 약해지면 sell-the-news가 나올 수 있다는 경고가 있습니다. 공통 macro 이벤트로 10/2 NFP도 있습니다.
+
+---
+
+## MGM (MGM Resorts)
+
+**1. +10% 시나리오**
+- 기준가 참고: 9/24 종가 $33.69 [확인됨]. 9/25 종가는 스크리너 값을 쓰세요.
+- **+10%는 대략 People 철회 직전 종가로 되돌아가는 수준입니다.** 직전 종가는 $37.85였고, 9/24 시가는 $33.87이었습니다. [확인됨] 즉 이 시나리오는 "딜 철회로 빠진 부분의 되돌림"입니다.
+- 경로는 두 가지입니다.
+  - (a) MGM이 People 인수를 공식 제안해 사실상 대규모 자사주 매입 구조가 확정되는 경우
+  - (b) 10/1 Macau 9월 GGR과 Golden Week 초기 지표가 기대를 넘고, short covering이 겹치는 경우
+
+**2. 트리거**
+- **(a) MGM의 People Inc. 인수 제안** [확인됨: 보도 / 추정: 시점].
+  - WSJ는 9/24에 MGM이 People 인수 제안을 논의 중이며, 진행하면 며칠 안에 제안할 수 있다고 보도했습니다.
+  - Newsquawk는 이를 익명 소식통에 기반한 가장 초기 단계의 조건부 딜 루머로 분류했습니다.
+  - 확정된 날짜는 없습니다. 제안이 나오면 8-K와 보도자료로 확인할 수 있습니다.
+- **(b) Macau 9월 GGR 발표** [추정: 날짜].
+  - DICJ는 보통 다음 달 1일에 발표합니다. 작년 9월 GGR도 10/1에 발표됐습니다.
+  - 작년 보도 시각(05:10 UTC)으로 보면 **10/1 새벽 ET, 정규장 전**에 반영될 가능성이 큽니다.
+  - Golden Week은 10/1~10/5입니다. 일별 수치는 대부분 구간 밖에 나오므로 가중치가 낮습니다.
+
+**3. 아직 가격에 반영되지 않았다고 보는 근거**
+- **역인수 구조가 가격에 들어가지 않았습니다** [확인됨: 수치 / 추정: 해석].
+  - People의 약 27% 지분 가치가 People 자체 시가총액과 거의 같습니다.
+  - MGM에게는 대규모 자사주 매입을 실행하면서 People의 다른 자산까지 싼 값에 얻는 수단이 될 수 있습니다.
+  - 9/24 정규장에서는 거의 11% 떨어졌지만, 보도 이후 after-hours에서는 -0.3%로 안정됐습니다. [추정] 시장은 아직 이 옵션을 거의 반영하지 않았습니다.
+  - 제안이 확정되면 27% overhang이 제거되는 효과도 생깁니다.
+- **People도 거래 의향을 공식 문서로 남겼습니다** [확인됨]. 9/23 13D/A에 People이 MGM과의 전략적 거래 가능성에 여전히 열려 있고 관심이 있으며, 여러 대안을 검토하겠다고 적었습니다. 루머만이 아니라 SEC 공시로 확인되는 내용입니다.
+- **Macau 기대치가 이미 낮고, MGM China는 점유율이 개선되고 있습니다** [확인됨].
+  - Citi의 9월 GGR 전망은 MOP 18B(-2% YoY)입니다. 기대 기준선이 낮습니다.
+  - 9/18 Citi table survey에서 MGM China는 premium-mass 점유율 24%로 2위였습니다. 전년 9월에는 9%였습니다.
+  - Citi는 이벤트 일정 덕분에 10월 GGR 회복을 예상합니다.
+
+**4. 수급 근거**
+- **Options는 강하게 반등에 베팅하는 중입니다** [확인됨]. put/call ratio가 0.44까지 떨어져 52주 최저이고, 20일 평균보다 약 2.2 표준편차 낮습니다.
+- **Short는 급하게 늘었습니다. 이것이 squeeze 연료입니다** [확인됨]. 9/24 기준 short interest는 free float의 7.0%로 하루에 18% 늘었습니다. [추정] 딜 철회 직후 새로 들어온 short라 평균 단가가 낮고, (a) 트리거가 나오면 빠르게 covering될 수 있는 포지션입니다.
+- **Sell-side는 목표가를 낮췄지만 긍정 의견은 유지했습니다** [확인됨]. Susquehanna는 $55에서 $46으로, Mizuho는 $60에서 $55로 목표가를 내리면서 positive/outperform 의견은 유지했습니다. 두 목표가 모두 현재가보다 한참 위입니다.
+- 자사주 매입 재개 가능성 [추정]: 특별위원회 협상이 끝났으니 blackout이 풀렸을 수 있습니다. 다만 현재 남은 한도는 확인 불가입니다.
+
+**이 논거를 깨는 것**: Morgan Stanley는 Underweight에 목표가 $33입니다. MGM이 People 인수 자금을 부채로 조달할 경우 시장 반응 방향은 확인 불가입니다.
+
+---
+
+## 평가 구간 트리거 타임라인 (ET)
+
+| 일시 | 이벤트 | 해당 종목 | 상태 |
+|:--|:--|:--|:--|
+| 9/28~ (미정) | MGM의 People 인수 제안 가능성 | MGM | 보도 확인 / 시점 추정 |
+| 9/30 07:00경 / 08:30 / 09:00 | FDS Q4 FY26 보도자료 / 프레젠테이션 / 콜 | FDS | 08:30, 09:00 확인 / 07:00 추정 |
+| 9/30 16:00 이후 / 16:30 | Micron FQ4 발표 / 콜 | SNDK | 확인됨 |
+| 10/1 새벽 | Macau 9월 GGR (DICJ) | MGM | 추정 (전년 선례) |
+| 10/2 08:30 | NFP (세 종목 공통 macro) | 전체 | 확인됨 |
+
+이 문서는 매수 측 논거만 정리한 것이고 투자 권유가 아닙니다(저는 financial advisor가 아닙니다). 가장 큰 공백은 세 가지입니다: MGM 9/25 종가, FDS 보도자료 배포 시각, SNDK short interest 기준일. 반대 측(매도 측) 검증 단계에서 이 부분을 채우시면 좋겠습니다.
+
+Sources:
+- [FactSet IR – Q4 2026 earnings call](https://investor.factset.com/news-releases/news-release-details/factset-schedules-fourth-quarter-2026-earnings-call) · [Yahoo – FactSet schedules Q4](https://finance.yahoo.com/markets/stocks/articles/factset-schedules-fourth-quarter-2026-110000138.html) · [Alphastreet FDS preview](https://news.alphastreet.com/factset-research-systems-fds-q4-2026-preview-eps-est-4-35-reports-september-30/amp/)
+- [StockTitan FDS overview](https://www.stocktitan.net/overview/FDS/) · [Benzinga – RBC on FDS ASV](https://www.benzinga.com/analyst-stock-ratings/reiteration/26/07/60250455/factset-research-systems-rising-ai-adoption-bodes-well-for-subscription-value-growth-says-analyst) · [Perplexity Finance FDS](https://www.perplexity.ai/finance/FDS) · [Alphaseeker FDS Q3](https://alphaseeker84.substack.com/p/factset-research-systems-fds-q3-fy2026) · [Yahoo – FDS mixed earnings setup](https://finance.yahoo.com/markets/stocks/articles/factset-mixed-earnings-setup-could-011500949.html) · [FDS Q2 FY26 presentation](https://investor.factset.com/static-files/e24493a8-95d4-4911-be9f-8ea84b109a84)
+- [Alphastreet MU preview](https://news.alphastreet.com/micron-technology-mu-q4-2026-preview-eps-est-31-56-reports-september-30/) · [TradingKey MU preview](https://www.tradingkey.com/analysis/stocks/us-stocks/262184360-mu-q4-micron-dram-skhynix-samsung-hbm-nvda-jay-tradingkey) · [TradingKey MU $1,100](https://www.tradingkey.com/analysis/stocks/us-stocks/262188101-mu-dram-hbm-skhynix-samsung-tradingkey) · [Investing.com MU outlook](https://www.investing.com/news/stock-market-news/micron-earnings-outlook-what-to-watch-ahead-of-the-september-30-report-93CH-4911385) · [Motley Fool – Citi on MU](https://www.fool.com/investing/2026/09/24/micron-stock-gets-a-big-wall-street-boost-ahead-of-earnings/)
+- [Morningstar SNDK](https://www.morningstar.com/stocks/xnas/sndk/quote) · [AD HOC SNDK 9/24](https://www.ad-hoc-news.de/boerse/news/vorboerse/sandisk-stock-slips-3-47-percent-ahead-of-the-open/70180745) · [Robinhood SNDK](https://robinhood.com/us/en/stocks/SNDK/) · [StockAnalysis SNDK stats](https://stockanalysis.com/stocks/sndk/statistics/) · [ShortInterestTracker SNDK](https://shortinteresttracker.com/stock/SNDK) · [Motley Fool – SNDK after MU](https://www.fool.com/investing/2026/07/01/sandisk-is-big-winner-after-micron-earnings/)
+- [SEC – People 13D/A](https://www.sec.gov/Archives/edgar/data/0000789570/000110465926110214/primary_doc.xml) · [Reuters via WTVB – MGM bid for People](https://wtvbam.com/2026/09/24/mgm-discusses-bid-for-barry-dillers-people-inc-wsj-reports/) · [Yahoo/Investing – MGM weighs bid](https://finance.yahoo.com/markets/stocks/articles/mgm-resorts-weighs-potential-takeover-222637423.html) · [Newsquawk](https://www.newsquawk.com/headlines/mgm-resorts-mgm-eyes-a-bid-for-barry-dillers-people-incorporated-ppli-while-an-offer-could-be-made-in-the-coming-days-according-to-wsj) · [ORTEX MGM](https://ortex.news/articles/173252/mgm-call-buyers-clash-with-rising-short-tide) · [Defense World MGM](https://www.defenseworld.net/2026/09/25/mgm-resorts-international-nysemgm-shares-gap-down-on-analyst-downgrade.html) · [AD HOC MGM](https://www.ad-hoc-news.de/boerse/news/vorboerse/mgm-resorts-stock-heads-into-the-open-after-a-10-99-percent-drop/70180485) · [Investing.com MGM](https://ca.investing.com/news/stock-market-news/why-is-mgm-resorts-stock-sliding-today-93CH-4851179)
+- [Macau Business – Citi table survey](https://macaubusiness.com/citi-cuts-macau-september-casino-revenue-forecast-after-weak-table-survey/) · [Futu – Citi MOP18B](https://news.futunn.com/en/post/79593265/citi-maintains-forecast-of-mop-18-billion-for-macau-s) · [AASTOCKS – Citi Oct recovery](https://www.aastocks.com/en/stocks/news/aafn-con/now.1545697/latest-news) · [Bloomberg – Sep 2025 GGR release](https://www.bloomberg.com/news/articles/2025-10-01/macau-gaming-revenue-misses-estimate-in-post-summer-slowdown)
+
+[매도 측]
+세 종목의 매수 논거를 검증하고 하방 시나리오를 구성하겠습니다. 검색 30회를 종목당 약 7회, 매크로 약 5회, 예비 약 4회로 나눠 쓰겠습니다.검색은 30회 중 27회를 썼습니다. 기준가는 9/25(금) 종가이고, 그 이후 가격은 모르는 것으로 전제합니다. "-5% 가격" 같은 수치는 검색값이 아니라 제가 계산한 값이며 (계산)으로 표시했습니다.
+
+---
+
+## 0. 공통 매크로 (세 종목 모두에 해당)
+
+- **금리·달러**: DXY는 9/25에 101.03으로 전일보다 0.25% 내렸지만, 한 달간 1.88% 올랐고 4거래일 연속 상승하면서 약 두 달 만의 최고 수준에 있습니다. SocGen은 10Y가 2023년 고점(5.02%)을 넘어 상승 추세를 이어가고 있고, 의미 있는 되돌림 신호는 아직 보이지 않는다고 봤습니다.
+- **Fed**: Fed는 지난주 25bp 인상했고 향후 결정은 데이터에 따른다는 입장입니다.
+- **이번 주 일정**: 9/29에는 JOLTS와 Consumer Confidence, 9/30에는 ADP, PCE, Personal Income/Spending, Chicago PMI, Q2 GDP 확정치가 나옵니다. 10/2에는 NFP가 있습니다.
+  - **FDS 실적(9/30 BMO)과 PCE가 같은 날 아침에 겹칩니다.**
+
+---
+
+## FDS (FactSet): 기준가 $271.11
+
+FDS는 9/25에 $271.11로 하락 마감했고, beta 0.56으로 시장 민감도가 낮은 편입니다.
+
+### 1. -5% 이상 하락 시나리오 (≈$257.6 이하, 계산)
+
+- 9/30 BMO 실적에서 **FY27 가이던스 중간값이 컨센서스를 밑돌면** 9/30 시가에 갭 하락합니다. Q4 마진이 회복되지 않았다는 숫자가 함께 나와도 같은 결과입니다.
+- 같은 날 08:30 PCE가 예상보다 높으면 금리 경로가 다시 불리해지고 하락이 커집니다.
+- 선례: 1년 전 같은 Q4 발표(FY 가이던스를 처음 내놓는 분기)에서 FY 가이던스와 그에 따른 마진 전망 때문에 주가가 장중 8.8% 빠지며 S&P 500 최대 하락 종목 중 하나가 됐습니다.
+
+### 2. 매수 논거 검증
+
+- **"Sell-side가 실적 전 목표가를 연이어 올렸다" → 과장입니다.**
+  - 올린 곳이 모두 중립 의견입니다. Jefferies는 $253에서 $285로 올렸지만 Hold를 유지했고, Deutsche Bank도 $299로 올리면서 Hold를 유지했습니다. Morgan Stanley는 $230에서 $300으로 올렸지만 의견은 Hold입니다.
+  - Wells Fargo의 목표가는 $210입니다.
+  - 7월 기준 컨센서스 의견은 'Reduce'였고, 당시 주가는 평균 목표가보다 6~7% 높았습니다.
+  - 9/10 기준 집계로는 Strong Buy 1, Buy 2, Hold 10, Sell 6으로 'Reduce'이고 평균 목표가는 $265였습니다. 현재가($271.11)가 평균 목표가보다 위에 있습니다. 단, 이 집계를 실은 기사는 같은 글에서 "Q4 2026 실적 발표 후"라고 잘못 서술하고 있어 참고치로만 보셔야 합니다.
+- **"Q3 발표일 장중 급반전 = short 구조 반복" → 비교 대상이 잘못됐습니다.**
+  - Q3 발표일에도 가이던스가 문제였습니다. 회사는 FY26 adj. EPS 가이던스 $17.25~17.75를 유지했는데, 중간값 $17.50이 컨센서스 $17.71보다 낮았고 주가는 프리마켓에서 2.81% 하락했습니다.
+  - 이번 9/30 발표의 구조는 Q3가 아니라 작년 Q4와 같습니다. 작년 Q4에는 EPS $4.05로 예상 $4.13에 못 미쳤고, FY26 가이던스 $16.90~17.60도 컨센서스 $18.27보다 낮았습니다.
+- **"Q4 마진 회복을 예고했다" → 회복은 upside가 아니라 넘어야 할 기준선입니다.**
+  - Q3 adj. operating margin은 34.0%로 전년 36.8%보다 낮았고, 보상비와 기술 비용 증가가 원인이었습니다.
+  - 콜에서는 보상 관련 비용이 전년 대비 7% 늘었고, FX 헤지가 약 60bp 부담이 됐으며, 전년 Q4가 강해 비교가 어렵다는 이유로 가이던스를 올리지 않았다고 밝혔습니다.
+- **"자사주 한도 $697M 잔여" → 오래된 수치입니다.** 2026년 5/31 기준으로 자사주 매입 한도는 $494.0M 남아 있습니다.
+- **"EPS 컨센서스 $4.35"** → 출처에 따라 다릅니다. Zacks 기준으로는 $4.32이고, 최근 30일 동안 0.3% 상향됐습니다.
+- **Short interest 12.6%** → 사실입니다. 다만 해석을 달리 볼 수 있습니다. short interest는 직전 대비 24.4% 늘었고, 2025년 9월 이후로는 108.8% 증가했습니다. 이는 실적 직전까지 공매도 측이 포지션을 계속 늘리고 있다는 뜻이기도 합니다.
+
+### 3. 하방 요인
+
+- **차익실현**: 최근 상승폭이 거의 없어서 차익실현 매물보다는 하락 추세가 이어지는 것이 리스크입니다.
+  - 최근 한 달 수익률은 -10.9%로, 같은 기간 S&P 500(+0.7%)보다 크게 부진했습니다.
+  - 9/24에는 2.93% 떨어진 $271.25로 마감해 52주 고점 $320.48보다 15.36% 낮은 위치입니다.
+  - 단기 과열 지표(RSI 등)는 확인 불가입니다.
+- **이벤트 리스크**:
+  - 9/30 BMO 실적이 유일한 확정 이벤트입니다. Most Accurate Estimate가 컨센서스보다 낮아 Earnings ESP는 -2.21%이고 Zacks Rank는 #3입니다.
+  - 유상증자, CB, 보호예수, 소송은 검색 범위 안에서 확인되지 않았습니다(확인 불가).
+  - BCC Group 인수는 조건이 공개되지 않았고, 회사는 재무적 영향이 크지 않다고 밝혔습니다.
+- **매크로 노출**:
+  - 민감도는 낮습니다. SPY와의 상관계수가 0.02입니다. 따라서 하방은 거의 전부 실적 이벤트에서 나옵니다.
+  - 다만 투자자들이 금융 데이터와 브로커리지 종목에서 AI 중심 기술주로 옮겨가는 흐름과 함께 약세를 보였다는 분석이 있어 섹터 수급은 불리합니다.
+- **Sell the news**:
+  - AI 관련 호재(ChatGPT for Financial Services 파트너 참여), 목표가 상향, 인수 발표는 모두 이미 공개됐습니다.
+  - 11/10 Investor Day가 예정돼 있어, 중장기 청사진이 이번 콜이 아니라 그때로 미뤄질 수 있습니다(추정).
+
+### 4. 절대 사면 안 되는 단 하나의 이유
+
+최근 두 번의 가이던스 이벤트(2025년 9월 FY26 첫 가이던스, 2026년 7월 재확인)에서 모두 중간값이 컨센서스보다 낮았고, 9/30은 FY27 가이던스를 처음 내놓는 바로 그 자리입니다.
+
+---
+
+## SNDK (Sandisk): 기준가 $1,777.80
+
+9/25 종가는 $1,777.80(+1.38%)이고, after-hours에서는 $1,772.10(-0.32%)이었습니다.
+
+### 1. -5% 이상 하락 시나리오 (≈$1,689 이하, 계산)
+
+- Micron(9/30 AMC)이 실적은 beat하지만 FQ1 가이던스나 NAND 가격 코멘트가 "기대 수준"에 그치는 경우입니다.
+- 그러면 10/1 시가에 memory 섹터 전체에 sell-the-news가 나오고, 10/2 NFP 금리 쇼크가 겹칩니다.
+- 스크리너 ATR 기준으로 5일 변동폭이 약 15%라서, -5%는 1σ 안의 흔한 움직임입니다.
+
+### 2. 매수 논거 검증
+
+- **"Micron의 선행 모멘텀이 아직 약하다($1,095 미돌파)" → 사실과 다릅니다.**
+  - MU는 5% 오른 세션 뒤 $1,096.16으로 마감했고, 그 주 누적 상승률은 18.17%였습니다.
+  - 월요일 +2.8%, 화요일 +5% 오른 뒤 2.2% 밀렸습니다. 9/23 종가는 $1,071.88입니다.
+  - 즉 $1,095를 한 번 넘었다가 다시 아래로 내려온 것입니다. 매수 측이 인용한 바로 그 분석이 이런 흐름을 경고 신호로 봅니다. 실적 전에 $1,095를 넘지 못하고 밀리면 "buy the rumor, sell the news" 신호일 수 있고, HBM 가격이나 수요 지속성에 대한 표현이 조금만 약해져도 beat에도 sell-the-news가 나올 수 있다고 했습니다.
+- **"기대치가 과열된 상태가 아니다" → 반대 근거가 확인됩니다.**
+  - 애널리스트 기대치는 회사 가이던스의 중상단까지 올라와 있습니다.
+  - Rosenblatt는 또 한 번의 "beat-and-raise"를 예상합니다.
+  - MU를 커버하는 29명 중 28명이 Buy입니다.
+- **"직전 Micron 실적 때 SNDK +10%" → 그 뒤가 빠져 있습니다.**
+  - SNDK는 6/22 장중 52주 고점 $2,354.39를 찍은 뒤 30% 넘게 하락했습니다.
+  - CNBC는 6/25 Micron이 blowout 실적으로 급등했다고 보도했습니다. 그런데 6/26에는 memory 랠리가 식으면서 SNDK가 7% 빠져 $2,176까지 내려갔습니다.
+  - 이어 7/2에는 이틀 연속 하락 끝에 11% 떨어진 $1,802를 기록했습니다.
+  - 지난 Micron 호재는 결과적으로 단기 고점이었습니다.
+- **"NAND 가격 80% 이상 상승" → 이미 지난 분기 수치이고, 상승률은 감속 중입니다.**
+  - NAND 계약가 상승률은 2분기 70~75%에서 이번 분기 10~15%로 크게 둔화될 전망이고, Sandisk 분기 순차 매출 성장의 약 3분의 2가 가격에서 나왔습니다.
+  - TrendForce의 4Q26 전망은 NAND 전체 +15~20% QoQ인데, enterprise SSD(+23~28%)가 끌어올린 것이고 consumer 쪽은 소폭 상승에 그칩니다. 가격 모멘텀이 enterprise 한 곳에 몰려 있다는 뜻입니다.
+
+### 3. 하방 요인
+
+- **차익실현**:
+  - 1개월 +18.57%, YTD +648.93%입니다.
+  - 9/22 고점($1,887) 부근이 단기 저항입니다.
+  - 9/21에는 memory 종목이 모두 오르는 가운데 SNDK만 2% 빠졌는데, 이는 몰려 있던 포지션을 줄이는 모습으로 해석됐습니다.
+  - 경영진 매도: CEO Goeckeler는 9/14 10b5-1 계획에 따라 주당 약 $1,522에 매도했습니다.
+- **이벤트 리스크**:
+  - 자체 실적은 구간 밖입니다(다음 실적 추정일 11/5 AMC).
+  - 유상증자, CB, 보호예수 해제는 확인되지 않았습니다.
+  - **Good news에 하락한 선례가 있습니다.** 8월 자체 Q4 실적은 EPS가 13.47% beat였는데도 after-hours에서 12.1% 빠졌습니다.
+  - **중국 공급 헤드라인**: 9/24로 예상된 Trump-Xi 회담 뒤 Apple의 CXMT/YMTC 구매가 허용될 수 있다는 소식통 보도가 있었습니다. 이 보도가 처음 나왔을 때 SNDK는 약 9% 하락했습니다.
+    - 다만 원 기사 스스로도 이 루머를 "가능성 낮음"으로 평가했습니다.
+    - 회담 결과는 확인 불가입니다. 헤드라인 리스크로만 분류합니다.
+- **매크로 노출**: 금리에 가장 민감합니다. 9/24에는 회사 뉴스가 없었는데도 10Y가 2007년 이후 최고치인 5.12%에 오르자 memory 3사가 프리마켓에서 2% 넘게 빠졌고, 중국 memory 공급 증가도 함께 주시되고 있었습니다.
+- **Sell the news**: S&P 100 편입, Rosenblatt initiation, investor day는 모두 소진됐습니다. 남은 Micron 이벤트도 "beat는 기본값"으로 가격에 들어가 있습니다. 매출이 전년 대비 346% 늘었던 Q3에 이어, 이번에는 EPS가 전분기 대비 약 24% 더 뛰어야 하는 높은 기준입니다.
+
+### 4. 절대 사면 안 되는 단 하나의 이유
+
+최근 memory 대형 호재 두 번(6월 Micron blowout, 8월 자체 beat-and-raise)이 모두 며칠 안에 두 자릿수 하락으로 끝났고, 이번에는 그 호재가 이미 기본값으로 가격에 들어가 있습니다.
+
+---
+
+## MGM (MGM Resorts): 기준가 ≈$32.58 (계산)
+
+9/25 정규장 변동은 -$1.11(-3.29%)이었고 after-hours 종가는 $32.74였습니다. 9/24 종가 $33.69에서 빼면 9/25 종가는 약 $32.58입니다(계산). 매수 측이 "확인 불가"로 남긴 공백이 이것으로 채워집니다.
+
+### 1. -5% 이상 하락 시나리오 (≈$30.95 이하, 계산)
+
+- (a) 9/28~10/2 사이 MGM의 People 인수 제안이 나오지 않거나, 나오더라도 부채 조달 구조라 레버리지 우려가 커지는 경우
+- (b) 10/1 발표되는 9월 Macau GGR이 이미 낮춰진 Citi 전망마저 밑도는 경우
+- (c) 딜 기대로 들어왔던 event-driven 자금의 청산 매물이 계속 나오는 경우
+- 셋 중 하나만 일어나도 $31선 아래로 내려갈 수 있습니다. 52주 저점은 $29.18입니다.
+
+### 2. 매수 논거 검증
+
+- **"보도 후 after-hours -0.3%로 안정됐으니 시장은 역인수 옵션을 반영하지 않았다" → 틀렸습니다.** 시장은 보도 다음 정규장에서 이 옵션을 오히려 부정적으로 가격에 넣었습니다. 두 회사 모두 WSJ 보도를 공식 확인하지 않았고, MGM은 금요일 오전에도 3% 하락했습니다.
+- **"+10% = 철회 직전 종가 $37.85로의 되돌림" → 기준가가 틀렸습니다.**
+  - 9/25 종가(≈$32.58)에서 $37.85로 가려면 약 +16.2%가 필요합니다(계산).
+  - 게다가 $37.85는 $48.30 인수 제안이 살아 있던 시점의 종가라서 딜 프리미엄이 들어 있는 가격입니다.
+- **"역인수는 사실상 대규모 자사주 매입" → 조달과 전략 측면의 반대 근거가 확인됩니다.**
+  - CNBC의 David Faber는 Diller가 물러선 이유 중 하나로 딜이 만들어낼 막대한 부채를 꼽았습니다.
+  - 업계에서는 차입 비용과 규제 승인 문제가 딜을 무산시켰다고 보고, MGM이 출판사를 인수해서 얻는 전략적 가치도 분명하지 않다고 평가합니다. Salem 의장도 인수 추진을 시사하지 않았습니다.
+  - 6월 기준 MGM의 debt-to-equity는 1.93이고, 2026년 EPS는 약 40% 감소가 예상됐습니다.
+- **"Macau 기대치가 이미 낮다" → 전망치가 계속 하향되는 방향입니다.**
+  - Citi는 9월 초 9월 GGR을 +12%(MOP20.5bn)로 전망했습니다.
+  - 이후 MOP18bn(-2% YoY)으로 낮췄고, 업계 자료로는 VIP 베팅액이 전월 대비 15~18%, 중간급(mass) 게이밍 매출이 13~16% 줄었습니다.
+  - 작년에도 9월 GGR은 추정치를 밑돌았습니다.
+  - "Citi 9/18 table survey에서 MGM China 점유율 24%"는 확인 불가입니다.
+- **"Short 급증 = squeeze 연료" → 해석이 편향돼 있습니다.** short interest는 9/24 free float의 7.0%로 하루에 18% 늘었습니다. 같은 시기 put/call ratio는 0.44까지 내려갔지만 주가는 한 달간 23% 떨어졌습니다. Call 매수가 가격을 떠받치지 못하는 상황에서, 새로 들어온 short는 추가 하락에 베팅하는 포지션입니다.
+- 경미한 사항: 매수 측은 13D/A를 9/23 제출로 적었지만, ORTEX는 제출일을 9/24, 지분율을 26.5%로 기재했습니다.
+
+### 3. 하방 요인
+
+- **차익실현·청산 매물**: 이 종목은 상승폭이 아니라 딜 청산 매물이 문제입니다. Truist는 주가 하락이 인수 기대에 베팅했던 event-driven 투자자들의 이탈을 반영한 것이라고 봤고, BofA는 Neutral·목표가 $40으로 커버리지를 재개했습니다.
+- **이벤트 리스크**:
+  - WSJ는 MGM이 결정하면 며칠 안에 제안할 수 있다고 보도했습니다. 확정된 날짜는 없습니다.
+  - People의 27% 지분은 overhang으로 남아 있습니다. People은 6,680만 주(약 27%)를 계속 보유하며 여러 대안을 검토하겠다고 밝혔습니다. 이 "대안"에 지분 매각이 포함될지는 추정입니다.
+  - 실적은 구간 밖입니다. 10/28 예정이고, 직전 실적 때는 발표일 -1.2%, 이후 5거래일 -3.7%였습니다.
+  - 유상증자·CB·소송은 확인 불가입니다.
+- **매크로 노출**:
+  - 레버리지가 높아 금리(10Y 5%대)에 불리합니다.
+  - 유가 상승에 불리합니다(스크리너 분류 기준).
+  - Mizuho는 Las Vegas, Macau, digital 모두 단기적으로 부진할 것으로 봤습니다.
+- **Sell the news**: 역인수 보도는 9/24 장후에 이미 나왔고, 다음 날 주가는 하락했습니다. 실제 제안이 나오더라도 부채로 조달하는 구조라면 호재로 받아들여진다는 근거가 없습니다.
+
+### 4. 절대 사면 안 되는 단 하나의 이유
+
+매수 논거의 핵심 트리거가 두 회사 모두 확인하지 않은 익명 소식통 보도인데, 시장은 그 보도가 나온 다음 날 주가를 3.3% 더 끌어내렸습니다.
+
+---
+
+**확인 불가로 남은 항목**
+- 세 종목의 EDGAR 원문 전수 조회(S-1, 424B5 등)
+- Trump-Xi 회담 결과
+- 2026년 9월 Macau GGR 발표일(10/1이 확실한지)
+- MGM China table survey 수치
+- FDS·MGM의 단기 과열 지표
+
+매도 측 논거만 정리한 문서라 균형 잡힌 평가가 아니고, 투자 권유도 아닙니다(저는 financial advisor가 아닙니다).
+
+Sources:
+- [MarketChameleon FDS](https://marketchameleon.com/Overview/FDS/Summary/) · [Yahoo – FDS Q4 estimates](https://finance.yahoo.com/markets/stocks/articles/ahead-factset-fds-q4-earnings-121513578.html) · [TradingView/Zacks FDS preview](https://www.tradingview.com/news/zacks:5aa9b3041094b:0-factset-to-report-q4-earnings-what-s-in-store-for-the-stock/) · [Yahoo – FDS ESP](https://finance.yahoo.com/markets/stocks/articles/factset-research-fds-reports-next-140002620.html) · [StockTitan FDS](https://www.stocktitan.net/overview/FDS/) · [Investing.com FDS Q3](https://ng.investing.com/news/stock-market-news/factset-stock-falls-3-on-mixed-guidance-despite-third-quarter-beat-93CH-2582099) · [Yahoo – FDS Q3 call](https://finance.yahoo.com/markets/stocks/articles/factset-research-systems-inc-fds-210048881.html) · [StockTitan FDS Q3](https://www.stocktitan.net/news/FDS/fact-set-reports-results-for-third-quarter-htoi23eochw6.html) · [Yahoo – FDS Q4 FY25](https://finance.yahoo.com/news/factset-shares-dip-q4-earnings-113539826.html) · [Benzinga FDS](https://benzinga.com/z/47764932) · [Perplexity FDS](https://www.perplexity.ai/finance/FDS) · [AD HOC FDS 9/24](https://www.ad-hoc-news.de/boerse/news/corporate-news/factset-research-systems-stock-falls-2-93-percent-as-targets-diverge/70182937) · [AD HOC FDS 9/11](https://www.ad-hoc-news.de/boerse/news/corporate-news/factset-research-stock-falls-after-q4-2026-earnings-and-higher-morgan/70088006) · [CNN FDS](https://www.cnn.com/markets/stocks/FDS) · [Yahoo FDS quote](https://finance.yahoo.com/quote/FDS/) · [Investing.com BCC](https://uk.investing.com/news/stock-market-news/factset-acquires-bcc-group-to-expand-market-data-platform-93CH-4877503)
+- [StockAnalysis SNDK](https://stockanalysis.com/stocks/sndk/) · [StockAnalysis SNDK stats](https://stockanalysis.com/stocks/sndk/statistics/) · [CNBC SNDK](https://www.cnbc.com/quotes/SNDK) · [Investing.com SNDK](https://www.investing.com/equities/sandisk-corp) · [Forbes SNDK](https://www.forbes.com/sites/investor-hub/article/sandisk-stock-over-574-where-its-heading-2026/) · [Investing.com – Sandisk earnings impact](https://www.investing.com/news/stock-market-news/sandisk-earnings-impact-on-micron-western-digital-and-seagate-93CH-4839061) · [Yahoo – SNDK sinks 11%](https://finance.yahoo.com/markets/stocks/articles/sandisk-sinks-11-seagate-falls-160250009.html) · [CNBC – Citi on SNDK](https://www.cnbc.com/2026/06/25/micron-soars-on-strong-earnings-thats-good-for-sandisk-citi-says.html) · [24/7 Wall St. SNDK](https://247wallst.com/investing/2026/09/21/sandisk-falls-2-despite-memory-rally-micron-advances-3-western-digital-nudges-higher/) · [24/7 Wall St. MU](https://247wallst.com/investing/2026/09/23/micron-wall-street-target-hits-2000-as-traders-pile-in-before-earnings/) · [Investing.com MU outlook](https://www.investing.com/news/stock-market-news/micron-earnings-outlook-what-to-watch-ahead-of-the-september-30-report-93CH-4911385) · [TradingKey MU](https://www.tradingkey.com/analysis/stocks/us-stocks/262188101-mu-dram-hbm-skhynix-samsung-tradingkey) · [Yahoo – MU 279% rally](https://finance.yahoo.com/markets/stocks/articles/microns-279-rally-heading-big-152309318.html) · [StockAnalysis MU](https://stockanalysis.com/stocks/mu/) · [TipRanks 9/24 (1)](https://www.tipranks.com/news/why-micron-sandisk-and-sk-hynix-stocks-are-down-today-sep-24-and-what-wall-street-sees-next) · [TipRanks 9/24 (2)](https://www.tipranks.com/news/why-micron-sandisk-and-sk-hynix-stocks-are-falling-today) · [Motley Fool – NAND pricing](https://www.fool.com/investing/2026/08/23/sandisk-rode-an-estimated-70-jump-in-nand-prices-trendforce-sees-10-to-15-this-quarter/) · [TrendForce 3Q26](https://www.trendforce.com/presscenter/news/20260703-13134.html) · [TrendForce 4Q26](https://www.trendforce.com/research/download/RP260924PL) · [SEC Form 4 SNDK](https://www.sec.gov/Archives/edgar/data/0002023554/000124264826000032/edgardoc.xml) · [Digitimes CXMT/YMTC](https://www.digitimes.com/news/a20260826PD216/ymtc-apple-cxmt-market-capacity.html) · [TUAW](https://www.tuaw.com/2026/08/26/trump-eyes-apple-china-memory-deal-for-trade-leverage) · [Invezz 8/24](https://invezz.com/news/2026/08/24/why-are-micron-sk-hynix-sandisk-stocks-falling-today/)
+- [Finviz MGM](https://finviz.com/stock?t=MGM) · [AD HOC MGM](https://www.ad-hoc-news.de/boerse/news/vorboerse/mgm-resorts-stock-heads-into-the-open-after-a-10-99-percent-drop/70180485) · [Defense World MGM](https://www.defenseworld.net/2026/09/25/mgm-resorts-international-nysemgm-shares-gap-down-on-analyst-downgrade.html) · [CNBC MGM](https://www.cnbc.com/2026/09/24/barry-diller-people-mgm-resorts.html) · [iGaming Business MGM](https://igamingbusiness.com/casino/mgm-people-inc-flipped-september-2026/) · [BigGo MGM](https://finance.biggo.com/news/962697b8-b62f-492f-8801-a841b2cd031f) · [Yahoo – Mizuho on MGM](https://finance.yahoo.com/markets/stocks/articles/mgm-stock-tumbles-barry-diller-162524837.html) · [Yahoo – MGM leverage](https://finance.yahoo.com/markets/stocks/articles/billionaire-barry-diller-making-18m-200002818.html) · [ORTEX MGM](https://ortex.news/articles/173252/mgm-call-buyers-clash-with-rising-short-tide) · [Deadline](https://deadline.com/2026/09/barry-diller-people-inc-merger-mgm-resorts-1237113781/) · [Bloomberg – WSJ report](https://www.bloomberg.com/news/articles/2026-09-24/mgm-resorts-is-discussing-making-a-bid-for-people-wsj) · [Variety](https://variety.com/2026/biz/news/barry-diller-mgm-resorts-abandons-acquisition-bid-people-inc-1236873791/) · [InterGame – Citi +12%](https://www.intergameonline.com/land-based-gaming/news/macau-september-ggr-tipped-rise-12) · [Futu – Citi MOP18bn](https://news.futunn.com/en/post/79593265/citi-maintains-forecast-of-mop-18-billion-for-macau-s) · [Bloomberg – Sep 2025 GGR miss](https://www.bloomberg.com/news/articles/2025-10-01/macau-gaming-revenue-misses-estimate-in-post-summer-slowdown)
+- [Trading Economics DXY](https://tradingeconomics.com/united-states/currency) · [FXStreet week ahead](https://www.fxstreet.com/analysis/forecasting-the-upcoming-week-the-rba-is-set-to-hike-rates-nfp-shifts-the-focus-to-us-jobs-202609251659) · [FXStreet DXY/10Y](https://www.fxstreet.com/news/united-states-dollar-index-gains-ahead-of-weekly-initial-jobless-claims-data-202609240919)
+
+## 판단 기준
+
+1순위: 2026-10-02 이전에 실현 가능한 catalyst의 구체성. 날짜가 특정되지 않은 catalyst는 없는 것으로 본다
+2순위: 매도 측 반박이 매수 논거의 핵심을 무너뜨렸는지 여부. 주변부 반박은 감점하지 않는다
+3순위: 상방과 하방의 비대칭성. 하방이 제한적이면서 상방 트리거가 있는 쪽을 택한다
+
+다음은 판단에 사용하지 않는다: 장기 성장성, 밸류에이션, 기업 규모, 브랜드 인지도, 과거 주가 실적.
+
+## 출력
+
+먼저 3개 종목의 비교 논증을 서술하고, 마지막에 아래 JSON을 코드블록 없이 단독으로 출력한다.
+market 값은 "US" 로 고정한다.
+
+{
+  "market": "US",
+  "ticker": "",
+  "name": "",
+  "thesis": ["", "", ""],
+  "catalyst": "날짜가 포함된 구체적 이벤트",
+  "expected_return_range": [하한, 상한],
+  "primary_risk": "",
+  "rejected": [{"ticker": "", "reason": ""}, {"ticker": "", "reason": ""}]
+}

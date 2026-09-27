@@ -1,0 +1,25 @@
+{
+  "week": 5,
+  "market": "US",
+  "mode": "manual",
+  "prompt_version": "v2",
+  "config_version": 3,
+  "stages": {
+    "analyst": {
+      "rendered_at": "2026-09-27T14:02:54",
+      "model": ""
+    },
+    "bull": {
+      "rendered_at": "2026-09-27T14:08:59",
+      "model": ""
+    },
+    "bear": {
+      "rendered_at": "2026-09-27T14:12:34",
+      "model": ""
+    },
+    "trader": {
+      "rendered_at": "2026-09-27T14:18:11",
+      "model": ""
+    }
+  }
+}

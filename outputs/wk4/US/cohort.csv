@@ -1,0 +1,21 @@
+﻿week,market,ticker,name,role,buy_date,sell_date,buy_open,sell_close,ret_pct
+4,US,NBIS,Nebius Group,candidate,2026-09-21,2026-09-25,225.96,237.33,5.03
+4,US,CIEN,Ciena,finalist,2026-09-21,2026-09-25,365.05,356.91,-2.23
+4,US,CRWV,CoreWeave,candidate,2026-09-21,2026-09-25,81.56,87.59,7.39
+4,US,WDC,Western Digital,candidate,2026-09-21,2026-09-25,455.64,456.81,0.26
+4,US,AXON,Axon Enterprise,candidate,2026-09-21,2026-09-25,446.42,430.11,-3.65
+4,US,SMCI,Supermicro,candidate,2026-09-21,2026-09-25,40.63,43.26,6.47
+4,US,TER,Teradyne,candidate,2026-09-21,2026-09-25,378.71,398.38,5.19
+4,US,LRCX,Lam Research,candidate,2026-09-21,2026-09-25,292.49,315.21,7.77
+4,US,ON,ON Semiconductor,candidate,2026-09-21,2026-09-25,71.0,77.2,8.73
+4,US,HPE,Hewlett Packard Enterprise,candidate,2026-09-21,2026-09-25,62.65,62.94,0.46
+4,US,FLEX,Flex Ltd.,candidate,2026-09-21,2026-09-25,110.48,114.68,3.8
+4,US,AMAT,Applied Materials,candidate,2026-09-21,2026-09-25,455.95,485.0,6.37
+4,US,KLAC,KLA Corporation,candidate,2026-09-21,2026-09-25,179.3,187.92,4.81
+4,US,FIX,Comfort Systems USA,candidate,2026-09-21,2026-09-25,1667.72,1658.91,-0.53
+4,US,CASY,Casey's,candidate,2026-09-21,2026-09-25,591.0,598.46,1.26
+4,US,AKAM,Akamai Technologies,candidate,2026-09-21,2026-09-25,106.04,113.94,7.45
+4,US,TRI,Thomson Reuters,candidate,2026-09-21,2026-09-25,94.95,98.99,4.25
+4,US,MPWR,Monolithic Power Systems,finalist,2026-09-21,2026-09-25,1243.25,1367.4301,9.99
+4,US,GEV,GE Vernova,candidate,2026-09-21,2026-09-25,955.0,957.63,0.28
+4,US,QCOM,Qualcomm,pick,2026-09-21,2026-09-25,180.61,201.97,11.83
