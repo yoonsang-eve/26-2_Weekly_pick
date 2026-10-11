@@ -436,7 +436,7 @@ def main() -> int:
     provider = None
     if mode == "auto":
         try:
-            provider = llm_mod.build(cfg)
+            provider = llm_mod.build(cfg, week)
         except llm_mod.LLMError as e:
             print(f"LLM 설정 오류:\n{e}\n\n"
                   f"설정을 채우기 전까지는 `--mode manual`로 프롬프트만 뽑아 쓸 수 있다.",

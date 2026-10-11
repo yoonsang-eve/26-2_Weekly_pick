@@ -1,0 +1,10 @@
+{
+  "choice": "US",
+  "market": "US",
+  "ticker": "LRCX",
+  "name": "Lam Research",
+  "source": "agent",
+  "week": 7,
+  "note": "Selector 추천(LRCX)을 사용자가 확정",
+  "chosen_at": "2026-10-11T17:28:18"
+}

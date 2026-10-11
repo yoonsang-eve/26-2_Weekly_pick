@@ -1,0 +1,11 @@
+{
+  "market": "KR",
+  "week": 7,
+  "ref_date": "2026-10-08",
+  "buy_date": "2026-10-12",
+  "sell_date": "2026-10-16",
+  "holding_days": 5,
+  "n_candidates": 20,
+  "config_version": 3,
+  "screened_at": "2026-10-11T17:06:09"
+}

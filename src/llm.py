@@ -54,6 +54,58 @@ class Reply:
     web_searches: int = 0
 
 
+def billed_input(usage: dict) -> int:
+    """과금되는 입력 토큰. 캐시 쓰기·읽기도 입력으로 센다 (보수적으로)."""
+    return sum(int(usage.get(k) or 0) for k in
+               ("input_tokens", "prompt_tokens",
+                "cache_creation_input_tokens", "cache_read_input_tokens"))
+
+
+def billed_output(usage: dict) -> int:
+    return int(usage.get("output_tokens") or usage.get("completion_tokens") or 0)
+
+
+class Budget:
+    """주차 단위 토큰 상한 (config llm.token_budget).
+
+    호출할 때마다(서버 검색의 pause_turn 라운드 포함) 사용량을
+    outputs/wk{N}/llm_spend.jsonl에 바로 적는다. 실패한 호출도 돈은 나가므로
+    run_meta.json(성공한 단계만 기록)이 아니라 이 장부로 센다. 같은 단계를 실수로
+    여러 번 돌려도 장부가 누적되므로 주차 상한에서 멈춘다.
+    상한을 올리려면 config를 고치거나 장부 파일을 지운다 — 둘 다 의도적인 행동이어야 한다.
+    """
+
+    def __init__(self, ledger: Path, conf: dict):
+        self.ledger = ledger
+        self.max_input = int(conf.get("week_input") or 0)
+        self.max_output = int(conf.get("week_output") or 0)
+        self.per_call_input = int(conf.get("per_call_input") or 0)
+
+    def spent(self) -> tuple[int, int]:
+        i = o = 0
+        if self.ledger.exists():
+            for line in self.ledger.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    r = json.loads(line)
+                    i += int(r.get("input") or 0)
+                    o += int(r.get("output") or 0)
+        return i, o
+
+    def check(self) -> None:
+        i, o = self.spent()
+        if (self.max_input and i >= self.max_input) or (self.max_output and o >= self.max_output):
+            raise LLMError(
+                f"주차 토큰 예산 소진 — 입력 {i:,}/{self.max_input:,}, 출력 {o:,}/{self.max_output:,} "
+                f"({self.ledger.relative_to(ROOT)}). 더 쓰려면 config llm.token_budget을 올릴 것.")
+
+    def record(self, model: str, usage: dict) -> None:
+        self.ledger.parent.mkdir(parents=True, exist_ok=True)
+        row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "model": model,
+               "input": billed_input(usage), "output": billed_output(usage)}
+        with self.ledger.open("a", encoding="utf-8") as fp:
+            fp.write(json.dumps(row) + "\n")
+
+
 def _sleep(attempt: int) -> None:
     time.sleep(min(2 ** attempt + random.random(), 30))
 
@@ -92,6 +144,7 @@ class OpenAICompatProvider:
         self.supports_web_search = bool(conf.get("web_search"))
         self.timeout = timeout
         self.max_retries = max_retries
+        self.budget: Budget | None = None
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
                  temperature: float | None, web_search: bool,
@@ -108,6 +161,8 @@ class OpenAICompatProvider:
         }
         if temperature is not None:
             body["temperature"] = temperature
+        if self.budget:
+            self.budget.check()
 
         last = ""
         for attempt in range(self.max_retries + 1):
@@ -118,7 +173,10 @@ class OpenAICompatProvider:
                 last = f"네트워크 오류: {e}"
             else:
                 if r.status_code == 200:
-                    return self._parse(r.json(), model)
+                    reply = self._parse(r.json(), model)
+                    if self.budget:
+                        self.budget.record(reply.model, reply.usage)
+                    return reply
                 last = f"HTTP {r.status_code}: {r.text[:500]}"
                 if r.status_code not in RETRY_STATUS:
                     break
@@ -173,6 +231,7 @@ class AnthropicProvider:
         self.max_uses = int(conf.get("max_web_searches") or 8)
         # pause_turn을 몇 번까지 이어받을지. 검색 예산이 클수록 더 필요하다.
         self.max_pause_rounds = int(conf.get("max_pause_rounds") or 8)
+        self.budget: Budget | None = None
 
     def complete(self, *, model: str, prompt: str, max_tokens: int,
                  temperature: float | None, web_search: bool,
@@ -217,6 +276,8 @@ class AnthropicProvider:
 
         for round_no in range(self.max_pause_rounds):
             kwargs["messages"] = messages
+            if self.budget:
+                self.budget.check()
             try:
                 with self.client.messages.stream(**kwargs) as s:
                     if on_search is not None:
@@ -246,9 +307,17 @@ class AnthropicProvider:
                         if isinstance(v2, (int, float)):
                             acc[k2] = acc.get(k2, 0) + v2
             last = msg
+            if self.budget:
+                self.budget.record(msg.model, msg.usage.model_dump() if msg.usage else {})
 
             if msg.stop_reason != "pause_turn":
                 break
+            # pause_turn을 이어받으면 지금까지의 대화 전체가 다시 입력으로 들어간다.
+            # 한 호출이 상한을 넘었으면 이어받지 않고 끊는다.
+            cap = self.budget.per_call_input if self.budget else 0
+            if cap and billed_input(usage) >= cap:
+                raise LLMError(f"호출 1회 입력 토큰 상한 초과 ({billed_input(usage):,} >= {cap:,}). "
+                               f"검색 예산(llm.search_budget)을 줄일 것.")
             print(f"    pause_turn — 턴 이어받기 {round_no + 1}/"
                   f"{self.max_pause_rounds - 1}")
             messages = messages + [{"role": "assistant", "content": msg.content}]
@@ -266,14 +335,22 @@ class AnthropicProvider:
 
 # ------------------------------------------------------------------ 팩토리
 
-def build(cfg: dict):
+def build(cfg: dict, week: int | None = None):
     load_dotenv()
     llm = cfg["llm"]
     provider = llm.get("provider", "openai_compat")
     timeout = int(llm.get("timeout_sec") or 900)
     retries = int(llm.get("max_retries") or 2)
     if provider == "openai_compat":
-        return OpenAICompatProvider(llm.get("openai_compat") or {}, timeout, retries)
-    if provider == "anthropic":
-        return AnthropicProvider(llm.get("anthropic") or {}, timeout, retries)
-    raise LLMError(f"알 수 없는 llm.provider: {provider}")
+        p = OpenAICompatProvider(llm.get("openai_compat") or {}, timeout, retries)
+    elif provider == "anthropic":
+        p = AnthropicProvider(llm.get("anthropic") or {}, timeout, retries)
+    else:
+        raise LLMError(f"알 수 없는 llm.provider: {provider}")
+    if llm.get("token_budget"):
+        wk = week or cfg["run"]["week_no"]
+        p.budget = Budget(ROOT / "outputs" / f"wk{wk}" / "llm_spend.jsonl", llm["token_budget"])
+        i, o = p.budget.spent()
+        print(f"토큰 예산 wk{wk}: 입력 {i:,}/{p.budget.max_input:,} · 출력 {o:,}/{p.budget.max_output:,} "
+              f"· 호출당 입력 {p.budget.per_call_input:,}")
+    return p

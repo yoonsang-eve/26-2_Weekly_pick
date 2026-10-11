@@ -1,0 +1,58 @@
+{"ts": "2026-10-11T17:05:40.118", "agent": "screener", "kind": "start", "msg": "기준일 2026-10-09 종가"}
+{"ts": "2026-10-11T17:05:41.084", "agent": "screener", "kind": "step", "msg": "KRX 전체 상장", "data": {"n": 2872}}
+{"ts": "2026-10-11T17:05:41.086", "agent": "screener", "kind": "step", "msg": "KONEX 제외", "data": {"n": 2765}}
+{"ts": "2026-10-11T17:05:41.098", "agent": "screener", "kind": "step", "msg": "우선주 제외", "data": {"n": 2648}}
+{"ts": "2026-10-11T17:05:41.101", "agent": "screener", "kind": "step", "msg": "스팩 제외", "data": {"n": 2577}}
+{"ts": "2026-10-11T17:05:41.103", "agent": "screener", "kind": "step", "msg": "리츠 제외", "data": {"n": 2555}}
+{"ts": "2026-10-11T17:05:41.105", "agent": "screener", "kind": "step", "msg": "관리종목·투자주의환기 제외", "data": {"n": 2391}}
+{"ts": "2026-10-11T17:06:06.458", "agent": "screener", "kind": "step", "msg": "조회 성공", "data": {"n": 500}}
+{"ts": "2026-10-11T17:06:06.474", "agent": "screener", "kind": "step", "msg": "기준일 조정 2026-10-08 (금요일 휴장)"}
+{"ts": "2026-10-11T17:06:08.968", "agent": "screener", "kind": "step", "msg": "기준일 종가 보유 (거래정지 제외)", "data": {"n": 485}}
+{"ts": "2026-10-11T17:06:08.977", "agent": "screener", "kind": "step", "msg": "1. adv20 상위 300위", "data": {"n": 300}}
+{"ts": "2026-10-11T17:06:08.982", "agent": "screener", "kind": "step", "msg": "2. 시총 >= 2,000억", "data": {"n": 280}}
+{"ts": "2026-10-11T17:06:08.990", "agent": "screener", "kind": "step", "msg": "3. 120일 모멘텀(최근 20일 제외) 상위 40% & 5일 수익률 <= +0%", "data": {"n": 58}}
+{"ts": "2026-10-11T17:06:08.997", "agent": "screener", "kind": "step", "msg": "4. atr20_pct 정렬 후 상위", "data": {"n": 20}}
+{"ts": "2026-10-11T17:06:09.039", "agent": "screener", "kind": "done", "msg": "후보 20종목 확정", "data": {"n": 20, "tickers": ["002990 금호건설", "336260 두산퓨얼셀", "119850 지엔씨에너지", "024840 KBI메탈", "008930 한미사이언스", "446540 메가터치", "241710 코스메카코리아", "332570 PS일렉트로닉스", "319660 피에스케이", "000500 가온전선", "047040 대우건설", "095610 테스", "006260 LS", "093370 후성", "402340 SK스퀘어", "475150 SK이터닉스", "000150 두산", "252990 샘씨엔에스", "006360 GS건설", "483650 달바글로벌"]}}
+{"ts": "2026-10-11T17:08:53.187", "agent": "analyst", "kind": "start", "msg": "claude-sonnet-5-5 호출 · 검색 예산 10", "data": {"model": "claude-sonnet-5-5", "budget": 10}}
+{"ts": "2026-10-11T17:09:01.967", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:15.385", "agent": "analyst", "kind": "search", "msg": "2026년 10월 한글날 휴장 코스피 10월 12일 증시 일정 금통위 10월 FOMC 미국 CPI"}
+{"ts": "2026-10-11T17:09:16.531", "agent": "analyst", "kind": "search", "msg": "금호건설 주가 10월 2026 공시"}
+{"ts": "2026-10-11T17:09:16.535", "agent": "analyst", "kind": "search", "msg": "대우건설 GS건설 주가 10월 2026 건설주 3분기 실적"}
+{"ts": "2026-10-11T17:09:16.539", "agent": "analyst", "kind": "search", "msg": "두산퓨얼셀 두산 SK이터닉스 주가 2026년 10월"}
+{"ts": "2026-10-11T17:09:16.542", "agent": "analyst", "kind": "search", "msg": "가온전선 LS 주가 2026년 10월 공시"}
+{"ts": "2026-10-11T17:09:16.546", "agent": "analyst", "kind": "search", "msg": "지엔씨에너지 후성 주가 2026년 10월"}
+{"ts": "2026-10-11T17:09:16.558", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:19.101", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:22.867", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:26.773", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:29.738", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:35.378", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:39.685", "agent": "analyst", "kind": "search", "msg": "피에스케이 테스 샘씨엔에스 메가터치 PS일렉트로닉스 KBI메탈 주가 10월 2026"}
+{"ts": "2026-10-11T17:09:39.877", "agent": "analyst", "kind": "search", "msg": "SK스퀘어 두산 LS 후성 SK이터닉스 10월 2026 공시 주가 급락"}
+{"ts": "2026-10-11T17:09:39.881", "agent": "analyst", "kind": "search", "msg": "이번주 증시 일정 10월 12일 주간 캘린더 미국 CPI 금통위 3분기 실적 발표"}
+{"ts": "2026-10-11T17:09:39.885", "agent": "analyst", "kind": "search", "msg": "한미사이언스 코스메카코리아 달바글로벌 주가 10월 2026 공시"}
+{"ts": "2026-10-11T17:09:40.037", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:42.748", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:44.797", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:09:49.333", "agent": "analyst", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:16:10.033", "agent": "analyst", "kind": "done", "msg": "436.8초 · 검색 10회", "data": {"elapsed_sec": 436.8, "searches": 10, "input_tokens": 371596, "output_tokens": 15726, "pick": null}}
+{"ts": "2026-10-11T17:16:10.043", "agent": "bull", "kind": "start", "msg": "claude-sonnet-5-5 호출", "data": {"model": "claude-sonnet-5-5", "budget": 0}}
+{"ts": "2026-10-11T17:16:57.800", "agent": "bull", "kind": "done", "msg": "47.8초 · 검색 0회", "data": {"elapsed_sec": 47.8, "searches": 0, "input_tokens": 7180, "output_tokens": 6365, "pick": null}}
+{"ts": "2026-10-11T17:16:57.809", "agent": "bear", "kind": "start", "msg": "claude-sonnet-5-5 호출 · 검색 예산 5", "data": {"model": "claude-sonnet-5-5", "budget": 5}}
+{"ts": "2026-10-11T17:17:03.054", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:07.892", "agent": "bear", "kind": "search", "msg": "대우건설 3분기 실적 발표일 2026 10월 주가 하락 원인"}
+{"ts": "2026-10-11T17:17:08.504", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:13.514", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:21.022", "agent": "bear", "kind": "search", "msg": "한미사이언스 주가 급락 10월 8일 에페오토 허가 차익실현"}
+{"ts": "2026-10-11T17:17:21.079", "agent": "bear", "kind": "search", "msg": "피에스케이 주가 10월 2026 3분기 실적 발표 반도체 장비 외국인 공매도"}
+{"ts": "2026-10-11T17:17:21.194", "agent": "bear", "kind": "search", "msg": "한국은행 금융통화위원회 10월 2026 기준금리 결정 일정 코스피 10월 12일"}
+{"ts": "2026-10-11T17:17:21.196", "agent": "bear", "kind": "search", "msg": "한미약품 에페오토인젝터 출시 약가 급여 일정 한미사이언스 목표가"}
+{"ts": "2026-10-11T17:17:22.398", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:29.251", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:29.747", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:36.005", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:57.966", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:17:58.384", "agent": "bear", "kind": "search", "msg": ""}
+{"ts": "2026-10-11T17:19:52.657", "agent": "bear", "kind": "done", "msg": "174.8초 · 검색 5회", "data": {"elapsed_sec": 174.8, "searches": 5, "input_tokens": 222437, "output_tokens": 19829, "pick": null}}
+{"ts": "2026-10-11T17:19:52.664", "agent": "trader", "kind": "start", "msg": "claude-sonnet-5-5 호출", "data": {"model": "claude-sonnet-5-5", "budget": 0}}
+{"ts": "2026-10-11T17:20:13.648", "agent": "trader", "kind": "done", "msg": "21.0초 · 검색 0회", "data": {"elapsed_sec": 21.0, "searches": 0, "input_tokens": 19724, "output_tokens": 2950, "pick": "047040"}}

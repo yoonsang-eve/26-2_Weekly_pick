@@ -11,14 +11,18 @@ meta:
   # 2026 추석(9/25 금)이 낀 wk4가 그 첫 사례로, KR은 3영업일, US는 5영업일이다.
   # v2는 아직 한 번도 제출되지 않았으므로 이 변경을 v2에 포함시키고, 첫 제출 이후의
   # 변경부터 v3으로 올린다 (v1 때와 같은 기준).
-  prompt_version: v2
+  #
+  # v3 변경점: Step 4 Selector 추가 (prompts/v3/selector.txt). 한국·미국 추천이 각각 나온 뒤
+  # 이번 주에 낼 1종목을 LLM이 고른다. 규칙 비교(app/advice.py)는 기준이 갈리면 판정을
+  # 못 내려서 둔 단계다. analyst·bull·bear·trader 문구는 v2와 같다.
+  prompt_version: v3
   config_version: 3
 
 run:
-  week_no: 5
+  week_no: 7
   # 시장 공통 기본값. 휴장이 끼면 markets.{시장}.sell_date로 시장별로 덮어쓴다.
-  buy_date: "2026-09-28"
-  sell_date: "2026-10-02"
+  buy_date: "2026-10-12"
+  sell_date: "2026-10-16"
   # 운용 시장. 각 시장에서 독립적으로 1종목씩 추천한다 (KR 1 + US 1).
   markets: [KR, US]
   agent_mode: auto          # manual | auto
@@ -173,9 +177,9 @@ llm:
     # 서버사이드 웹 검색 툴. Opus 4.6+ / Sonnet 4.6+ 는 _20260209, 그 이전은 _20250305.
     web_search_tool_type: web_search_20260209
     # 검색 결과가 전부 입력 토큰으로 들어온다. unit을 아끼려면 이 값을 낮춘다.
-    max_web_searches: 24
+    max_web_searches: 10
     # pause_turn(서버 검색 중 턴 끊김)을 몇 번까지 이어받을지.
-    max_pause_rounds: 8
+    max_pause_rounds: 4
 
   # 단계별 검색 예산. 적은 쪽이 비용에 그대로 반영된다.
   #
@@ -185,8 +189,9 @@ llm:
   # wk4 실측: bear 한 단계가 input 514k 토큰으로 전체 비용의 절반을 썼다.
   # 여기 없는 단계는 위 max_web_searches를 쓴다 (bull·trader는 검색 자체를 안 한다).
   search_budget:
-    analyst: 24
-    bear: 8
+    analyst: 10
+    bear: 5
+    selector: 4               # 두 추천의 catalyst 날짜·수치만 다시 확인한다
 
   # 단계별 모델. openai_compat 을 쓰면 게이트웨이의 모델(에셋) 이름을 적는다.
   # 이 이름이 요청 body의 "model" 필드로 그대로 나간다 — API 키는 인증만 하고,
@@ -202,12 +207,22 @@ llm:
   # unit을 줄이려면 순서대로: (1) max_web_searches 낮추기, (2) universe.quota 줄이기
   # (검증할 종목이 적어지면 검색도 준다), (3) 검색 끄기(품질 급락, 권장하지 않음).
   models:
-    analyst: claude-sonnet-5
-    bull: claude-sonnet-5
-    bear: claude-sonnet-5
-    trader: claude-sonnet-5
+    analyst: claude-sonnet-5-5
+    bull: claude-sonnet-5-5
+    bear: claude-sonnet-5-5
+    trader: claude-sonnet-5-5
+    selector: claude-sonnet-5-5     # 한국·미국 추천 중 최종 1종목 (src/selector.py)
 
   max_tokens: 16000
+
+  # 토큰 안전장치 (src/llm.py Budget). 모든 호출의 사용량을 outputs/wk{N}/llm_spend.jsonl에
+  # 즉시 적고, 주차 누적이 상한에 닿으면 다음 호출(또는 pause_turn 이어받기)을 거부한다.
+  # 실패한 호출·재실행분도 장부에 남으므로 같은 단계를 실수로 반복해도 여기서 멈춘다.
+  # 예상치(wk7 기준): KR·US 각 4콜 + selector 1콜, 검색 analyst 10/bear 5/selector 4 → 입력 1M 안팎.
+  token_budget:
+    week_input: 1_500_000         # 주차 누적 입력 (캐시 읽기·쓰기 포함)
+    week_output: 200_000          # 주차 누적 출력 (thinking 포함)
+    per_call_input: 400_000       # 호출 1회(검색 루프 포함) 입력 상한
   temperature: null               # null이면 파라미터 자체를 보내지 않는다
   timeout_sec: 900
   max_retries: 2                  # trader JSON 파싱 실패 시 재시도 포함
