@@ -9,7 +9,8 @@
 <header class="hd">
   <div class="wm"><svg viewBox="0 0 22 22" aria-hidden="true"><rect x="1.5" y="1.5" width="19" height="19" fill="none" stroke="#121416" stroke-width="2.4"/><path d="M1.5 11h9v9.5M10.5 1.5v5" stroke="#121416" stroke-width="1.6" fill="none"/><rect x="12" y="12" width="7" height="7" fill="#ffe14d"/></svg><b>주간픽 데스크</b></div>
   <nav class="nav">
-    <a href="#desk" data-view="desk">데스크</a>
+    <a href="#agent" data-view="agent">에이전트</a>
+    <a href="#desk" data-view="desk" title="고정 체인 파이프라인(prompt v3, wk3~7) 화면">이전 데스크 <small>v3</small></a>
     <a href="#market" data-view="market">시장</a>
     <a href="#perf" data-view="perf">성과</a>
     <a href="#account" data-view="account">계좌</a>
@@ -19,7 +20,10 @@
   <div class="clock"><span id="built"></span><span id="deadline"></span><span>KST <strong id="kst" class="num">--:--</strong></span></div>
 </header>
 
-<!-- ============================================================ 데스크 -->
+<!-- ============================================================ 에이전트 (prompt v4~, 기본 화면) -->
+<section class="view" id="v-agent"><div class="page wide" id="agent"></div></section>
+
+<!-- ============================================================ 이전 데스크 (고정 체인, prompt v3) -->
 <section class="view" id="v-desk">
   <div class="desk">
     <div class="plan-wrap">
@@ -111,6 +115,7 @@
 <script src="/static/app/market.js"></script>
 <script src="/static/app/perf.js"></script>
 <script src="/static/app/account.js"></script>
+<script src="/static/app/agent.js"></script>
 <script src="/static/app/guide.js"></script>
 <script src="/static/app/main.js"></script>
 </body></html>

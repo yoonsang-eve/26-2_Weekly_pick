@@ -256,11 +256,15 @@ def _pipeline_dates() -> list[dict]:
 
 def _events(start: date, end: date) -> list[dict]:
     ev = []
+    cal.merge_auto()                                    # 에이전트가 주간 갱신한 휴장일 반영
     for m, hs in cal.HOLIDAYS.items():
         ev += [{"date": d, "kind": "휴장", "title": f"{'한국' if m == 'KR' else '미국'} 휴장: {t}", "market": m} for d, t in hs.items()]
     ev += [{"date": d, "kind": "FOMC", "title": "FOMC 결정 (한국시간 다음 날 새벽)", "market": "US"} for d in cal.FOMC]
     ev += _pipeline_dates()
     ev += [{**e, "kind": e.get("kind") or "일정", "user": True} for e in cal.user_events()]
+    ev += [{"date": e["date"], "kind": "일정", "market": e.get("market", ""),
+            "title": e["title"] + (f" ({e['time_kst']} KST)" if e.get("time_kst") else ""), "auto": True}
+           for e in cal.auto_events()]
     try:
         ev += _cached("earnings", 6 * 3600, _earnings)
     except Exception:

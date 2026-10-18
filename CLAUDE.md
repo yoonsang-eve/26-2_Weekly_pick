@@ -6,6 +6,9 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 구현 대상, 설계 근거, 제약 조건, 금지 사항이 모두 여기에 있다.
 프롬프트 전문은 `docs/prompts_v2.md`, 외부 참고자료는 `docs/references.md`에 있다.
 
+**wk8부터 추천의 기본 경로는 에이전트(10절, `src/agent/`, prompt v4)다.** 2·4·5절의 고정 파이프라인은
+지우지 않고 비교·백업용으로 남긴다. 둘이 충돌하면 10절이 이긴다.
+
 ---
 
 ## 1. 과제 개요 (도메인 컨텍스트)
@@ -17,7 +20,7 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
 | 주기 | 매주 KR 1종목 + US 1종목 추천 |
 | 추천 기한 | 금~일 (다음 주 월요일 장 시작 전) |
 | 평가 구간 | 월요일 **시가** 매수 → 그 주 마지막 거래일 **종가** 매도 (평시 5영업일) |
-| 채점 | 주간 수익률 기준 상대 순위 |
+| 채점 | 주차별 수익률의 **단순합**으로 순위 (복리 아님) |
 | 대상 시장 | 한국(KRX) / 미국(US). **둘 다 운용한다** (config_version 3부터) |
 | 부가 요건 | 주간 상위 3위는 8슬라이드 내외 발표 |
 | 프롬프트 제출 | **학기 전체에 1개 고정.** 수정 시 새 버전으로 추가되고 이전 버전도 기록으로 남음 |
@@ -32,6 +35,10 @@ Claude Code가 이 저장소에서 작업할 때 항상 참조하는 프로젝�
    않는 날의 종가를 목표로 삼게 된다. (첫 사례: 2026 추석 주간 — KR 3영업일 / US 5영업일)
 1. **Horizon이 5영업일이다.** 밸류에이션·성장성은 이 구간에서 노이즈다. 실제로 가격을 움직이는 것은 catalyst(실적·공시·정책·수주), 단기 수급, 섹터 로테이션뿐이다. fundamental analysis 가중치는 0으로 둔다.
 2. **주간 독립 시행이고 손실이 다음 주로 이월되지 않는다.** 따라서 geometric drag가 없고, 변동성을 낮출 이유가 구조적으로 없다. 기대수익률 +2%/변동성 3%짜리 대형주는 상위 3위에 절대 들지 못한다. → **고변동성을 의도적으로 선호한다.**
+   **(wk8 수정)** 순위가 주차별 수익률의 단순합이라는 점이 확인됐다. 단순합에서 변동성은 기대수익을 키우지도
+   줄이지도 않으므로, 고변동성은 기대수익이 양(+)일 때만 쓰는 수단이다. wk6·7 하락장에서 고변동 후보군이
+   벤치마크보다 크게 빠진 것(wk7 US 후보 평균 -12.8% vs S&P500 -2.0%)이 그 비용이다. 에이전트는 국면에 따라
+   aggressive / balanced / defensive / hedge 중 자세를 고른다 (10절).
 3. **프롬프트가 학기 내내 고정이다.** 따라서 프롬프트는 특정 주차·특정 종목에 대한 내용을 담으면 안 되고, 매주 바뀌는 값은 전부 placeholder로 빠져야 한다. 파이프라인 전체가 "템플릿 + 주간 변수 주입" 구조여야 하는 이유다.
 4. **실제 체결이 없다.** slippage·호가 스프레드·거래비용을 모델링할 필요가 없다. 유동성 필터는 체결 목적이 아니라 거래정지 회피와 발표 방어 목적으로만 남긴다.
 
@@ -47,6 +54,8 @@ KR과 US를 완전히 분리해 같은 파이프라인을 두 번 돌린다.
 [Step 2] agents.py     Analyst            LLM + web search → 후보 20개 중 3개로 압축 (탈락시키는 단계)
    ↓
 [Step 3] agents.py     Bull / Bear / Trader  LLM           → 최종 1종목 (선택하는 단계) → pick.json
+   ↓ (KR·US 둘 다 끝나면 한 번)
+[Step 4] selector.py   Selector       LLM + web search → KR 추천 vs US 추천 중 1종목 → final.json
    ↓ (금요일 장마감 후)
          settle.py     실제 수익률 정산 → log.csv 누적
    ↓
@@ -60,6 +69,22 @@ KR과 US를 완전히 분리해 같은 파이프라인을 두 번 돌린다.
 제출 형식과도 맞지 않는다. 시장 간 비교는 파이프라인 밖의 문제로 둔다.
 시장별로 다른 것은 **유니버스와 데이터 소스, 그리고 프롬프트에 주입되는 시장 특성
 블록**뿐이고, 필터 파라미터와 단계 구조는 동일하다.
+
+### Step 4 Selector (prompt v3부터)
+
+과제는 주당 1종목만 내므로 두 시장의 결과를 마지막에 한 번은 비교해야 한다. 처음에는 규칙
+비교(`app/advice.py` — 예측 상단·ATR×√보유일·촉매 확정성 다수결)만 두었으나, 기준이 갈리면
+판정을 못 내려(wk6) LLM 단계를 추가했다. 위의 '시장 분리' 원칙과 충돌하지 않게 **각 시장
+파이프라인이 끝난 뒤의 결과물만** 입력으로 준다 — `pick.json`, Trader 응답 전문, 스크리닝 지표.
+탈락한 후보는 넣지 않는다 (넣으면 Step 3의 선택을 다시 뒤집는 단계가 된다).
+
+- 산출물은 주차 공통 폴더 `outputs/wk{N}/final/`: `rendered_selector.txt`, `responses/selector.md`,
+  `selection.json`, `run_meta.json`
+- `selection.json`이 생기면 `outputs/wk{N}/final.json`(최종 선택)을 채우되 `decided_by: selector`를
+  붙인다. **사용자가 직접 저장한 최종 선택은 덮어쓰지 않는다** (decided_by가 selector일 때만 갱신)
+- 판단 기준은 1순위 자기 시장 보유기간 내 catalyst 구체성, 2순위 실현 시 상승 폭, 3순위 미해소
+  핵심 반박, 4순위 시장 구조. 시장 선호·밸류에이션·하방 크기는 쓰지 않는다 (토너먼트 구조)
+- 모델과 검색 예산은 `llm.models.selector`, `llm.search_budget.selector`
 
 ### 단계 분리의 근거
 
@@ -79,20 +104,25 @@ weekly_pick/
 │   └── us_universe.csv        # S&P500 + NDX 합집합 (분기 1회 갱신)
 ├── docs/
 │   ├── prompts_v1.md          # v1 프롬프트 전문 (보존)
-│   ├── prompts_v2.md          # 현행 프롬프트 전문 = 제출본의 원본
+│   ├── prompts_v2.md          # 고정 파이프라인 프롬프트 전문
+│   ├── agent_design.md        # 에이전트 설계 (10절의 상세)
 │   └── references.md          # 외부 참고자료
 ├── src/
 │   ├── screener.py            # Step 1 (KR + US)
 │   ├── us_universe.py         # US 유니버스 로드·갱신
 │   ├── llm.py                 # LLM 호출 계층 (openai_compat / anthropic)
 │   ├── agents.py              # Step 2, 3 (manual / auto)
+│   ├── selector.py            # Step 4 — KR·US 추천 중 최종 1종목 (manual / auto)
 │   ├── settle.py              # 금요일 정산 → log.csv
+│   ├── agent/                 # 에이전트 (10절): data · tools · loop · memory · schedule · run
 │   └── deck/                  # 발표 자료 — 지워도 파이프라인은 돈다
 │       ├── chart.py           #   6개월 일봉 PNG
 │       └── build.py           #   8슬라이드 pptx
 ├── prompts/
 │   ├── v1/                    # analyst.txt, bull.txt, bear.txt, trader.txt (보존)
-│   └── v2/                    # 현행. 시장 컨텍스트 블록 추가
+│   ├── v2/                    # 시장 컨텍스트 블록 추가 (보존)
+│   ├── v3/                    # 고정 파이프라인 현행. v2 4개 + selector.txt
+│   └── v4/                    # 에이전트: agent_system.txt · critic.txt · review.txt
 ├── outputs/
 │   └── wk{N}/
 │       └── {KR|US}/
@@ -104,6 +134,8 @@ weekly_pick/
 │           ├── pick.json             # trader의 구조화 출력
 │           ├── chart_{ticker}.png          # deck 산출물
 │           └── deck_wk{N}_{시장}_{ticker}.pptx
+│       ├── final/                    # Step 4 Selector 산출물 (+ 최종 선택 리포트)
+│       └── final.json                # 이번 주 최종 선택 1종목
 ├── requirements.txt           # 파이프라인 의존성
 ├── requirements-deck.txt      # 발표 자료 전용 (deck을 지우면 같이 지운다)
 └── log.csv                    # 주차별 누적 기록
@@ -310,7 +342,8 @@ python src/deck/build.py --week 3 --market KR
 2. **Step 1 스크리닝 기준 전문** — LLM 호출이 아니라는 점을 명시
 3. Analyst 프롬프트 전문 (placeholder 포함 상태)
 4. Bull / Bear / Trader 프롬프트 전문
-5. 사용 모델 및 도구 (web search 사용 여부)
+5. Selector 프롬프트 전문 (v3부터 — KR·US 추천 중 1종목)
+6. 사용 모델 및 도구 (web search 사용 여부)
 
 **Step 1을 빼면 안 된다.** "LLM에게 무엇을 물었나"의 절반은 "무엇을 후보로 주었나"에서 결정되므로, 스크리닝 기준이 없으면 프롬프트만으로 재현이 불가능하다. placeholder를 남긴 템플릿 형태로 내는 것이 규칙(학기 전체 1개 고정)과도 맞다.
 
@@ -344,3 +377,44 @@ python src/deck/build.py --week 3 --market KR
 8. 슬라이드 5·6의 요약 품질 — 현재는 파일에서 기계적으로 추출한다. 발표하는 주차에만
    LLM으로 요약하는 `--full` 경로를 붙일 수 있다 (deck은 llm을 import하지 않으므로
    지연 import로 처리하고, 없으면 기계 추출로 떨어지게 할 것)
+9. ~~에이전트 (`src/agent/`, prompt v4) + 작업 스케줄러 tick (`agent_register.ps1`)~~ **완료** (wk8)
+10. ~~데스크 '에이전트' 화면 (`app/agent_view.py`, `app/static/app/agent.js`)~~ **완료**. 기존 도면 데스크는
+    '이전 데스크 v3' 탭으로 남겼다
+11. ~~휴장일·대형 일정 주간 자동 갱신 (`src/agent/calendar_refresh.py`)~~ **완료**
+
+---
+
+## 10. 에이전트 (prompt v4~)
+
+상세 설계는 `docs/agent_design.md`. 여기에는 지켜야 할 규칙만 둔다.
+
+- **구조**: 도구 사용 루프 하나(`src/agent/loop.py`). 국면 조사 → 탐색 범위 → 후보 탐색 → 비판 → 판단(되돌아가기
+  가능) → 제출. 순서는 모델이 정하고, 코드는 예산과 제출 검증만 강제한다.
+- **후보는 데이터에서**: 주식 패널(KR 거래대금 상위 ~500, US S&P500∪NDX)과 ETF 목록에 지표를 붙여 주고,
+  필터·정렬 조건은 에이전트가 정한다. 위생 필터(4절 필터 1·2)는 `screen_stocks` 기본값으로 항상 걸린다.
+  LLM 기억 속 종목을 바로 제출하지 못하도록 제출 종목은 시세 확인을 통과해야 한다.
+- **비판자 분리**: `request_critique`는 별도 LLM 호출이고 매수 논거 텍스트만 받는다. 메인 대화 히스토리를
+  넘기지 말 것 (8절의 bull→bear 동조 금지와 같은 이유). 최종 종목은 비판 없이 제출되지 않는다.
+- **상품**: 주식과 ETF(지수·섹터·해외·현금성·원자재·인버스·레버리지). 인버스·레버리지는 수업 규칙상
+  허용된다 (2026-10-18 확인). 현금성 ETF는 마지막 수단이다 (현금 아닌 후보 4개 이상 검토 후에만 접수).
+- **스케줄**: `tick`이 매시간 돈다. 추천은 다음 평가 주간 첫 거래일 전날(일요일 또는 연휴 마지막 날)
+  `agent.schedule.recommend_at` 이후, 보고는 고른 시장의 매도일 종가가 현지 시각으로 확정된 뒤. 매수 시가가
+  지난 시장은 후보에서 뺀다. 휴장일은 `app/calendar_data.py`의 고정 HOLIDAYS에 주 1회(토·일) 웹 검색으로
+  찾은 휴장일(`data/calendar_auto.json`)을 더한 것이다. 자동 갱신은 고정값을 지우지 않고, 휴장일이 바뀌면
+  알림을 남긴다. 같은 검색이 앞으로 3~5주의 대형 일정(금리 결정·물가·고용·초대형주 실적)도 채운다.
+- **피드백**: 회고는 운/실력 분해와 비교군 수익률을 본 뒤 교훈을 `data/agent_lessons.json`에 넣는다. 순지지
+  3주 미만은 '가설'로만 노출한다. 결과 교훈(특정 섹터·종목)보다 과정 교훈을 우선한다. 이 규칙을 느슨하게
+  만들지 말 것 — 주당 표본 1개라 과적합만 남는다.
+- **산출물 호환**: 고른 시장 폴더에 기존 형식(pick.json·candidates.csv·responses/bull·bear.md·run_meta.json)을
+  같이 쓴다. settle·cohort·deck·autotrade는 고치지 않고 그대로 읽는다. `final.json`은 `decided_by: agent`이며
+  사용자가 직접 정한 값은 덮어쓰지 않는다.
+- **알림**: 메일은 보내지 않는다. `app/notify.py`가 `private/notify.jsonl`에 남기고 Windows 알림을 띄운다.
+  데스크 '에이전트'(추천·결과·오류)와 '매매'(체결·오류) 화면이 이 기록을 보여 준다.
+- **스키마**: 게이트웨이는 도구 입력 스키마를 강제하지 않는다 (wk8에 bull_case가 빈 문자열로 왔다). 형식 검사는
+  `submit_recommendation` 코드에서 한다.
+- **검색 도구**: 에이전트 경로는 `web_search_20250305`(기본형). `_20260209`는 내부 코드 실행이 실패해 예산만
+  소진했다 (wk8 1차 실행).
+- **비용**: 추천 1회 상한 `agent.cost_limit_unit`(4 unit, 70%에서 제출 재촉). 주차 장부(`llm_spend.jsonl`)를 기존 파이프라인과 공유하고, 캐시 읽기는 `cache_read_weight`로
+  가중한다. 상한은 `agent.token_budget`. 처음 쓰기 전과 게이트웨이를 바꾼 뒤에는 `run.py check`.
+- **프롬프트 버전**: `prompts/v4/`의 세 파일과 `agent:` 블록의 도구 구성이 제출 대상이다 (7절 규칙 그대로).
+  주차별 내용은 placeholder로만 들어간다.

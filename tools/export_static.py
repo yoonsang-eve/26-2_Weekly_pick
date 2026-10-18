@@ -119,6 +119,12 @@ def main() -> int:
             for f in files:
                 b.get(f"/api/runs/{w}/{m}/file/{f['path']}")
 
+    # 에이전트 화면 (prompt v4~)
+    ag = b.get("/api/agent") or {}
+    for w in ag.get("weeks", []):
+        for r in w.get("runs", []):
+            b.get(f"/api/agent/week/{w['week']}?run={r}")
+
     # 시장 (외부 시세. 실패한 항목은 화면에서 '받지 못함'으로 보인다)
     if not a.no_market:
         print("시장 데이터 굽는 중...")

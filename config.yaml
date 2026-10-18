@@ -19,10 +19,10 @@ meta:
   config_version: 3
 
 run:
-  week_no: 7
+  week_no: 8
   # 시장 공통 기본값. 휴장이 끼면 markets.{시장}.sell_date로 시장별로 덮어쓴다.
-  buy_date: "2026-10-12"
-  sell_date: "2026-10-16"
+  buy_date: "2026-10-19"
+  sell_date: "2026-10-23"
   # 운용 시장. 각 시장에서 독립적으로 1종목씩 추천한다 (KR 1 + US 1).
   markets: [KR, US]
   agent_mode: auto          # manual | auto
@@ -226,3 +226,52 @@ llm:
   temperature: null               # null이면 파라미터 자체를 보내지 않는다
   timeout_sec: 900
   max_retries: 2                  # trader JSON 파싱 실패 시 재시도 포함
+
+# ---------------------------------------------------------------- 에이전트 (prompt v4~)
+# 고정 체인(screener → analyst → bull → bear → trader → selector) 대신 도구를 쥔 LLM 하나가 국면 조사 →
+# 탐색 → 비판 → (필요하면 되돌아가기) → 제출을 스스로 진행한다. 설계: docs/agent_design.md
+#   python src/agent/run.py status | recommend | review --week N | tick | tools-test | check
+# 위의 filters 블록은 여기서 '위생 필터(시총·거래대금 하한)'로만 쓰인다. 모멘텀·변동성 조건은 에이전트가
+# 국면을 보고 직접 고른다.
+agent:
+  # false면 스케줄러 tick이 아무것도 하지 않는다 (수동 recommend/review는 된다).
+  enabled: true
+  prompt_version: v4            # prompts/v4/agent_system.txt · critic.txt · review.txt
+  model: claude-sonnet-5-5      # 메인 루프. 품질을 올리려면 claude-opus-5-5 (단가 2배)
+  critic_model: claude-sonnet-5-5
+  review_model: claude-sonnet-5-5
+  # 도구를 여러 번 부르는 루프는 medium이 토큰 대비 효율이 좋다 (Sonnet 5.5 기본값은 high)
+  effort: medium                # null이면 모델 기본값. low | medium | high | xhigh
+  max_tokens: 32000             # 응답 1회 상한 (스트리밍이라 타임아웃 걱정 없음)
+  max_turns: 30                 # 응답 턴 상한. 도구 호출 1묶음 = 1턴
+  per_turn_searches: 5          # 응답 1회 안에서의 서버 검색 상한
+  # 검색 도구 종류. _20260209(동적 필터링)는 결과를 코드 실행으로 거르는데 wk8 첫 실행에서 그 코드가 실패해
+  # 검색 예산만 소진됐다. 결과를 그대로 받는 기본형을 쓴다 (입력 토큰은 조금 더 든다).
+  web_search_tool_type: web_search_20250305
+  search_budget:
+    agent: 15                   # 메인 루프 전체 웹 검색 (프롬프트에 그대로 알린다)
+    critic: 6                   # 비판 1회당
+    calendar: 4                 # 주간 휴장일·대형 일정 갱신 (src/agent/calendar_refresh.py)
+  max_critiques: 4              # 비판 요청 상한. 최종 종목은 반드시 비판을 받아야 제출된다
+  require_critique: true
+  instruments:
+    stocks: true
+    etfs: true
+    # 인버스·레버리지 ETF는 수업 규칙상 허용된다 (2026-10-18 확인)
+    inverse: true               # 인버스 ETF (KODEX 인버스, SH, SQQQ 등)
+    leveraged: true             # 레버리지 ETF
+  schedule:
+    # 추천: 다음 평가 주간 첫 거래일 전날(일요일 또는 연휴 마지막 날) 이 시각 이후 첫 tick.
+    # 보고: 고른 종목 시장의 매도일 종가가 현지 시각으로 확정된 뒤 첫 tick.
+    recommend_at: "18:00"
+    margin_min: 30              # 매수 시가까지 이보다 적게 남은 시장은 후보에서 뺀다
+  # 추천 1회의 비용 상한 (unit ≈ USD, 메인 루프 + 비판자). 70%에서 제출을 재촉하고 100%에서 멈춘다.
+  # Letsur 게이트웨이를 20명이 월 200 unit으로 나눠 쓴다 (인당 약 10). 주 1회 추천 + 회고 기준으로 잡았다.
+  cost_limit_unit: 4.0
+  token_budget:
+    # 루프는 매 턴 대화 전체를 다시 보낸다. 캐시 읽기(단가 1/10)를 0.1로 쳐서 센다.
+    # 장부는 outputs/wk{N}/llm_spend.jsonl (기존 파이프라인과 공유).
+    week_input: 1_500_000
+    week_output: 200_000
+    per_call_input: 400_000
+    cache_read_weight: 0.1

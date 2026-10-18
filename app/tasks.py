@@ -221,6 +221,15 @@ def _argv(j: JobIn, week: int) -> tuple[list[str], str]:
             raise HTTPException(400, "리포트는 시장을 골라야 한다.")
         return ([PY, "src/deck/build.py", *wk, *mk] + (["--full"] if j.full else []),
                 f"리포트 {m}{' (상세판)' if j.full else ''}")
+    if j.kind in ("agent_recommend", "agent_review", "agent_calendar"):
+        # 에이전트 (src/agent/run.py). 셋 다 공용 LLM API를 쓴다
+        if not j.confirm_api:
+            raise HTTPException(400, "에이전트 실행은 공용 LLM API를 쓴다. confirm_api=true가 필요하다.")
+        if j.kind == "agent_recommend":
+            return [PY, "src/agent/run.py", "recommend"] + (["--force"] if j.full else []), "에이전트 추천"
+        if j.kind == "agent_review":
+            return [PY, "src/agent/run.py", "review", *wk] + (["--force"] if j.full else []), f"에이전트 회고 wk{week}"
+        return [PY, "src/agent/run.py", "calendar"], "휴장일·대형 일정 갱신"
     raise HTTPException(400, f"알 수 없는 작업: {j.kind}")
 
 

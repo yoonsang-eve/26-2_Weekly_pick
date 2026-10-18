@@ -80,6 +80,9 @@ class Budget:
         self.max_input = int(conf.get("week_input") or 0)
         self.max_output = int(conf.get("week_output") or 0)
         self.per_call_input = int(conf.get("per_call_input") or 0)
+        # 캐시 읽기는 단가가 입력의 1/10이다. 대화를 이어 붙이는 에이전트 루프는 캐시 읽기가 대부분이라
+        # 1로 세면 실제 비용보다 몇 배 빨리 상한에 닿는다. 기본값 1은 기존 파이프라인과 같은 보수적 계산이다.
+        self.cache_read_weight = float(conf.get("cache_read_weight", 1.0))
 
     def spent(self) -> tuple[int, int]:
         i = o = 0
@@ -100,8 +103,12 @@ class Budget:
 
     def record(self, model: str, usage: dict) -> None:
         self.ledger.parent.mkdir(parents=True, exist_ok=True)
+        cache_read = int(usage.get("cache_read_input_tokens") or 0)
+        weighted = billed_input(usage) - cache_read + cache_read * self.cache_read_weight
         row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "model": model,
-               "input": billed_input(usage), "output": billed_output(usage)}
+               "input": int(round(weighted)), "output": billed_output(usage)}
+        if self.cache_read_weight != 1.0:
+            row["cache_read_raw"] = cache_read
         with self.ledger.open("a", encoding="utf-8") as fp:
             fp.write(json.dumps(row) + "\n")
 
