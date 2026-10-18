@@ -1,0 +1,36 @@
+{
+  "market": "US",
+  "ticker": "SGOV",
+  "name": "iShares 0-3 Month Treasury Bond ETF",
+  "thesis": [
+    "방향 불명에 변동성이 높은 국면이라, 단순합 채점에서 꼬리 손실을 피하는 쪽을 택했다.",
+    "NFLX 실적 베팅은 내재 변동 ±9%로 대칭이고 알파가 없다. 비판도 동전 던지기로 평가해 기각했다.",
+    "XLV는 방어 자금 이동이 이미 5일 +3.5%로 반영됐고 ABT·TMO·DHR 실적 일정은 확인하지 못했다. 비판이 지적한 대로 catalyst가 약해 기각했다.",
+    "SGOV는 변동성이 0.2%이고 5일 약 +0.1%의 이자 수익이 있다."
+  ],
+  "catalyst": "없음. 보유 기간 이자 수익만 기대한다. 구간 내 NFLX(10/20 장후), META·TSLA(10/21 장후) 실적 등 이벤트는 지수 변동 요인이지만 이 상품에는 영향이 없다.",
+  "expected_return_range": [
+    0,
+    0.15
+  ],
+  "primary_risk": "기회비용이다. 반도체와 KOSPI가 급락한 뒤 큰 반등이 나오면 순위에서 뒤처진다. 상품 자체의 손실 위험은 거의 없다.",
+  "rejected": [
+    {
+      "ticker": "NFLX",
+      "reason": "10/20 장후 실적이 보유 기간에 들어오지만 내재 변동 ±9%로 대칭이다. 우위 근거가 모두 가격에 반영된 공개 정보다. 비판도 fatal(조건부)로 평가했다."
+    },
+    {
+      "ticker": "XLV",
+      "reason": "방어 자금 이동이 이미 반영됐다(5일 +3.5%). 실적 catalyst 일정은 확인하지 못했다. 비판이 fatal로 평가했다."
+    },
+    {
+      "ticker": "XLE",
+      "reason": "유가 상승 추세는 있으나 5일 +4.9%를 이미 반영했고 단기 반전 위험이 있다. 추가 검증 예산이 없어 제외했다."
+    }
+  ],
+  "instrument_type": "etf",
+  "regime_view": "neutral",
+  "stance": "defensive",
+  "confidence": "low",
+  "decided_by": "agent"
+}

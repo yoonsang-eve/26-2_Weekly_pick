@@ -93,6 +93,10 @@ def labelled(sec: str, label: str) -> str:
         return ""
     m = re.search(rf"\*\*[^*]*{re.escape(label)}[^*]*\*\*\s*\n+(.+?)(?=\n\*\*|\Z)",
                   sec, re.S)
+    if not m:
+        # '### 1. -5% 시나리오'처럼 소제목을 헤딩으로 단 응답 (wk6 KR bear)
+        m = re.search(rf"^#{{2,6}}[^\n]*{re.escape(label)}[^\n]*\n+(.+?)(?=\n#{{1,6}}\s|\Z)",
+                      sec, re.S | re.M)
     return clean(m.group(1)) if m else ""
 
 
@@ -100,6 +104,7 @@ def clean(s: str) -> str:
     s = re.sub(r"^[\s>\-*•]+", "", s.strip(), flags=re.M)
     s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
     s = re.sub(r"`(.+?)`", r"\1", s)
+    s = s.replace("**", "")              # 줄을 넘겨 짝이 깨진 굵게 표시
     return re.sub(r"\n{2,}", "\n", s).strip()
 
 
@@ -257,6 +262,39 @@ PIPELINE = [
     "Bear가 Bull과 같은 맥락에 있으면 반박하지 않고 동조하기 때문이다.",
 ]
 
+STEP4 = [
+    "Step 4 — Selector (LLM + 웹 검색) : 한국 추천 vs 미국 추천 → 이번 주 1종목",
+    "   각 시장 파이프라인의 결과물만 비교한다. 탈락한 후보는 넣지 않는다",
+    "",
+]
+
+
+def pipeline(week: int) -> list[str]:
+    """Selector를 돌린 주차(prompt v3~)에만 Step 4를 싣는다. 안 돌린 주차에 넣으면 거짓이 된다."""
+    if not (ROOT / "outputs" / f"wk{week}" / "final" / "selection.json").exists():
+        return PIPELINE
+    i = next(k for k, ln in enumerate(PIPELINE) if ln.startswith("각 단계는"))
+    return PIPELINE[:i] + STEP4 + PIPELINE[i:]
+
+
+AGENT_PIPELINE = [
+    "에이전트 (prompt v4~) — 도구를 쥔 LLM 하나가 순서를 스스로 정한다",
+    "",
+    "1. 국면 조사 : 지수·금리·VIX·시장 폭·과거 유사 주간 base rate + 웹 검색 + 지난 주차 기록",
+    "2. 탐색 범위 : 국면에 맞춰 시장·섹터·상품(주식 / 지수·섹터·인버스·현금성 ETF) 결정",
+    "3. 후보 탐색 : 스크리닝 조건을 에이전트가 직접 정함 (모멘텀·반전·저베타·catalyst 등)",
+    "4. 반박      : 별도 컨텍스트의 비판자 LLM(웹 검색, 동의 금지)에게 매수 논거 검증",
+    "5. 판단      : 핵심이 무너지면 3으로, 국면 판단이 흔들리면 1로 되돌아감",
+    "6. 제출      : 코드가 형식·비판 여부·시세를 검증해야 확정",
+    "",
+    "주차가 끝나면 정산 → 회고(LLM) → 교훈 갱신(지지 3주 미만은 '가설') → 발표 자료",
+]
+
+
+def agent_decision(week: int) -> dict:
+    """에이전트가 결정한 주차면 decision.json. 고정 파이프라인 주차는 빈 dict."""
+    return read_json(ROOT / "outputs" / f"wk{week}" / "agent" / "decision.json")
+
 
 def build(week: int, market: str, full: bool = False,
           no_chart: bool = False) -> Path:
@@ -292,6 +330,8 @@ def build(week: int, market: str, full: bool = False,
 
     sec_bull = section(bull, ticker, name)
     sec_bear = section(bear, ticker, name)
+    agent = agent_decision(week)
+    review = read_json(ROOT / "outputs" / f"wk{week}" / "agent" / "review.json") if agent else {}
 
     deck = Deck(f"wk{week} · {label} · {name}({ticker})")
 
@@ -307,14 +347,20 @@ def build(week: int, market: str, full: bool = False,
          f"초과수익      {excess}%p" if excess != "" else ""])
 
     # 2. 파이프라인 ---------------------------------------------------------
-    deck.bullets("파이프라인 구조", PIPELINE,
-                 "LLM에게 '오를 종목을 추천해줘'라고 묻지 않는다. "
-                 "후보는 기계적으로 먼저 확정하고, LLM은 그 안에서만 탈락·선택한다.")
+    if agent:
+        st = agent.get("stats") or {}
+        deck.bullets("에이전트 구조", AGENT_PIPELINE,
+                     f"이번 주: 응답 {st.get('turns', '?')}턴 · 웹 검색 {st.get('web_searches', '?')}회 · "
+                     f"국면 {agent.get('regime_view', '')} → 자세 {agent.get('stance', '')}")
+    else:
+        deck.bullets("파이프라인 구조", pipeline(week),
+                     "LLM에게 '오를 종목을 추천해줘'라고 묻지 않는다. "
+                     "후보는 기계적으로 먼저 확정하고, LLM은 그 안에서만 탈락·선택한다.")
 
     # 3. 사용 모델 및 프롬프트 ----------------------------------------------
     stages = rmeta.get("stages") or {}
     srows = []
-    for st in ("analyst", "bull", "bear", "trader"):
+    for st in (list(stages) if agent else ("analyst", "bull", "bear", "trader")):
         v = stages.get(st) or {}
         u = v.get("usage") or {}
         # manual 모드에는 web_search가 기록되지 않는다. 그 경우 파이프라인 규약
@@ -353,16 +399,25 @@ def build(week: int, market: str, full: bool = False,
     except Exception:
         pass
     ref = smeta.get("ref_date") or "(기록 없음)"
-    deck.table(f"Step 1 — 기계적 스크리닝 결과 (상위 {len(crows)} / {n_total or '?'}종목)",
-               ["티커", "종목명", "6개월 모멘텀", "5일", "ATR20", "선택"], crows,
-               f"기준일 {ref} 종가 · 후보 {smeta.get('n_candidates', n_total)}종목 "
-               f"→ Analyst가 3종목으로 압축 → Trader가 1종목 선택")
+    if agent:
+        tc = rmeta.get("tool_calls") or {}
+        deck.table(f"에이전트가 상세 검토한 종목 ({n_total}개)",
+                   ["티커", "종목명", "6개월 모멘텀", "5일", "ATR20", "선택"], crows,
+                   f"기준일 {ref} 종가 · 스크리닝 {tc.get('screen_stocks', 0)}회 · ETF 탐색 {tc.get('screen_etfs', 0)}회 · "
+                   f"상세 조회 {tc.get('instrument_detail', 0)}회 · 비판 {tc.get('request_critique', 0)}회 — 조건은 에이전트가 국면을 보고 정함")
+    else:
+        deck.table(f"Step 1 — 기계적 스크리닝 결과 (상위 {len(crows)} / {n_total or '?'}종목)",
+                   ["티커", "종목명", "6개월 모멘텀", "5일", "ATR20", "선택"], crows,
+                   f"기준일 {ref} 종가 · 후보 {smeta.get('n_candidates', n_total)}종목 "
+                   f"→ Analyst가 3종목으로 압축 → Trader가 1종목 선택")
 
     # 5. 종목 설명 -----------------------------------------------------------
     thesis = pick.get("thesis") or []
+    regime = ([f"국면 {agent.get('regime_view')} · 자세 {agent.get('stance')} · 확신 {agent.get('confidence')} — "
+               f"{clip(agent.get('regime_rationale', ''), 150)}", ""] if agent else [])
     deck.bullets(f"{name} — 선정 근거",
-                 list(thesis) + ["", f"Catalyst : {clip(pick.get('catalyst', ''), 160)}"],
-                 "출처: Trader 단계 구조화 출력(pick.json)")
+                 regime + list(thesis) + ["", f"Catalyst : {clip(pick.get('catalyst', ''), 160)}"],
+                 "출처: 에이전트 제출(decision.json)" if agent else "출처: Trader 단계 구조화 출력(pick.json)")
 
     # 6. Bull vs Bear --------------------------------------------------------
     bull_items = [labelled(sec_bull, "시나리오"), labelled(sec_bull, "트리거"),
@@ -371,7 +426,7 @@ def build(week: int, market: str, full: bool = False,
                   labelled(sec_bear, "절대 사면 안 되는 이유")]
     bull_items = [b for b in bull_items if b] or ["(추출 실패 — responses/bull.md 참조)"]
     bear_items = [b for b in bear_items if b] or ["(추출 실패 — responses/bear.md 참조)"]
-    deck.two_col("Bull vs Bear", "매수 측", bull_items, "매도 측", bear_items)
+    deck.two_col("Bull vs Bear", "매수 측", bull_items, "매도 측 (비판자)" if agent else "매도 측", bear_items)
 
     # 7. 차트 ---------------------------------------------------------------
     png = out / f"chart_{ticker}.png"
@@ -404,7 +459,11 @@ def build(week: int, market: str, full: bool = False,
     else:
         verdict.append("(아직 정산 전 — python src/settle.py 실행)")
     verdict += ["", f"예상했던 최대 리스크 : {clip(pick.get('primary_risk', ''), 200)}", ""]
-    verdict += ["무엇이 맞고 무엇이 틀렸는지 한 줄로 :", "  (직접 작성)"]
+    if review.get("summary"):
+        verdict += [f"회고 : {clip(review['summary'], 200)}",
+                    f"국면 판단 {review.get('regime_call', '-')} · {clip(review.get('luck_vs_skill', ''), 150)}"]
+    else:
+        verdict += ["무엇이 맞고 무엇이 틀렸는지 한 줄로 :", "  (직접 작성)"]
     deck.bullets("사후 검증 — 예측 대비 실제", verdict,
                  "주차별 기록은 log.csv에 누적된다. 학기말 hit rate 분석의 원자료다.")
 
@@ -451,7 +510,7 @@ def build_final(week: int, full: bool = False, no_chart: bool = False) -> Path:
         f"주간 수익률   {ret + '%' if ret != '' else '(정산 전)'}"
         + (f"      벤치마크({row.get('benchmark', '')}) {bret}%" if bret != "" else ""),
         f"초과수익      {excess}%p" if excess != "" else ""])
-    deck.bullets("파이프라인 구조", PIPELINE,
+    deck.bullets("파이프라인 구조", pipeline(week),
                  "이번 주 최종 제출 종목은 에이전트 추천이 아니라 사용자가 직접 골랐다. 다음 장에서 비교한다.")
 
     rows = []

@@ -1,0 +1,11 @@
+{
+  "market": "US",
+  "week": 6,
+  "ref_date": "2026-10-02",
+  "buy_date": "2026-10-05",
+  "sell_date": "2026-10-09",
+  "holding_days": 5,
+  "n_candidates": 20,
+  "config_version": 3,
+  "screened_at": "2026-10-04T13:38:58"
+}

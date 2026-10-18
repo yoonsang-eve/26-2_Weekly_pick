@@ -6,6 +6,21 @@
 
 두 시장은 **완전히 독립된 파이프라인**으로 돌린다. 후보 스크리닝부터 최종 선택까지 한 번도 섞이지 않는다. 섞으면 LLM이 "미국이 나은가 한국이 나은가"를 따지기 시작하는데, 그건 이 과제의 판단 기준(5영업일 내 catalyst의 구체성)과 무관한 축이고 매주 1종목씩 내는 제출 형식과도 맞지 않는다.
 
+## wk8부터: 에이전트
+
+고정 체인 대신 **도구를 쥔 LLM 하나가 국면 조사 → 탐색 → 비판 → (되돌아가기) → 제출**을 스스로 진행한다.
+하락 국면에서는 방어주·현금성 ETF·인버스 ETF도 고르고, 주차가 끝나면 정산·회고·교훈 갱신·발표 자료까지
+자동으로 만든다. 설계는 [docs/agent_design.md](docs/agent_design.md), 코드는 `src/agent/`, 프롬프트는 `prompts/v4/`.
+
+```
+python src/agent/run.py status        # 이번 평가 주간과 추천 예정 시각
+python src/agent/run.py recommend     # 지금 추천 (LLM)
+python src/agent/run.py review --week 8
+powershell -ExecutionPolicy Bypass -File agent_register.ps1   # 매시간 자동 실행 등록
+```
+
+아래는 wk3~7에 쓴 고정 파이프라인 설명이다 (비교·백업용으로 유지).
+
 ## 설계 요약
 
 LLM에게 "다음 주에 오를 종목을 추천해줘"라고 묻지 않는다. 그렇게 물으면 학습 데이터에 각인된 유명주나 이미 지나간 테마가 나온다. 대신 후보를 기계적으로 먼저 확정하고, LLM은 그 안에서만 탈락과 선택을 수행한다.

@@ -1,0 +1,11 @@
+{
+  "choice": "US",
+  "market": "US",
+  "ticker": "SGOV",
+  "name": "iShares 0-3 Month Treasury Bond ETF",
+  "source": "agent",
+  "decided_by": "agent",
+  "week": 8,
+  "note": "에이전트 추천 — 국면 neutral, 자세 defensive, 확신 low",
+  "chosen_at": "2026-10-18T17:32:34"
+}

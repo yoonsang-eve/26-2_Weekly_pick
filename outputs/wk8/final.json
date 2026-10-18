@@ -1,0 +1,11 @@
+{
+  "choice": "US",
+  "market": "US",
+  "ticker": "HAL",
+  "name": "Halliburton",
+  "source": "agent",
+  "decided_by": "agent",
+  "week": 8,
+  "note": "에이전트 추천 — 국면 neutral, 자세 balanced, 확신 low",
+  "chosen_at": "2026-10-18T17:42:01"
+}

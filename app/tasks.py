@@ -27,6 +27,9 @@ STAGES = ["analyst", "bull", "bear", "trader"]
 
 sys.path.insert(0, str(ROOT / "src"))
 import events  # noqa: E402
+import selector  # noqa: E402
+
+SELECTOR = selector.STAGE
 
 router = APIRouter()
 
@@ -198,6 +201,12 @@ def _argv(j: JobIn, week: int) -> tuple[list[str], str]:
         if not j.confirm_api:
             raise HTTPException(400, "auto 모드는 공용 LLM API를 쓴다. confirm_api=true가 필요하다.")
         return [PY, "src/agents.py", "--mode", "auto", *wk, *mk], f"에이전트 auto {m}"
+    if j.kind == "selector_manual":
+        return [PY, "src/selector.py", "--mode", "manual", *wk], "최종 선택 프롬프트 생성"
+    if j.kind == "selector_auto":
+        if not j.confirm_api:
+            raise HTTPException(400, "auto 모드는 공용 LLM API를 쓴다. confirm_api=true가 필요하다.")
+        return [PY, "src/selector.py", "--mode", "auto", *wk], "최종 선택 auto"
     if j.kind == "settle":
         return [PY, "src/settle.py", *wk, *mk], f"정산 {m}"
     if j.kind == "cohort":
@@ -212,6 +221,15 @@ def _argv(j: JobIn, week: int) -> tuple[list[str], str]:
             raise HTTPException(400, "리포트는 시장을 골라야 한다.")
         return ([PY, "src/deck/build.py", *wk, *mk] + (["--full"] if j.full else []),
                 f"리포트 {m}{' (상세판)' if j.full else ''}")
+    if j.kind in ("agent_recommend", "agent_review", "agent_calendar"):
+        # 에이전트 (src/agent/run.py). 셋 다 공용 LLM API를 쓴다
+        if not j.confirm_api:
+            raise HTTPException(400, "에이전트 실행은 공용 LLM API를 쓴다. confirm_api=true가 필요하다.")
+        if j.kind == "agent_recommend":
+            return [PY, "src/agent/run.py", "recommend"] + (["--force"] if j.full else []), "에이전트 추천"
+        if j.kind == "agent_review":
+            return [PY, "src/agent/run.py", "review", *wk] + (["--force"] if j.full else []), f"에이전트 회고 wk{week}"
+        return [PY, "src/agent/run.py", "calendar"], "휴장일·대형 일정 갱신"
     raise HTTPException(400, f"알 수 없는 작업: {j.kind}")
 
 
@@ -268,6 +286,11 @@ def run_status(week: int, market: str):
             "final_decks": sorted(p.name for p in (OUT / f"wk{week}" / "final").glob("deck_*.pptx"))}
 
 
+def _stage_ok(market: str, stage: str) -> bool:
+    """시장 4단계는 KR/US 폴더, Selector는 주차 공통 final 폴더에만 저장한다."""
+    return stage == SELECTOR if market == "final" else stage in STAGES
+
+
 class ResponseIn(BaseModel):
     text: str
     model: str = ""         # manual 모드에서 사람이 적는 사용 모델 (발표 자료 3번 슬라이드)
@@ -275,19 +298,31 @@ class ResponseIn(BaseModel):
 
 @router.post("/api/runs/{week}/{market}/response/{stage}")
 def save_response(week: int, market: str, stage: str, r: ResponseIn):
-    if stage not in STAGES:
+    if not _stage_ok(market, stage):
         raise HTTPException(400)
     if len(r.text.strip()) < 50:
         raise HTTPException(400, "응답이 너무 짧다. 전문을 붙여넣을 것.")
     d = _run_dir(week, market)
     (d / "responses").mkdir(parents=True, exist_ok=True)
-    (d / "responses" / f"{stage}.md").write_text(r.text, encoding="utf-8")
+    cur = d / "responses" / f"{stage}.md"
+    if cur.exists():                                    # 덮어쓰기 전 이전 응답을 보관 (되돌리기용)
+        hist = d / "responses" / ".history"
+        hist.mkdir(exist_ok=True)
+        cur.replace(hist / f"{stage}.{datetime.now():%Y%m%d-%H%M%S-%f}.md")
+    cur.write_text(r.text, encoding="utf-8")
     if r.model.strip():
         meta_f = d / "run_meta.json"
         meta = json.loads(meta_f.read_text(encoding="utf-8")) if meta_f.exists() else {}
         st = meta.setdefault("stages", {}).setdefault(stage, {})
         st["model"] = r.model.strip()
         meta_f.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    if stage == SELECTOR:
+        sel = selector.parse(week, r.text)
+        msg = selector.apply(week, sel)
+        if sel:
+            _resettle_final(week)
+        return {"saved": True, "selection": sel, "message": msg,
+                "warning": None if sel else "응답에서 choice(KR/US)가 담긴 JSON을 찾지 못했다."}
     pick = None
     if stage == "trader":
         import agents                                   # extract_pick 재사용 (LLM 호출 없음)
@@ -299,6 +334,44 @@ def save_response(week: int, market: str, stage: str, r: ResponseIn):
         events.emit(stage, "done", "응답 저장됨 (manual)", pick=(pick or {}).get("ticker"))
     return {"saved": True, "pick": pick,
             "warning": None if stage != "trader" or pick else "trader 응답에서 JSON을 찾지 못했다."}
+
+
+@router.post("/api/runs/{week}/{market}/response/{stage}/undo")
+def undo_response(week: int, market: str, stage: str):
+    """저장을 한 단계 되돌린다. 덮어쓰기 이전 응답이 있으면 그것으로 복원하고, 없으면 응답을 지운다.
+    trader면 pick.json, selector면 selection.json·final.json도 맞춰서 되돌린다."""
+    if not _stage_ok(market, stage):
+        raise HTTPException(400)
+    d = _run_dir(week, market)
+    cur = d / "responses" / f"{stage}.md"
+    if not cur.exists():
+        raise HTTPException(404, "되돌릴 응답이 없다.")
+    prev = sorted((d / "responses" / ".history").glob(f"{stage}.*.md"))
+    restored = bool(prev)
+    if restored:
+        text = prev[-1].read_text(encoding="utf-8")
+        cur.write_text(text, encoding="utf-8")
+        prev[-1].unlink()
+    else:
+        cur.unlink()
+    if stage == SELECTOR:
+        selector.apply(week, selector.parse(week, text) if restored else None)
+        _resettle_final(week)
+        return {"restored": restored}
+    if stage == "trader":
+        pf = d / "pick.json"
+        pick = None
+        if restored:
+            import agents
+            pick = agents.extract_pick(text)
+        if pick:
+            pf.write_text(json.dumps(pick, ensure_ascii=False, indent=2), encoding="utf-8")
+        elif pf.exists():
+            pf.unlink()
+    events.bind(week, market)
+    if events.active():
+        events.emit(stage, "undo", "이전 응답으로 복원" if restored else "응답 삭제")
+    return {"restored": restored}
 
 
 # ------------------------------------------------------------------ 산출물
@@ -368,8 +441,12 @@ def get_final(week: int):
             opts.append({"id": m, "market": m, "ticker": str(p["ticker"]), "name": p.get("name", ""),
                          "range": p.get("expected_return_range"), "catalyst": p.get("catalyst", "")})
     from app.advice import advise
+    sd = selector.out_dir(week)
+    sel = {"rendered": (sd / f"rendered_{SELECTOR}.txt").exists(),
+           "response": (sd / "responses" / f"{SELECTOR}.md").exists(),
+           "selection": _read_json(sd / "selection.json")}
     return {"week": week, "options": opts, "final": _read_json(OUT / f"wk{week}" / "final.json"),
-            "settled": _final_log().get(week), "advice": advise(OUT / f"wk{week}")}
+            "settled": _final_log().get(week), "advice": advise(OUT / f"wk{week}"), "selector": sel}
 
 
 @router.get("/api/finals")
@@ -461,7 +538,7 @@ def _resettle_final(week: int) -> None:
     cfg = _load_cfg()
     try:
         row = fin_mod.settle_final(cfg, week)
-    except Exception as e:
+    except (Exception, SystemExit) as e:           # final.json이 없으면 SystemExit (Selector 되돌리기)
         print(f"최종 선택 정산 실패: {e}", file=sys.stderr)
         row = None
     if row:

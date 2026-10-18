@@ -12,3 +12,5 @@
 {"ts": "2026-10-11T17:24:50", "model": "claude-sonnet-5-5", "input": 159642, "output": 18390}
 {"ts": "2026-10-11T17:25:09", "model": "claude-sonnet-5-5", "input": 17738, "output": 2700}
 {"ts": "2026-10-11T17:26:03", "model": "claude-sonnet-5-5", "input": 51918, "output": 4035}
+{"ts": "2026-10-18T17:28:15", "model": "claude-sonnet-5-5", "input": 419, "output": 47, "cache_read_raw": 0}
+{"ts": "2026-10-18T17:28:16", "model": "claude-sonnet-5-5", "input": 473, "output": 4, "cache_read_raw": 0}

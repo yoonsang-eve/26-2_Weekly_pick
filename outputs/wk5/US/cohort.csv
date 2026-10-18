@@ -1,0 +1,21 @@
+﻿week,market,ticker,name,role,buy_date,sell_date,buy_open,sell_close,ret_pct
+5,US,COHR,Coherent Corp.,candidate,2026-09-28,2026-10-02,290.08,337.04,16.19
+5,US,SNDK,Sandisk,finalist,2026-09-28,2026-10-02,1736.64,1719.99,-0.96
+5,US,DELL,Dell Technologies,candidate,2026-09-28,2026-10-02,551.74,562.52,1.95
+5,US,GEN,Gen Digital,candidate,2026-09-28,2026-10-02,21.49,21.99,2.33
+5,US,HOOD,Robinhood Markets,candidate,2026-09-28,2026-10-02,118.025,112.74,-4.48
+5,US,CVNA,Carvana,candidate,2026-09-28,2026-10-02,63.68,63.77,0.14
+5,US,HPQ,HP Inc.,candidate,2026-09-28,2026-10-02,31.29,32.12,2.65
+5,US,EXPE,Expedia Group,candidate,2026-09-28,2026-10-02,260.01,265.0,1.92
+5,US,CDW,CDW Corporation,candidate,2026-09-28,2026-10-02,134.0,133.29,-0.53
+5,US,WDAY,"Workday, Inc.",candidate,2026-09-28,2026-10-02,184.45,186.14,0.92
+5,US,FDS,FactSet,pick,2026-09-28,2026-10-02,270.06,266.0,-1.5
+5,US,CRM,Salesforce,candidate,2026-09-28,2026-10-02,224.97,234.69,4.32
+5,US,ARES,Ares Management,candidate,2026-09-28,2026-10-02,120.69,117.55,-2.6
+5,US,VLO,Valero Energy,candidate,2026-09-28,2026-10-02,389.11,406.3,4.42
+5,US,CNC,Centene Corporation,candidate,2026-09-28,2026-10-02,62.49,62.99,0.8
+5,US,JBHT,J.B. Hunt,candidate,2026-09-28,2026-10-02,224.63,234.2,4.26
+5,US,MGM,MGM Resorts,finalist,2026-09-28,2026-10-02,32.69,30.48,-6.76
+5,US,APA,APA Corporation,candidate,2026-09-28,2026-10-02,43.15,43.68,1.23
+5,US,MPC,Marathon Petroleum,candidate,2026-09-28,2026-10-02,396.0,422.33,6.65
+5,US,ABNB,Airbnb,candidate,2026-09-28,2026-10-02,155.94,162.43,4.16

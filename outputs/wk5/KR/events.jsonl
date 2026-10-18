@@ -37,3 +37,4 @@
 {"ts": "2026-09-27T14:11:16.064", "agent": "bear", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
 {"ts": "2026-09-27T14:11:18.825", "agent": "trader", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 24316}}
 {"ts": "2026-09-27T14:13:03.636", "agent": "trader", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": "031980"}}
+{"ts": "2026-10-04T13:35:06.083", "agent": "settle", "kind": "done", "msg": "+20.70% (벤치마크 -0.77%)", "data": {"ret_pct": 20.7, "benchmark_ret_pct": -0.77, "buy_open": 160400.0, "sell_close": 193600.0, "buy_date": "2026-09-28", "sell_date": "2026-10-02"}}

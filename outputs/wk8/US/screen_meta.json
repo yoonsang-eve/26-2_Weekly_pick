@@ -1,0 +1,12 @@
+{
+  "market": "US",
+  "week": 8,
+  "ref_date": "2026-10-16",
+  "buy_date": "2026-10-19",
+  "sell_date": "2026-10-23",
+  "holding_days": 5,
+  "n_candidates": 5,
+  "config_version": 3,
+  "screened_at": "2026-10-18T17:42:01",
+  "source": "agent"
+}

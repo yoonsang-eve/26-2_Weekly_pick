@@ -164,7 +164,7 @@ const Plan = (() => {
   function logLine(e) {
     const label = (AGENTS.find((a) => a[0] === e.agent) || [0, e.agent])[1];
     const d = document.createElement("div");
-    const mk = e.kind === "done" ? "완료 " : e.kind === "error" ? "오류 " : "";
+    const mk = e.kind === "done" ? "완료 " : e.kind === "error" ? "오류 " : e.kind === "undo" ? "되돌림 " : "";
     d.innerHTML = `<span class="t">${stamp(e.ts)}</span><span class="a">${label}</span>${mk}${esc(e.msg)}`;
     $("#log").appendChild(d);
     $("#log").scrollTop = 1e9;
@@ -211,6 +211,8 @@ const Plan = (() => {
         if (e.agent === "trader") moveEnv("trd", 1);
         if (e.agent === "settle") moveEnv("set", 1);
         break;
+      case "undo":
+        a.st = "work"; a.msg = ""; roomState(id, "work", "붙여넣기 대기"); note(id, e.msg); break;
       case "error":
         a.st = "err"; a.msg = e.msg; roomState(id, "err"); note(id, `오류  ${e.msg}`, "no"); break;
     }

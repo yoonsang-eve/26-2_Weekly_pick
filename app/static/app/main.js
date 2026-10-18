@@ -1,12 +1,13 @@
 // 라우팅, 시계, 초기화
 (() => {
-  const views = { desk: "#v-desk", market: "#v-market", perf: "#v-perf", account: "#v-account", guide: "#v-guide" };
+  const views = { agent: "#v-agent", desk: "#v-desk", market: "#v-market", perf: "#v-perf", account: "#v-account", guide: "#v-guide" };
   function route() {
-    const v = (location.hash || "#desk").slice(1);
-    let id = views[v] ? v : "desk";
-    if (App.viewer && id === "account") id = "desk";            // 보기 전용 링크에는 계좌가 없다
+    const v = (location.hash || "#agent").slice(1);
+    let id = views[v] ? v : "agent";
+    if (App.viewer && id === "account") id = "agent";            // 보기 전용 링크에는 계좌가 없다
     $$(".view").forEach((el) => el.classList.toggle("on", `#${el.id}` === views[id]));
     $$(".nav a").forEach((a) => (a.dataset.view === id ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+    if (id === "agent") Agent.render();
     if (id === "perf") Perf.render();
     if (id === "market") Market.render();
     if (id === "account") Account.render();

@@ -56,3 +56,4 @@
 {"ts": "2026-10-11T17:19:52.657", "agent": "bear", "kind": "done", "msg": "174.8초 · 검색 5회", "data": {"elapsed_sec": 174.8, "searches": 5, "input_tokens": 222437, "output_tokens": 19829, "pick": null}}
 {"ts": "2026-10-11T17:19:52.664", "agent": "trader", "kind": "start", "msg": "claude-sonnet-5-5 호출", "data": {"model": "claude-sonnet-5-5", "budget": 0}}
 {"ts": "2026-10-11T17:20:13.648", "agent": "trader", "kind": "done", "msg": "21.0초 · 검색 0회", "data": {"elapsed_sec": 21.0, "searches": 0, "input_tokens": 19724, "output_tokens": 2950, "pick": "047040"}}
+{"ts": "2026-10-18T17:00:12.201", "agent": "settle", "kind": "done", "msg": "-10.30% (벤치마크 -13.84%)", "data": {"ret_pct": -10.3, "benchmark_ret_pct": -13.84, "buy_open": 16500.0, "sell_close": 14800.0, "buy_date": "2026-10-12", "sell_date": "2026-10-16"}}
