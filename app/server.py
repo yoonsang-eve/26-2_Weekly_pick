@@ -196,7 +196,8 @@ def run_detail(week: int, market: str):
 @app.get("/api/runs/{week}/{market}/text/{kind}/{stage}", response_class=PlainTextResponse)
 def run_text(week: int, market: str, kind: str, stage: str):
     """kind=response -> responses/{stage}.md, kind=prompt -> rendered_{stage}.txt"""
-    if stage not in STAGES or kind not in ("response", "prompt"):
+    ok = stage == "selector" if market == "final" else stage in STAGES
+    if not ok or kind not in ("response", "prompt"):
         raise HTTPException(400)
     d = OUT / f"wk{week}" / market
     f = d / "responses" / f"{stage}.md" if kind == "response" else d / f"rendered_{stage}.txt"
