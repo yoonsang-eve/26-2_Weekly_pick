@@ -1,0 +1,21 @@
+﻿week,market,ticker,name,role,buy_date,sell_date,buy_open,sell_close,ret_pct
+7,US,NBIS,Nebius Group,candidate,2026-10-12,2026-10-16,217.195,165.47,-23.82
+7,US,ALAB,Astera Labs,candidate,2026-10-12,2026-10-16,335.97,285.82,-14.93
+7,US,COHR,Coherent Corp.,candidate,2026-10-12,2026-10-16,306.0,232.9,-23.89
+7,US,WDC,Western Digital,candidate,2026-10-12,2026-10-16,391.76,332.0,-15.25
+7,US,STX,Seagate Technology,candidate,2026-10-12,2026-10-16,767.0,639.01,-16.69
+7,US,ARM,Arm Holdings,candidate,2026-10-12,2026-10-16,260.3,227.8,-12.49
+7,US,SNDK,Sandisk,candidate,2026-10-12,2026-10-16,1538.115,1299.3,-15.53
+7,US,SWKS,Skyworks Solutions,candidate,2026-10-12,2026-10-16,75.76,79.7,5.2
+7,US,INTC,Intel,candidate,2026-10-12,2026-10-16,102.52,89.85,-12.36
+7,US,SMCI,Supermicro,candidate,2026-10-12,2026-10-16,41.29,31.63,-23.4
+7,US,GLW,Corning Inc.,candidate,2026-10-12,2026-10-16,155.01,132.0,-14.84
+7,US,HOOD,Robinhood Markets,finalist,2026-10-12,2026-10-16,108.7,98.87,-9.04
+7,US,TER,Teradyne,candidate,2026-10-12,2026-10-16,394.09,325.0,-17.53
+7,US,ON,ON Semiconductor,candidate,2026-10-12,2026-10-16,76.88,72.02,-6.32
+7,US,CVNA,Carvana,candidate,2026-10-12,2026-10-16,63.73,58.83,-7.69
+7,US,MU,Micron Technology,finalist,2026-10-12,2026-10-16,1002.45,878.84,-12.33
+7,US,HPQ,HP Inc.,candidate,2026-10-12,2026-10-16,30.21,30.01,-0.66
+7,US,LRCX,Lam Research,pick,2026-10-12,2026-10-16,314.85,263.94,-16.17
+7,US,FIX,Comfort Systems USA,candidate,2026-10-12,2026-10-16,1700.11,1439.0699,-15.35
+7,US,QCOM,Qualcomm,candidate,2026-10-12,2026-10-16,175.19,172.11,-1.76

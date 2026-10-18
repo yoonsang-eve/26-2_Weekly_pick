@@ -17,3 +17,4 @@
 {"ts": "2026-09-27T14:18:08.411", "agent": "bear", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
 {"ts": "2026-09-27T14:18:11.476", "agent": "trader", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 38956}}
 {"ts": "2026-09-27T14:20:23.988", "agent": "trader", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": "FDS"}}
+{"ts": "2026-10-04T13:35:08.806", "agent": "settle", "kind": "done", "msg": "-1.50% (벤치마크 0.01%)", "data": {"ret_pct": -1.5, "benchmark_ret_pct": 0.01, "buy_open": 270.06, "sell_close": 266.0, "buy_date": "2026-09-28", "sell_date": "2026-10-02"}}

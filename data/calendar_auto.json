@@ -1,0 +1,74 @@
+{
+  "fetched_at": "2026-10-18T19:38:22",
+  "window": [
+    "2026-10-18",
+    "2026-11-22"
+  ],
+  "model": "claude-sonnet-5-5",
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 43753,
+    "output_tokens": 2116,
+    "output_tokens_details": {
+      "thinking_tokens": 1071
+    },
+    "server_tool_use": {
+      "web_fetch_requests": 0,
+      "web_search_requests": 4
+    },
+    "stop_reason": "end_turn"
+  },
+  "holidays": {
+    "KR": [],
+    "US": []
+  },
+  "events": [
+    {
+      "date": "2026-10-22",
+      "time_kst": "10-22 09:00",
+      "market": "KR",
+      "title": "한국은행 금융통화위원회 통화정책방향 결정회의 (10월 기준금리 결정). 한국은행이 10월 개최를 공지한 것은 확인했다. 10월 22일 날짜는 2차 출처 기준이다.",
+      "source": "https://trader.ai.kr/calendar/economic-indicators/bok"
+    },
+    {
+      "date": "2026-10-28",
+      "time_kst": "10-29 03:00",
+      "market": "US",
+      "title": "FOMC 금리 결정 (10월 27~28일 회의, 현지 14:00 ET 발표, 14:30 기자회견. 현재 기준금리 3.75~4.00%)",
+      "source": "https://fedratecalc.com/fomc-meeting-schedule/october-2026/"
+    },
+    {
+      "date": "2026-10-29",
+      "time_kst": "10-29 21:30",
+      "market": "US",
+      "title": "미국 3분기 GDP 속보치 및 9월 개인소득·지출(PCE 물가) 발표 (현지 08:30 ET)",
+      "source": "https://fedratecalc.com/us-economic-calendar/"
+    },
+    {
+      "date": "2026-11-06",
+      "time_kst": "11-06 22:30",
+      "market": "US",
+      "title": "미국 10월 고용보고서(비농업 고용·실업률) 발표 (현지 08:30 ET)",
+      "source": "https://www.bls.gov/schedule/news_release/empsit.htm"
+    },
+    {
+      "date": "2026-11-10",
+      "time_kst": "11-10 22:30",
+      "market": "US",
+      "title": "미국 10월 소비자물가지수(CPI) 발표 (현지 08:30 ET)",
+      "source": "https://www.bls.gov/schedule/news_release/cpi.htm"
+    },
+    {
+      "date": "2026-11-18",
+      "time_kst": "11-19 04:00",
+      "market": "US",
+      "title": "FOMC 10월 회의 의사록 공개 (현지 14:00 ET)",
+      "source": "https://capitalfinancebureau.com/news/fomc-meeting-schedule-2026-2027/"
+    }
+  ]
+}

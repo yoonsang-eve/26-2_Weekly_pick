@@ -1,0 +1,21 @@
+﻿week,market,ticker,name,role,buy_date,sell_date,buy_open,sell_close,ret_pct
+6,US,WDC,Western Digital,candidate,2026-10-05,2026-10-09,430.5,397.28,-7.72
+6,US,MRNA,Moderna,finalist,2026-10-05,2026-10-09,191.41,225.0,17.55
+6,US,STX,Seagate Technology,candidate,2026-10-05,2026-10-09,876.0,783.0,-10.62
+6,US,ALAB,Astera Labs,candidate,2026-10-05,2026-10-09,354.2,342.21,-3.39
+6,US,SNDK,Sandisk,candidate,2026-10-05,2026-10-09,1725.0,1581.8199,-8.3
+6,US,ARM,Arm Holdings,candidate,2026-10-05,2026-10-09,308.03,266.28,-13.55
+6,US,HOOD,Robinhood Markets,candidate,2026-10-05,2026-10-09,114.86,109.02,-5.08
+6,US,RDDT,Reddit,candidate,2026-10-05,2026-10-09,150.73,159.91,6.09
+6,US,CVNA,Carvana,candidate,2026-10-05,2026-10-09,63.705,63.73,0.04
+6,US,DELL,Dell Technologies,candidate,2026-10-05,2026-10-09,557.01,586.06,5.22
+6,US,INTC,Intel,candidate,2026-10-05,2026-10-09,115.34,104.7,-9.22
+6,US,SWKS,Skyworks Solutions,finalist,2026-10-05,2026-10-09,84.9,76.35,-10.07
+6,US,IT,Gartner,candidate,2026-10-05,2026-10-09,185.07,191.15,3.29
+6,US,MU,Micron Technology,pick,2026-10-05,2026-10-09,1069.6801,1029.0,-3.8
+6,US,JBL,Jabil,candidate,2026-10-05,2026-10-09,305.27,306.28,0.33
+6,US,NOW,ServiceNow,candidate,2026-10-05,2026-10-09,135.22,140.86,4.17
+6,US,FDS,FactSet,candidate,2026-10-05,2026-10-09,266.4,287.18,7.8
+6,US,CDW,CDW Corporation,candidate,2026-10-05,2026-10-09,133.12,142.17,6.8
+6,US,QCOM,Qualcomm,candidate,2026-10-05,2026-10-09,185.08,175.5,-5.18
+6,US,WDAY,"Workday, Inc.",candidate,2026-10-05,2026-10-09,186.0,186.59,0.32

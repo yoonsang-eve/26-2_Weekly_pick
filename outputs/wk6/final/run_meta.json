@@ -1,0 +1,13 @@
+{
+  "week": 6,
+  "market": "final",
+  "prompt_version": "v3",
+  "config_version": 3,
+  "stages": {
+    "selector": {
+      "rendered_at": "2026-10-04T14:16:18",
+      "model": "Claude Opus 5.5(높음)"
+    }
+  },
+  "mode": "manual"
+}

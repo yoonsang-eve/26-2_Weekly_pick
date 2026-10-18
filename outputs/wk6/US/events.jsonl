@@ -1,0 +1,22 @@
+{"ts": "2026-10-04T13:36:52.861", "agent": "screener", "kind": "start", "msg": "기준일 후보 2026-10-02"}
+{"ts": "2026-10-04T13:36:52.874", "agent": "screener", "kind": "step", "msg": "S&P500 + NDX 합집합", "data": {"n": 518}}
+{"ts": "2026-10-04T13:38:07.249", "agent": "screener", "kind": "step", "msg": "조회 성공", "data": {"n": 518}}
+{"ts": "2026-10-04T13:38:56.520", "agent": "screener", "kind": "step", "msg": "시총 조회 성공", "data": {"n": 518}}
+{"ts": "2026-10-04T13:38:58.488", "agent": "screener", "kind": "step", "msg": "기준일 종가 보유 (거래정지·신규상장 제외)", "data": {"n": 515}}
+{"ts": "2026-10-04T13:38:58.564", "agent": "screener", "kind": "step", "msg": "복수 클래스 주식 정리", "data": {"n": 512}}
+{"ts": "2026-10-04T13:38:58.568", "agent": "screener", "kind": "step", "msg": "1. adv20 >= $50M", "data": {"n": 511}}
+{"ts": "2026-10-04T13:38:58.571", "agent": "screener", "kind": "step", "msg": "2. 시총 >= $2B", "data": {"n": 511}}
+{"ts": "2026-10-04T13:38:58.576", "agent": "screener", "kind": "step", "msg": "3. 120일 모멘텀(최근 20일 제외) 상위 40% & 5일 수익률 <= +0%", "data": {"n": 138}}
+{"ts": "2026-10-04T13:38:58.580", "agent": "screener", "kind": "step", "msg": "4. atr20_pct 정렬 후 상위", "data": {"n": 20}}
+{"ts": "2026-10-04T13:38:58.605", "agent": "screener", "kind": "done", "msg": "후보 20종목 확정", "data": {"n": 20, "tickers": ["WDC Western Digital", "MRNA Moderna", "STX Seagate Technology", "ALAB Astera Labs", "SNDK Sandisk", "ARM Arm Holdings", "HOOD Robinhood Markets", "RDDT Reddit", "CVNA Carvana", "DELL Dell Technologies", "INTC Intel", "SWKS Skyworks Solutions", "IT Gartner", "MU Micron Technology", "JBL Jabil", "NOW ServiceNow", "FDS FactSet", "CDW CDW Corporation", "QCOM Qualcomm", "WDAY Workday, Inc."]}}
+{"ts": "2026-10-04T13:39:11.196", "agent": "analyst", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 5529}}
+{"ts": "2026-10-04T13:45:45.782", "agent": "analyst", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-10-04T13:45:47.610", "agent": "bull", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 6876}}
+{"ts": "2026-10-04T13:50:06.636", "agent": "bull", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-10-04T13:50:09.065", "agent": "bear", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 15918}}
+{"ts": "2026-10-04T13:56:17.465", "agent": "bear", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-10-04T13:59:01.461", "agent": "bear", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": null}}
+{"ts": "2026-10-04T13:59:36.514", "agent": "trader", "kind": "wait", "msg": "프롬프트 렌더링 완료 — 수동 실행 대기", "data": {"chars": 28762}}
+{"ts": "2026-10-04T14:01:05.037", "agent": "trader", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": "402340"}}
+{"ts": "2026-10-04T14:04:02.303", "agent": "trader", "kind": "done", "msg": "응답 저장됨 (manual)", "data": {"pick": "MU"}}
+{"ts": "2026-10-11T17:02:55.012", "agent": "settle", "kind": "done", "msg": "-3.80% (벤치마크 1.04%)", "data": {"ret_pct": -3.8, "benchmark_ret_pct": 1.04, "buy_open": 1069.6801, "sell_close": 1029.0, "buy_date": "2026-10-05", "sell_date": "2026-10-09"}}

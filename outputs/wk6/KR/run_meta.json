@@ -1,0 +1,25 @@
+{
+  "week": 6,
+  "market": "KR",
+  "mode": "manual",
+  "prompt_version": "v2",
+  "config_version": 3,
+  "stages": {
+    "analyst": {
+      "rendered_at": "2026-10-04T13:39:03",
+      "model": "Claude Opus 5.5(높음)"
+    },
+    "bull": {
+      "rendered_at": "2026-10-04T13:45:30",
+      "model": "Claude Opus 5.5(높음)"
+    },
+    "bear": {
+      "rendered_at": "2026-10-04T13:49:06",
+      "model": ""
+    },
+    "trader": {
+      "rendered_at": "2026-10-04T13:59:16",
+      "model": ""
+    }
+  }
+}
